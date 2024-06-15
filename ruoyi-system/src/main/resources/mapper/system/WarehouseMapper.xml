@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ruoyi.system.mapper.WarehouseMapper">
+
+    <resultMap type="Warehouse" id="WarehouseResult">
+        <result property="warehouseId" column="warehouse_id"/>
+        <result property="warehouseName" column="warehouse_name"/>
+        <result property="warehouseDirector" column="warehouse_director"/>
+        <result property="warehouseTelephone" column="warehouse_telephone"/>
+        <result property="warehouseAddress" column="warehouse_address"/>
+        <result property="warehouseValid" column="warehouse_valid"/>
+        <result property="warehouseNotes" column="warehouse_notes"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <!--    查询公用方法      -->
+    <sql id="selectWarehouseVo">
+        SELECT
+        w.warehouse_id,
+        w.warehouse_name,
+        w.warehouse_director,
+        w.warehouse_telephone,
+        w.warehouse_address,
+        w.warehouse_valid,
+        w.warehouse_notes,
+        w.create_by,
+        w.create_time,
+        w.update_by,
+        w.update_time
+        FROM warehouse w
+    </sql>
+
+    <!--    仓库资料查询      -->
+    <select id="WarehouseQuery" parameterType="Warehouse" resultMap="WarehouseResult">
+        <include refid="selectWarehouseVo"/>
+        WHERE 1=1
+        <if test="warehouseId != null and warehouseId != 0">
+            AND w.warehouse_id = #{warehouseId}
+        </if>
+        <if test="warehouseName != null and warehouseName != ''">
+            AND w.warehouse_name = #{warehouseName}
+        </if>
+        <if test="warehouseDirector != null and warehouseDirector != ''">
+            AND w.warehouse_director = #{warehouseDirector}
+        </if>
+        <if test="warehouseTelephone != null and warehouseTelephone != ''">
+            AND w.warehouse_telephone = #{WarehouseTelephone}
+        </if>
+        <if test="warehouseAddress != null and warehouseAddress != ''">
+            AND w.warehouse_address = #{WarehouseAddress}
+        </if>
+        <if test="warehouseValid != null">
+            AND w.warehouse_valid = #{WarehouseValid}
+        </if>
+        <if test="warehouseNotes != null and warehouseNotes != ''">
+            AND w.warehouse_notes = #{WarehouseNotes}
+        </if>
+    </select>
+
+    <!--    仓库编号查询      -->
+    <select id="selectWarehouseById" parameterType="Long" resultMap="WarehouseResult">
+        <include refid="selectWarehouseVo"/>
+        where w.warehouse_id = #{warehouseId}
+    </select>
+
+    <!--    仓库名称查询      -->
+    <select id="selectWarehouseByWarehouseName" parameterType="String" resultMap="WarehouseResult">
+        <include refid="selectWarehouseVo"/>
+        where w.warehouse_name = #{warehouseName}
+    </select>
+
+    <!--    仓库资料新增      -->
+    <insert id="insertWarehouse" parameterType="Warehouse">
+        insert into warehouse(
+        <if test="warehouseName != null and warehouseName != ''">warehouse_name,</if>
+        <if test="warehouseDirector != null and warehouseDirector != ''">warehouse_director,</if>
+        <if test="warehouseTelephone != null and warehouseTelephone != ''">warehouse_telephone,</if>
+        <if test="warehouseAddress != null and warehouseAddress != ''">warehouse_address,</if>
+        <if test="warehouseValid != null and warehouseValid != ''">warehouse_valid,</if>
+        <if test="warehouseNotes != null and warehouseNotes != ''">warehouse_notes,</if>
+        <if test="createBy != null and createBy != ''">create_by,</if>
+        create_time
+        )values(
+        <if test="warehouseName != null and warehouseName != ''">#{warehouseName},</if>
+        <if test="warehouseDirector != null and warehouseDirector != ''">#{warehouseDirector},</if>
+        <if test="warehouseTelephone != null and warehouseTelephone != ''">#{warehouseTelephone},</if>
+        <if test="warehouseAddress != null and warehouseAddress != ''">#{warehouseAddress},</if>
+        <if test="warehouseValid != null and warehouseValid != ''">#{warehouseValid},</if>
+        <if test="warehouseNotes != null and warehouseNotes != ''">#{warehouseNotes},</if>
+        <if test="createBy != null and createBy != ''">#{createBy},</if>
+        sysdate()
+        )
+    </insert>
+
+    <!--    仓库资料修改      -->
+    <update id="updateWarehouse" parameterType="Warehouse">
+        update warehouse
+        <set>
+            <if test="warehouseName != null and warehouseName != ''">warehouse_name = #{warehouseName},</if>
+            <if test="warehouseDirector != null and warehouseDirector != ''">warehouse_director =
+                #{warehouseDirector},
+            </if>
+            <if test="warehouseTelephone != null and warehouseTelephone != ''">warehouse_telephone =
+                #{warehouseTelephone},
+            </if>
+            <if test="warehouseAddress != null and warehouseAddress != ''">warehouse_address = #{warehouseAddress},</if>
+            <if test="warehouseValid != null and warehouseValid != ''">warehouse_valid = #{warehouseValid},</if>
+            <if test="warehouseNotes != null and warehouseNotes != ''">warehouse_notes = #{warehouseNotes},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            update_time = sysdate()
+        </set>
+        where warehouse_id = #{warehouseId}
+    </update>
+
+    <!--    仓库资料删除      -->
+    <delete id="deleteWarehouseByIds" parameterType="Long">
+        delete from warehouse where warehouse_id in
+        <foreach collection="array" item="warehouseId" open="(" separator="," close=")">
+            #{warehouseId}
+        </foreach>
+    </delete>
+
+</mapper>

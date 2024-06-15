@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ruoyi.system.mapper.ProductMapper">
+
+    <resultMap type="Product" id="ProductResult">
+        <result property="productId" column="product_id"/>
+        <result property="productCode" column="product_code"/>
+        <result property="productName" column="product_name"/>
+        <result property="productType" column="product_type"/>
+        <result property="productSpecifications" column="product_specifications"/>
+        <result property="measureUnit" column="measure_unit"/>
+        <result property="producer" column="producer"/>
+        <result property="costPrice" column="cost_price"/>
+        <result property="price" column="price"/>
+        <result property="productBarcode" column="product_barcode"/>
+        <result property="upperLimit" column="upper_limit"/>
+        <result property="lowerLimit" column="lower_limit"/>
+        <result property="defaultWarehouse" column="default_warehouse"/>
+        <result property="notes" column="notes"/>
+        <result property="status" column="status"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <association property="type" javaType="ProductType" resultMap="ProductTypeResult"/>
+    </resultMap>
+
+    <resultMap type="ProductType" id="ProductTypeResult">
+        <id property="productTypeId" column="product_type_id"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="ancestors" column="ancestors"/>
+        <result property="productTypeName" column="product_type_name"/>
+        <result property="orderNum" column="order_num"/>
+        <result property="status" column="status"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="parentName" column="parent_name"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <!--    查询货品公用方法    -->
+    <sql id="selectProductVo">
+        SELECT
+        p.product_id, p.product_code, p.product_name, p.product_type, p.product_specifications, p.measure_unit,
+        p.producer, p.cost_price, p.price, p.product_barcode, p.upper_limit, p.lower_limit, p.default_warehouse,
+        p.notes, p.status, p.create_by, p.create_time, p.update_by, p.update_time,
+        pt.product_type_id, pt.parent_id, pt.ancestors, pt.product_type_name, pt.order_num, pt.status, pt.del_flag,
+        pt.create_by, pt.create_time, pt.update_by, pt.update_time
+        FROM product p
+        JOIN product_type pt ON pt.product_type_id = p.product_type
+    </sql>
+
+    <!--    货品资料查询      -->
+    <select id="ProductQuery" parameterType="Product" resultMap="ProductResult">
+        <include refid="selectProductVo"/>
+        WHERE 1=1
+        <!-- 货品编号 -->
+        <if test="productCode != null and productCode != ''">
+            AND p.product_code = #{productCode}
+        </if>
+        <!-- 货品名称 -->
+        <if test="productName != null and productName != ''">
+            AND p.product_name like concat('%', #{productName}, '%')
+        </if>
+        <!-- 货品类型 -->
+        <if test="productType != null and productType != ''">
+            AND p.product_type = #{productType}
+        </if>
+        <!-- 商品规格 -->
+        <if test="productSpecifications != null and productSpecifications != ''">
+            AND p.product_specifications = #{productSpecifications}
+        </if>
+        <!-- 计量单位 -->
+        <if test="measureUnit != null and measureUnit != ''">
+            AND p.measure_unit = #{measureUnit}
+        </if>
+        <!-- 货品条码 -->
+        <if test="productBarcode != null and productBarcode != ''">
+            AND p.product_barcode like concat('%', #{productBarcode}, '%')
+        </if>
+        <!-- 默认仓库 -->
+        <if test="defaultWarehouse != null and defaultWarehouse != ''">
+            AND p.default_warehouse = #{defaultWarehouse}
+        </if>
+        <!-- 开始时间检索 -->
+        <if test="params.beginTime != null and params.beginTime != ''">
+            AND date_format(u.create_time,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')
+        </if>
+        <!-- 结束时间检索 -->
+        <if test="params.endTime != null and params.endTime != ''">
+            AND date_format(u.create_time,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')
+        </if>
+        <!-- 状态 -->
+        <if test="status != null">
+            AND p.status = #{status}
+        </if>
+        <!-- 数据范围过滤 -->
+        ${params.dataScope}
+    </select>
+
+    <!--    货品编号查询      -->
+    <select id="selectProductById" parameterType="Long" resultMap="ProductResult">
+        <include refid="selectProductVo"/>
+        where p.product_id = #{productId}
+    </select>
+
+    <!--    货品名称查询      -->
+    <select id="selectProductByProductName" parameterType="String" resultMap="ProductResult">
+        <include refid="selectProductVo"/>
+        where p.product_name = #{productName}
+    </select>
+
+    <!--    货品资料新增      -->
+    <insert id="insertProduct" parameterType="Product">
+        insert into product(
+        <if test="productCode != null and productCode != ''">product_code,</if>
+        <if test="productName != null and productName != ''">product_name,</if>
+        <if test="productType != null and productType != ''">product_type,</if>
+        <if test="productSpecifications != null and productSpecifications != ''">product_specifications,</if>
+        <if test="measureUnit != null and measureUnit != ''">measure_unit,</if>
+        <if test="producer != null and producer != ''">producer,</if>
+        <if test="costPrice != null and costPrice != ''">cost_price,</if>
+        <if test="price != null and price != ''">price,</if>
+        <if test="productBarcode != null and productBarcode != ''">product_barcode,</if>
+        <if test="upperLimit != null and upperLimit != ''">upper_limit,</if>
+        <if test="lowerLimit != null and lowerLimit != ''">lower_limit,</if>
+        <if test="defaultWarehouse != null and defaultWarehouse != ''">default_warehouse,</if>
+        <if test="notes != null and notes != ''">notes,</if>
+        <if test="status != null and status != ''">status,</if>
+        <if test="createBy != null and createBy != ''">create_by,</if>
+        create_time
+        )values(
+        <if test="productCode != null and productCode != ''">#{productCode},</if>
+        <if test="productName != null and productName != ''">#{productName},</if>
+        <if test="productType != null and productType != ''">#{productType},</if>
+        <if test="productSpecifications != null and productSpecifications != ''">#{productSpecifications},</if>
+        <if test="measureUnit != null and measureUnit != ''">#{measureUnit},</if>
+        <if test="producer != null and producer != ''">#{producer},</if>
+        <if test="costPrice != null and costPrice != ''">#{costPrice},</if>
+        <if test="price != null and price != ''">#{price},</if>
+        <if test="productBarcode != null and productBarcode != ''">#{productBarcode},</if>
+        <if test="upperLimit != null and upperLimit != ''">#{upperLimit},</if>
+        <if test="lowerLimit != null and lowerLimit != ''">#{lowerLimit},</if>
+        <if test="defaultWarehouse != null and defaultWarehouse != ''">#{defaultWarehouse},</if>
+        <if test="notes != null and notes != ''">#{notes},</if>
+        <if test="status != null and status != ''">#{status},</if>
+        <if test="createBy != null and createBy != ''">#{createBy},</if>
+        sysdate()
+        )
+    </insert>
+
+    <!--    货品资料修改      -->
+    <update id="updateProduct" parameterType="Product">
+        update product
+        <set>
+            <if test="productCode != null and productCode != ''">product_code = #{productCode},</if>
+            <if test="productName != null and productName != ''">product_name = #{productName},</if>
+            <if test="productType != null and productType != ''">product_type = #{productType},</if>
+            <if test="productSpecifications != null and productSpecifications != ''">product_specifications =
+                #{productSpecifications},
+            </if>
+            <if test="measureUnit != null and measureUnit != ''">measure_unit = #{measureUnit},</if>
+            <if test="producer != null and producer != ''">producer = #{producer},</if>
+            <if test="costPrice != null and costPrice != ''">cost_price = #{costPrice},</if>
+            <if test="price != null and price != ''">price = #{price},</if>
+            <if test="productBarcode != null and productBarcode != ''">product_barcode = #{productBarcode},</if>
+            <if test="upperLimit != null and upperLimit != ''">upper_limit = #{upperLimit},</if>
+            <if test="lowerLimit != null and lowerLimit != ''">lower_limit = #{lowerLimit},</if>
+            <if test="defaultWarehouse != null and defaultWarehouse != ''">default_warehouse = #{defaultWarehouse},</if>
+            <if test="notes != null and notes != ''">notes = #{notes},</if>
+            <if test="status != null and status != ''">status = #{status},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            update_time = sysdate()
+        </set>
+        where product_id = #{productId}
+    </update>
+
+    <!--    货品资料删除      -->
+    <delete id="deleteProductByIds" parameterType="Long">
+        delete from product where product_id in
+        <foreach collection="array" item="productId" open="(" separator="," close=")">
+            #{productId}
+        </foreach>
+    </delete>
+
+</mapper>

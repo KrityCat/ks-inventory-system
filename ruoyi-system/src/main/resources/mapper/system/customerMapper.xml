@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ruoyi.system.mapper.customerMapper">
+
+    <resultMap type="Customer" id="CustomerResult">
+        <result property="customerId" column="customer_id"/>
+        <result property="customerCode" column="customer_code"/>
+        <result property="customerName" column="customer_name"/>
+        <result property="customerSalesPerson" column="customer_sales_person"/>
+        <result property="customerContacts" column="customer_contacts"/>
+        <result property="customerContactNumber" column="customer_contact_number"/>
+        <result property="customerWorkAddress" column="customer_work_address"/>
+        <result property="customerPostalCode" column="customer_postal_code"/>
+        <result property="customerOpeningDebt" column="customer_opening_debt"/>
+        <result property="customerOpeningBank" column="customer_opening_bank"/>
+        <result property="customerAccountNumber" column="customer_account_number"/>
+        <result property="customerTaxId" column="customer_tax_id"/>
+        <result property="customerCompanyHomepage" column="customer_company_homepage"/>
+        <result property="customerEmail" column="customer_email"/>
+        <result property="customerLegalPerson" column="customer_legal_person"/>
+        <result property="status" column="status"/>
+        <result property="remarks" column="remarks"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <!--    查询客户公用方法    -->
+    <sql id="selectCustomerVo">
+        SELECT
+        c.customer_id,
+        c.customer_code,
+        c.customer_name,
+        c.customer_sales_person,
+        c.customer_contacts,
+        c.customer_contact_number,
+        c.customer_work_address,
+        c.customer_postal_code,
+        c.customer_opening_debt,
+        c.customer_opening_bank,
+        c.customer_account_number,
+        c.customer_tax_id,
+        c.customer_company_homepage,
+        c.customer_email,
+        c.customer_legal_person,
+        c.status,
+        c.remarks,
+        c.create_by,
+        c.create_time,
+        c.update_by,
+        c.update_time
+        FROM customer c
+    </sql>
+
+    <!--    客户资料查询      -->
+    <select id="CustomerQuery" parameterType="Customer" resultMap="CustomerResult">
+        <include refid="selectCustomerVo"/>
+        WHERE 1=1
+        <if test="customerCode != null and customerCode != ''">
+            AND c.customer_code = #{customerCode}
+        </if>
+        <if test="customerName != null and customerName != ''">
+            AND c.customer_name = #{customerName}
+        </if>
+        <if test="customerSalesPerson != null and customerSalesPerson != ''">
+            AND c.customer_sales_person = #{customerSalesPerson}
+        </if>
+        <if test="customerContacts != null and customerContacts != ''">
+            AND c.customer_contacts = #{customerContacts}
+        </if>
+        <if test="customerContactNumber != null and customerContactNumber != ''">
+            AND c.customer_contact_number = #{customerContactNumber}
+        </if>
+        <if test="status != null">
+            AND c.status = #{status}
+        </if>
+        <if test="customerWorkAddress != null and customerWorkAddress != ''">
+            AND c.customer_work_address like concat('%', #{customerWorkAddress}, '%')
+        </if>
+    </select>
+
+    <!--    客户编号查询      -->
+    <select id="selectCustomerById" parameterType="Long" resultMap="CustomerResult">
+        <include refid="selectCustomerVo"/>
+        where c.customer_id = #{customerId}
+    </select>
+
+    <!--    客户名称查询      -->
+    <select id="selectCustomerByCustomerName" parameterType="String" resultMap="CustomerResult">
+        <include refid="selectCustomerVo"/>
+        where c.customer_name = #{customerName}
+    </select>
+
+    <!--    客户资料新增      -->
+    <insert id="insertCustomer" parameterType="Customer">
+        insert into customer(
+        <if test="customerCode != null and customerCode != ''">customer_code,</if>
+        <if test="customerName != null and customerName != ''">customer_name,</if>
+        <if test="customerSalesPerson != null and customerSalesPerson != ''">customer_sales_person,</if>
+        <if test="customerContacts != null and customerContacts != ''">customer_contacts,</if>
+        <if test="customerContactNumber != null and customerContactNumber != ''">customer_contact_number,</if>
+        <if test="customerWorkAddress != null and customerWorkAddress != ''">customer_work_address,</if>
+        <if test="customerPostalCode != null and customerPostalCode != ''">customer_postal_code,</if>
+        <if test="customerOpeningDebt != null and customerOpeningDebt != ''">customer_opening_debt,</if>
+        <if test="customerOpeningBank != null and customerOpeningBank != ''">customer_opening_bank,</if>
+        <if test="customerAccountNumber != null and customerAccountNumber != ''">customer_account_number,</if>
+        <if test="customerTaxId != null and customerTaxId != ''">customer_tax_id,</if>
+        <if test="customerCompanyHomepage != null and customerCompanyHomepage != ''">customer_company_homepage,</if>
+        <if test="customerEmail != null and customerEmail != ''">customer_email,</if>
+        <if test="customerLegalPerson != null and customerLegalPerson != ''">customer_legal_person,</if>
+        <if test="remarks != null and remarks != ''">remarks,</if>
+        <if test="status != null and status != ''">status,</if>
+        <if test="createBy != null and createBy != ''">create_by,</if>
+        create_time
+        )values(
+        <if test="customerCode != null and customerCode != ''">#{customerCode},</if>
+        <if test="customerName != null and customerName != ''">#{customerName},</if>
+        <if test="customerSalesPerson != null and customerSalesPerson != ''">#{customerSalesPerson},</if>
+        <if test="customerContacts != null and customerContacts != ''">#{customerContacts},</if>
+        <if test="customerContactNumber != null and customerContactNumber != ''">#{customerContactNumber},</if>
+        <if test="customerWorkAddress != null and customerWorkAddress != ''">#{customerWorkAddress},</if>
+        <if test="customerPostalCode != null and customerPostalCode != ''">#{customerPostalCode},</if>
+        <if test="customerOpeningDebt != null and customerOpeningDebt != ''">#{customerOpeningDebt},</if>
+        <if test="customerOpeningBank != null and customerOpeningBank != ''">#{customerOpeningBank},</if>
+        <if test="customerAccountNumber != null and customerAccountNumber != ''">#{customerAccountNumber},</if>
+        <if test="customerTaxId != null and customerTaxId != ''">#{customerTaxId},</if>
+        <if test="customerCompanyHomepage != null and customerCompanyHomepage != ''">#{customerCompanyHomepage},</if>
+        <if test="customerEmail != null and customerEmail != ''">#{customerEmail},</if>
+        <if test="customerLegalPerson != null and customerLegalPerson != ''">#{customerLegalPerson},</if>
+        <if test="remarks != null and remarks != ''">#{remarks},</if>
+        <if test="status != null and status != ''">#{status},</if>
+        <if test="createBy != null and createBy != ''">#{createBy},</if>
+        sysdate()
+        )
+    </insert>
+
+    <!--    客户资料修改      -->
+    <update id="updateCustomer" parameterType="Customer">
+        update customer
+        <set>
+            <if test="customerCode != null and customerCode != ''">customer_code = #{customerCode},</if>
+            <if test="customerName != null and customerName != ''">customer_name = #{customerName},</if>
+            <if test="customerSalesPerson != null and customerSalesPerson != ''">customer_sales_person =
+                #{customerSalesPerson},
+            </if>
+            <if test="customerContacts != null and customerContacts != ''">customer_contacts = #{customerContacts},</if>
+            <if test="customerContactNumber != null and customerContactNumber != ''">customer_contact_number =
+                #{customerContactNumber},
+            </if>
+            <if test="customerWorkAddress != null and customerWorkAddress != ''">customer_work_address =
+                #{customerWorkAddress},
+            </if>
+            <if test="customerPostalCode != null and customerPostalCode != ''">customer_postal_code =
+                #{customerPostalCode},
+            </if>
+            <if test="customerOpeningDebt != null and customerOpeningDebt != ''">customer_opening_debt =
+                #{customerOpeningDebt},
+            </if>
+            <if test="customerOpeningBank != null and customerOpeningBank != ''">customer_opening_bank =
+                #{customerOpeningBank},
+            </if>
+            <if test="customerAccountNumber != null and customerAccountNumber != ''">customer_account_number =
+                #{customerAccountNumber},
+            </if>
+            <if test="customerTaxId != null and customerTaxId != ''">customer_tax_id = #{customerTaxId},</if>
+            <if test="customerCompanyHomepage != null and customerCompanyHomepage != ''">customer_company_homepage =
+                #{customerCompanyHomepage},
+            </if>
+            <if test="customerEmail != null and customerEmail != ''">customer_email = #{customerEmail},</if>
+            <if test="customerLegalPerson != null and customerLegalPerson != ''">customer_legal_person =
+                #{customerLegalPerson},
+            </if>
+            <if test="remarks != null and remarks != ''">remarks = #{remarks},</if>
+            <if test="status != null and status != ''">status = #{status},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            update_time = sysdate()
+        </set>
+        where customer_id = #{customerId}
+    </update>
+
+    <!--    客户资料删除      -->
+    <delete id="deleteCustomerByIds" parameterType="Long">
+        delete from customer where customer_id in
+        <foreach collection="array" item="customerId" open="(" separator="," close=")">
+            #{customerId}
+        </foreach>
+    </delete>
+
+</mapper>

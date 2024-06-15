@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.CommodityMapper">
+
+    <resultMap type="Commodity" id="CommodityResult">
+        <result property="commodityId" column="commodity_id"/>
+        <result property="commodityCode" column="commodity_code"/>
+        <result property="commodityName" column="commodity_name"/>
+        <result property="commodityType" column="commodity_type"/>
+        <result property="commoditySpecifications" column="commodity_specifications"/>
+        <result property="measureUnit" column="measure_unit"/>
+        <result property="producer" column="producer"/>
+        <result property="costPrice" column="cost_price"/>
+        <result property="price" column="price"/>
+        <result property="productBarcode" column="product_barcode"/>
+        <result property="upperLimit" column="upper_limit"/>
+        <result property="lowerLimit" column="lower_limit"/>
+        <result property="defaultWarehouse" column="default_warehouse"/>
+        <result property="notes" column="notes"/>
+        <result property="status" column="status"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectCommodityVo">
+        select commodity_id, commodity_code, commodity_name, commodity_type, commodity_specifications, measure_unit,
+        producer, cost_price, price, product_barcode, upper_limit, lower_limit, default_warehouse, notes, status,
+        create_by, create_time, update_by, update_time from commodity
+    </sql>
+
+    <select id="selectCommodityList" parameterType="Commodity" resultMap="CommodityResult">
+        <include refid="selectCommodityVo"/>
+        <where>
+            <if test="commodityCode != null  and commodityCode != ''">and commodity_code like concat('%',
+                #{commodityCode}, '%')
+            </if>
+            <if test="commodityName != null  and commodityName != ''">and commodity_name like concat('%',
+                #{commodityName}, '%')
+            </if>
+            <if test="commodityType != null  and commodityType != ''">and commodity_type = #{commodityType}</if>
+            <if test="commoditySpecifications != null  and commoditySpecifications != ''">and commodity_specifications =
+                #{commoditySpecifications}
+            </if>
+            <if test="productBarcode != null  and productBarcode != ''">and product_barcode = #{productBarcode}</if>
+            <if test="defaultWarehouse != null  and defaultWarehouse != ''">and default_warehouse =
+                #{defaultWarehouse}
+            </if>
+            <if test="status != null  and status != ''">and status = #{status}</if>
+            <if test="createTime != null ">and create_time = #{createTime}</if>
+        </where>
+    </select>
+
+    <select id="selectCommodityByCommodityId" parameterType="Long" resultMap="CommodityResult">
+        <include refid="selectCommodityVo"/>
+        where commodity_id = #{commodityId}
+    </select>
+
+    <insert id="insertCommodity" parameterType="Commodity" useGeneratedKeys="true" keyProperty="commodityId">
+        insert into commodity
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="commodityCode != null">commodity_code,</if>
+            <if test="commodityName != null">commodity_name,</if>
+            <if test="commodityType != null">commodity_type,</if>
+            <if test="commoditySpecifications != null">commodity_specifications,</if>
+            <if test="measureUnit != null">measure_unit,</if>
+            <if test="producer != null">producer,</if>
+            <if test="costPrice != null">cost_price,</if>
+            <if test="price != null">price,</if>
+            <if test="productBarcode != null">product_barcode,</if>
+            <if test="upperLimit != null">upper_limit,</if>
+            <if test="lowerLimit != null">lower_limit,</if>
+            <if test="defaultWarehouse != null">default_warehouse,</if>
+            <if test="notes != null">notes,</if>
+            <if test="status != null">status,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="commodityCode != null">#{commodityCode},</if>
+            <if test="commodityName != null">#{commodityName},</if>
+            <if test="commodityType != null">#{commodityType},</if>
+            <if test="commoditySpecifications != null">#{commoditySpecifications},</if>
+            <if test="measureUnit != null">#{measureUnit},</if>
+            <if test="producer != null">#{producer},</if>
+            <if test="costPrice != null">#{costPrice},</if>
+            <if test="price != null">#{price},</if>
+            <if test="productBarcode != null">#{productBarcode},</if>
+            <if test="upperLimit != null">#{upperLimit},</if>
+            <if test="lowerLimit != null">#{lowerLimit},</if>
+            <if test="defaultWarehouse != null">#{defaultWarehouse},</if>
+            <if test="notes != null">#{notes},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateCommodity" parameterType="Commodity">
+        update commodity
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="commodityCode != null">commodity_code = #{commodityCode},</if>
+            <if test="commodityName != null">commodity_name = #{commodityName},</if>
+            <if test="commodityType != null">commodity_type = #{commodityType},</if>
+            <if test="commoditySpecifications != null">commodity_specifications = #{commoditySpecifications},</if>
+            <if test="measureUnit != null">measure_unit = #{measureUnit},</if>
+            <if test="producer != null">producer = #{producer},</if>
+            <if test="costPrice != null">cost_price = #{costPrice},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="productBarcode != null">product_barcode = #{productBarcode},</if>
+            <if test="upperLimit != null">upper_limit = #{upperLimit},</if>
+            <if test="lowerLimit != null">lower_limit = #{lowerLimit},</if>
+            <if test="defaultWarehouse != null">default_warehouse = #{defaultWarehouse},</if>
+            <if test="notes != null">notes = #{notes},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where commodity_id = #{commodityId}
+    </update>
+
+    <delete id="deleteCommodityByCommodityId" parameterType="Long">
+        delete from commodity where commodity_id = #{commodityId}
+    </delete>
+
+    <delete id="deleteCommodityByCommodityIds" parameterType="String">
+        delete from commodity where commodity_id in
+        <foreach item="commodityId" collection="array" open="(" separator="," close=")">
+            #{commodityId}
+        </foreach>
+    </delete>
+</mapper>

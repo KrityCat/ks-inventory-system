@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ruoyi.system.mapper.SupplierMapper">
+
+    <resultMap type="Supplier" id="SupplierResult">
+        <result property="supplierId" column="supplier_id"/>
+        <result property="supplierCode" column="supplier_code"/>
+        <result property="supplierName" column="supplier_name"/>
+        <result property="supplierSalesPerson" column="supplier_sales_person"/>
+        <result property="supplierContacts" column="supplier_contacts"/>
+        <result property="supplierContactNumber" column="supplier_contact_number"/>
+        <result property="supplierWorkAddress" column="supplier_work_address"/>
+        <result property="supplierPostalCode" column="supplier_postal_code"/>
+        <result property="supplierOpeningDebt" column="supplier_opening_debt"/>
+        <result property="supplierOpeningBank" column="supplier_opening_bank"/>
+        <result property="supplierAccountNumber" column="supplier_account_number"/>
+        <result property="supplierTaxId" column="supplier_tax_id"/>
+        <result property="supplierCompanyHomepage" column="supplier_company_homepage"/>
+        <result property="supplierEmail" column="supplier_email"/>
+        <result property="supplierLegalPerson" column="supplier_legal_person"/>
+        <result property="status" column="status"/>
+        <result property="remarks" column="remarks"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <!--    查询供应商公用方法    -->
+    <sql id="selectSupplierVo">
+        SELECT
+        s.supplier_id,
+        s.supplier_code,
+        s.supplier_name,
+        s.supplier_sales_person,
+        s.supplier_contacts,
+        s.supplier_contact_number,
+        s.supplier_work_address,
+        s.supplier_postal_code,
+        s.supplier_opening_debt,
+        s.supplier_opening_bank,
+        s.supplier_account_number,
+        s.supplier_tax_id,
+        s.supplier_company_homepage,
+        s.supplier_email,
+        s.supplier_legal_person,
+        s.status,
+        s.remarks,
+        s.create_by,
+        s.create_time,
+        s.update_by,
+        s.update_time
+        FROM supplier s
+    </sql>
+
+    <!--    供应商资料查询      -->
+    <select id="SupplierQuery" parameterType="Supplier" resultMap="SupplierResult">
+        <include refid="selectSupplierVo"/>
+        WHERE 1=1
+        <if test="supplierCode != null and supplierCode != ''">
+            AND s.supplier_code = #{supplierCode}
+        </if>
+        <if test="supplierName != null and supplierName != ''">
+            AND s.supplier_name = #{supplierName}
+        </if>
+        <if test="supplierSalesPerson != null and supplierSalesPerson != ''">
+            AND s.supplier_sales_person = #{supplierSalesPerson}
+        </if>
+        <if test="supplierContacts != null and supplierContacts != ''">
+            AND s.supplier_contacts = #{supplierContacts}
+        </if>
+        <if test="supplierContactNumber != null and supplierContactNumber != ''">
+            AND s.supplier_contact_number = #{supplierContactNumber}
+        </if>
+        <if test="status != null">
+            AND s.status = #{status}
+        </if>
+        <if test="supplierWorkAddress != null and supplierWorkAddress != ''">
+            AND s.supplier_work_address like concat('%', #{supplierWorkAddress}, '%')
+        </if>
+    </select>
+
+    <!--    供应商编号查询      -->
+    <select id="selectSupplierById" parameterType="Long" resultMap="SupplierResult">
+        <include refid="selectSupplierVo"/>
+        where s.supplier_id = #{supplierId}
+    </select>
+
+    <!--    供应商名称查询      -->
+    <select id="selectSupplierBySupplierName" parameterType="String" resultMap="SupplierResult">
+        <include refid="selectSupplierVo"/>
+        where s.supplier_Name = #{supplierName}
+    </select>
+
+    <!--    供应商资料新增      -->
+    <insert id="insertSupplier" parameterType="Supplier">
+        insert into supplier(
+        <if test="supplierCode != null and supplierCode != ''">supplier_code,</if>
+        <if test="supplierName != null and supplierName != ''">supplier_name,</if>
+        <if test="supplierSalesPerson != null and supplierSalesPerson != ''">supplier_sales_person,</if>
+        <if test="supplierContacts != null and supplierContacts != ''">supplier_contacts,</if>
+        <if test="supplierContactNumber != null and supplierContactNumber != ''">supplier_contact_number,</if>
+        <if test="supplierWorkAddress != null and supplierWorkAddress != ''">supplier_work_address,</if>
+        <if test="supplierPostalCode != null and supplierPostalCode != ''">supplier_postal_code,</if>
+        <if test="supplierOpeningDebt != null and supplierOpeningDebt != ''">supplier_opening_debt,</if>
+        <if test="supplierOpeningBank != null and supplierOpeningBank != ''">supplier_opening_bank,</if>
+        <if test="supplierAccountNumber != null and supplierAccountNumber != ''">supplier_account_number,</if>
+        <if test="supplierTaxId != null and supplierTaxId != ''">supplier_tax_id,</if>
+        <if test="supplierCompanyHomepage != null and supplierCompanyHomepage != ''">supplier_company_homepage,</if>
+        <if test="supplierEmail != null and supplierEmail != ''">supplier_email,</if>
+        <if test="supplierLegalPerson != null and supplierLegalPerson != ''">supplier_legal_person,</if>
+        <if test="remarks != null and remarks != ''">remarks,</if>
+        <if test="status != null and status != ''">status,</if>
+        <if test="createBy != null and createBy != ''">create_by,</if>
+        create_time
+        )values(
+        <if test="supplierCode != null and supplierCode != ''">#{supplierCode},</if>
+        <if test="supplierName != null and supplierName != ''">#{supplierName},</if>
+        <if test="supplierSalesPerson != null and supplierSalesPerson != ''">#{supplierSalesPerson},</if>
+        <if test="supplierContacts != null and supplierContacts != ''">#{supplierContacts},</if>
+        <if test="supplierContactNumber != null and supplierContactNumber != ''">#{supplierContactNumber},</if>
+        <if test="supplierWorkAddress != null and supplierWorkAddress != ''">#{supplierWorkAddress},</if>
+        <if test="supplierPostalCode != null and supplierPostalCode != ''">#{supplierPostalCode},</if>
+        <if test="supplierOpeningDebt != null and supplierOpeningDebt != ''">#{supplierOpeningDebt},</if>
+        <if test="supplierOpeningBank != null and supplierOpeningBank != ''">#{supplierOpeningBank},</if>
+        <if test="supplierAccountNumber != null and supplierAccountNumber != ''">#{supplierAccountNumber},</if>
+        <if test="supplierTaxId != null and supplierTaxId != ''">#{supplierTaxId},</if>
+        <if test="supplierCompanyHomepage != null and supplierCompanyHomepage != ''">#{supplierCompanyHomepage},</if>
+        <if test="supplierEmail != null and supplierEmail != ''">#{supplierEmail},</if>
+        <if test="supplierLegalPerson != null and supplierLegalPerson != ''">#{supplierLegalPerson},</if>
+        <if test="remarks != null and remarks != ''">#{remarks},</if>
+        <if test="status != null and status != ''">#{status},</if>
+        <if test="createBy != null and createBy != ''">#{createBy},</if>
+        sysdate()
+        )
+    </insert>
+
+    <!--    供应商资料修改      -->
+    <update id="updateSupplier" parameterType="Supplier">
+        update supplier
+        <set>
+            <if test="supplierCode != null and supplierCode != ''">supplier_code = #{supplierCode},</if>
+            <if test="supplierName != null and supplierName != ''">supplier_name = #{supplierName},</if>
+            <if test="supplierSalesPerson != null and supplierSalesPerson != ''">supplier_sales_person =
+                #{supplierSalesPerson},
+            </if>
+            <if test="supplierContacts != null and supplierContacts != ''">supplier_contacts = #{supplierContacts},</if>
+            <if test="supplierContactNumber != null and supplierContactNumber != ''">supplier_contact_number =
+                #{supplierContactNumber},
+            </if>
+            <if test="supplierWorkAddress != null and supplierWorkAddress != ''">supplier_work_address =
+                #{supplierWorkAddress},
+            </if>
+            <if test="supplierPostalCode != null and supplierPostalCode != ''">supplier_postal_code =
+                #{supplierPostalCode},
+            </if>
+            <if test="supplierOpeningDebt != null and supplierOpeningDebt != ''">supplier_opening_debt =
+                #{supplierOpeningDebt},
+            </if>
+            <if test="supplierOpeningBank != null and supplierOpeningBank != ''">supplier_opening_bank =
+                #{supplierOpeningBank},
+            </if>
+            <if test="supplierAccountNumber != null and supplierAccountNumber != ''">supplier_account_number =
+                #{supplierAccountNumber},
+            </if>
+            <if test="supplierTaxId != null and supplierTaxId != ''">supplier_tax_id = #{supplierTaxId},</if>
+            <if test="supplierCompanyHomepage != null and supplierCompanyHomepage != ''">supplier_company_homepage =
+                #{supplierCompanyHomepage},
+            </if>
+            <if test="supplierEmail != null and supplierEmail != ''">supplier_email = #{supplierEmail},</if>
+            <if test="supplierLegalPerson != null and supplierLegalPerson != ''">supplier_legal_person =
+                #{supplierLegalPerson},
+            </if>
+            <if test="remarks != null and remarks != ''">remarks = #{remarks},</if>
+            <if test="status != null and status != ''">status = #{status},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            update_time = sysdate()
+        </set>
+        where supplier_id = #{supplierId}
+    </update>
+
+    <!--    供应商资料删除      -->
+    <delete id="deleteSupplierByIds" parameterType="Long">
+        delete from supplier where supplier_id in
+        <foreach collection="array" item="supplierId" open="(" separator="," close=")">
+            #{supplierId}
+        </foreach>
+    </delete>
+
+</mapper>

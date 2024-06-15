@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ruoyi.system.mapper.JiMuReportMapper">
+
+    <resultMap type="JiMuReport" id="JiMuReportResult">
+        <result property="id" column="id"/>
+        <result property="code" column="code"/>
+        <result property="name" column="name"/>
+        <result property="note" column="note"/>
+        <result property="status" column="status"/>
+        <result property="type" column="type"/>
+        <result property="jsonStr" column="json_str"/>
+        <result property="apiUrl" column="api_url"/>
+        <result property="thumb" column="thumb"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="apiMethod" column="api_method"/>
+        <result property="apiCode" column="api_code"/>
+        <result property="template" column="template"/>
+        <result property="viewCount" column="view_count"/>
+        <result property="cssStr" column="css_str"/>
+        <result property="jsStr" column="js_str"/>
+        <result property="pyStr" column="py_str"/>
+        <result property="tenantId" column="tenant_id"/>
+    </resultMap>
+
+    <!--    查询在线excel设计器公用方法    -->
+    <sql id="selectJiMuReportVo">
+        SELECT
+        jr.id,
+        jr.code,
+        jr.name,
+        jr.note,
+        jr.status,
+        jr.type,
+        jr.json_str,
+        jr.api_url,
+        jr.thumb,
+        jr.create_by,
+        jr.create_time,
+        jr.update_by,
+        jr.update_time,
+        jr.del_flag,
+        jr.api_method,
+        jr.api_code,
+        jr.template,
+        jr.view_count,
+        jr.css_str,
+        jr.js_str,
+        jr.py_str,
+        jr.tenant_id
+        FROM jimu_report jr
+    </sql>
+
+    <!--    在线excel设计器查询      -->
+    <select id="JiMuReportQuery" parameterType="JiMuReport" resultMap="JiMuReportResult">
+        <include refid="selectJiMuReportVo"/>
+        WHERE 1=1
+        <if test="id != null and id != ''">
+            AND jr.id = #{id}
+        </if>
+        <if test="code != null and code != ''">
+            AND jr.code = #{code}
+        </if>
+        <if test="name != null and name != ''">
+            AND jr.name = #{name}
+        </if>
+        <if test="note != null and note != ''">
+            AND jr.note = #{note}
+        </if>
+        <if test="status != null and status != ''">
+            AND jr.status = #{status}
+        </if>
+        <if test="type != null and status != ''">
+            AND jr.type = #{type}
+        </if>
+        <if test="jsonStr != null and jsonStr != ''">
+            AND jr.json_str = #{jsonStr}
+        </if>
+    </select>
+
+    <!--    在线excel设计器编号查询      -->
+    <select id="selectJiMuReportById" parameterType="String" resultMap="JiMuReportResult">
+        <include refid="selectJiMuReportVo"/>
+        where jr.id = #{id}
+    </select>
+
+</mapper>

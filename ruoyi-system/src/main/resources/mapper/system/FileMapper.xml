@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ruoyi.system.mapper.FileMapper">
+
+    <resultMap type="File" id="FileResult">
+        <result property="fileId" column="file_id"/>
+        <result property="fileName" column="file_name"/>
+        <result property="fileUrl" column="file_url"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <!--    查询文件共享公用方法    -->
+    <sql id="selectFileVo">
+        SELECT
+        tf.file_id,
+        tf.file_name,
+        tf.file_url,
+        tf.create_by,
+        tf.create_time,
+        tf.update_by,
+        tf.update_time
+        FROM template_file tf
+    </sql>
+
+    <!--    文件查询      -->
+    <select id="fileQuery" parameterType="File" resultMap="FileResult">
+        <include refid="selectFileVo"/>
+        WHERE 1=1
+        <if test="fileId != null and fileId != ''">
+            AND tf.file_id = #{fileId}
+        </if>
+        <if test="fileName != null and fileName != ''">
+            AND tf.file_name = #{fileName}
+        </if>
+    </select>
+
+    <!--    文件编号查询      -->
+    <select id="selectFileById" parameterType="Long" resultMap="FileResult">
+        <include refid="selectFileVo"/>
+        where tf.file_id = #{fileId}
+    </select>
+
+    <!--    上传文件    -->
+    <insert id="upload" parameterType="File">
+        insert into template_file(file_name, file_url)values(#{fileName}, #{fileUrl})
+    </insert>
+
+    <!--    文件修改      -->
+    <update id="updateFileName" parameterType="File">
+        update template_file
+        <set>
+            <if test="fileName != null and fileName != ''">file_Name = #{fileName},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            update_time = sysdate()
+        </set>
+        where file_id = #{fileId}
+    </update>
+
+    <!--    文件删除      -->
+    <delete id="deleteFileByIds" parameterType="Long">
+        delete from template_file where file_id in
+        <foreach collection="array" item="fileId" open="(" separator="," close=")">
+            #{fileId}
+        </foreach>
+    </delete>
+
+</mapper>
