@@ -69,13 +69,26 @@ public class Product extends BaseEntity {
      * 参考售价
      */
     @Excel(name = "参考售价")
-    private String price;
+    private String univalence;
+
+    /**
+     * 销售折扣
+     */
+    @Excel(name = "销售折扣")
+    private String discount;
+
 
     /**
      * 货品条码
      */
     @Excel(name = "货品条码")
     private String productBarcode;
+
+    /**
+     * 库存数量
+     */
+    @Excel(name = "库存数量")
+    private String inventoryQty;
 
     /**
      * 库存上限
@@ -114,6 +127,11 @@ public class Product extends BaseEntity {
             @Excel(name = "货品类型名称", targetAttr = "productTypeName", type = Type.EXPORT),
     })
     private ProductType type;
+
+    /**
+     * 货品类型名称
+     */
+    private String productTypeName;
 
     public String getProductId() {
         return productId;
@@ -179,12 +197,20 @@ public class Product extends BaseEntity {
         this.costPrice = costPrice;
     }
 
-    public String getPrice() {
-        return price;
+    public String getUnivalence() {
+        return univalence;
     }
 
-    public void setPrice(String price) {
-        this.price = price;
+    public void setUnivalence(String univalence) {
+        this.univalence = univalence;
+    }
+
+    public String getDiscount() {
+        return discount;
+    }
+
+    public void setDiscount(String discount) {
+        this.discount = discount;
     }
 
     public String getProductBarcode() {
@@ -193,6 +219,14 @@ public class Product extends BaseEntity {
 
     public void setProductBarcode(String productBarcode) {
         this.productBarcode = productBarcode;
+    }
+
+    public String getInventoryQty() {
+        return inventoryQty;
+    }
+
+    public void setInventoryQty(String inventoryQty) {
+        this.inventoryQty = inventoryQty;
     }
 
     public String getUpperLimit() {
@@ -243,6 +277,14 @@ public class Product extends BaseEntity {
         this.type = type;
     }
 
+    public String getProductTypeName() {
+        return productTypeName;
+    }
+
+    public void setProductTypeName(String productTypeName) {
+        this.productTypeName = productTypeName;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
@@ -254,14 +296,17 @@ public class Product extends BaseEntity {
                 .append("measureUnit", getMeasureUnit())
                 .append("producer", getProducer())
                 .append("costPrice", getCostPrice())
-                .append("price", getPrice())
+                .append("univalence", getUnivalence())
+                .append("discount", getDiscount())
                 .append("productBarcode", getProductBarcode())
+                .append("inventoryQty", getInventoryQty())
                 .append("upperLimit", getUpperLimit())
                 .append("lowerLimit", getLowerLimit())
                 .append("defaultWarehouse", getDefaultWarehouse())
                 .append("notes", getNotes())
                 .append("status", getStatus())
                 .append("type", getType())
+                .append("productTypeName", getProductTypeName())
                 .append("createBy", getCreateBy())
                 .append("createTime", getCreateTime())
                 .append("updateBy", getUpdateBy())

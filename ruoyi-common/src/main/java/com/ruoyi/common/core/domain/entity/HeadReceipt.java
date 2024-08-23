@@ -43,7 +43,7 @@ public class HeadReceipt extends BaseEntity {
     /**
      * 单据状态
      */
-    @Excel(name = "单据状态", readConverterExp = "1=拟制,2=生效")
+    @Excel(name = "单据状态", readConverterExp = "1=待审核,2=已审核")
     private Long receiptStatus;
 
     /**
@@ -120,26 +120,66 @@ public class HeadReceipt extends BaseEntity {
     private String receiptNotes;
 
     /**
-     * 备注
+     * 定金
      */
     @Excel(name = "定金")
     private String deposit;
 
     /**
-     * 备注
+     * 总金额
      */
     @Excel(name = "总金额")
     private String totalAmount;
 
     /**
-     * 备注
+     * 总金额（大写）
      */
     @Excel(name = "总金额（大写）")
     private String capitalizeTotalAmount;
 
+    @Excel(name = "售后安装", readConverterExp = "0=是,1=否")
+    private Long afterSalesInstallation;
+
+    /**
+     * 审核结果
+     */
+    @Excel(name = "审核结果")
+    private String findingOfAudit;
+
+    /**
+     * 审核意见
+     */
+    @Excel(name = "审核意见")
+    private String reviewComments;
+
+    private Long dailySalesAmount;
+
+    private Long lastMonthSalesAmount;
+
+    private Long lastSixMonthsSalesAmount;
+
+    private Long thisYearSalesAmount;
+
+    private Long lastYearSalesAmount;
+
+    private Long lastTwoYearsSalesAmount;
+
+    private Long dailyGrossProfit;
+
+    private Long lastMonthGrossProfit;
+
+    private Long lastSixMonthsGrossProfit;
+
+    private Long thisYearGrossProfit;
+
+    private Long lastYearGrossProfit;
+
+    private Long lastTwoYearsGrossProfit;
+
+
     private List<Product> product;
 
-    private List<DetailReceipt> detail;
+    private List<DetailReceipt> details;
 
     public String getSystematicReceipt() {
         return systematicReceipt;
@@ -285,6 +325,30 @@ public class HeadReceipt extends BaseEntity {
         this.capitalizeTotalAmount = capitalizeTotalAmount;
     }
 
+    public Long getAfterSalesInstallation() {
+        return afterSalesInstallation;
+    }
+
+    public void setAfterSalesInstallation(Long afterSalesInstallation) {
+        this.afterSalesInstallation = afterSalesInstallation;
+    }
+
+    public String getFindingOfAudit() {
+        return findingOfAudit;
+    }
+
+    public void setFindingOfAudit(String findingOfAudit) {
+        this.findingOfAudit = findingOfAudit;
+    }
+
+    public String getReviewComments() {
+        return reviewComments;
+    }
+
+    public void setReviewComments(String reviewComments) {
+        this.reviewComments = reviewComments;
+    }
+
     public Warehouse getWarehousing() {
         return warehousing;
     }
@@ -333,12 +397,108 @@ public class HeadReceipt extends BaseEntity {
         this.product = product;
     }
 
-    public List<DetailReceipt> getDetail() {
-        return detail;
+    public List<DetailReceipt> getDetails() {
+        return details;
     }
 
-    public void setDetail(List<DetailReceipt> detail) {
-        this.detail = detail;
+    public void setDetails(List<DetailReceipt> details) {
+        this.details = details;
+    }
+
+    public Long getDailySalesAmount() {
+        return dailySalesAmount;
+    }
+
+    public void setDailySalesAmount(Long dailySalesAmount) {
+        this.dailySalesAmount = dailySalesAmount;
+    }
+
+    public Long getLastMonthSalesAmount() {
+        return lastMonthSalesAmount;
+    }
+
+    public void setLastMonthSalesAmount(Long lastMonthSalesAmount) {
+        this.lastMonthSalesAmount = lastMonthSalesAmount;
+    }
+
+    public Long getLastSixMonthsSalesAmount() {
+        return lastSixMonthsSalesAmount;
+    }
+
+    public void setLastSixMonthsSalesAmount(Long lastSixMonthsSalesAmount) {
+        this.lastSixMonthsSalesAmount = lastSixMonthsSalesAmount;
+    }
+
+    public Long getThisYearSalesAmount() {
+        return thisYearSalesAmount;
+    }
+
+    public void setThisYearSalesAmount(Long thisYearSalesAmount) {
+        this.thisYearSalesAmount = thisYearSalesAmount;
+    }
+
+    public Long getLastYearSalesAmount() {
+        return lastYearSalesAmount;
+    }
+
+    public void setLastYearSalesAmount(Long lastYearSalesAmount) {
+        this.lastYearSalesAmount = lastYearSalesAmount;
+    }
+
+    public Long getLastTwoYearsSalesAmount() {
+        return lastTwoYearsSalesAmount;
+    }
+
+    public void setLastTwoYearsSalesAmount(Long lastTwoYearsSalesAmount) {
+        this.lastTwoYearsSalesAmount = lastTwoYearsSalesAmount;
+    }
+
+    public Long getDailyGrossProfit() {
+        return dailyGrossProfit;
+    }
+
+    public void setDailyGrossProfit(Long dailyGrossProfit) {
+        this.dailyGrossProfit = dailyGrossProfit;
+    }
+
+    public Long getLastMonthGrossProfit() {
+        return lastMonthGrossProfit;
+    }
+
+    public void setLastMonthGrossProfit(Long lastMonthGrossProfit) {
+        this.lastMonthGrossProfit = lastMonthGrossProfit;
+    }
+
+    public Long getLastSixMonthsGrossProfit() {
+        return lastSixMonthsGrossProfit;
+    }
+
+    public void setLastSixMonthsGrossProfit(Long lastSixMonthsGrossProfit) {
+        this.lastSixMonthsGrossProfit = lastSixMonthsGrossProfit;
+    }
+
+    public Long getThisYearGrossProfit() {
+        return thisYearGrossProfit;
+    }
+
+    public void setThisYearGrossProfit(Long thisYearGrossProfit) {
+        this.thisYearGrossProfit = thisYearGrossProfit;
+    }
+
+    public Long getLastYearGrossProfit() {
+        return lastYearGrossProfit;
+    }
+
+    public void setLastYearGrossProfit(Long lastYearGrossProfit) {
+        this.lastYearGrossProfit = lastYearGrossProfit;
+    }
+
+    public Long getLastTwoYearsGrossProfit() {
+        return lastTwoYearsGrossProfit;
+    }
+
+    public void setLastTwoYearsGrossProfit(Long lastTwoYearsGrossProfit) {
+        this.lastTwoYearsGrossProfit = lastTwoYearsGrossProfit;
     }
 
     @Override
@@ -362,6 +522,9 @@ public class HeadReceipt extends BaseEntity {
                 .append("deposit", getDeposit())
                 .append("totalAmount", getTotalAmount())
                 .append("capitalizeTotalAmount", getCapitalizeTotalAmount())
+                .append("afterSalesInstallation", getAfterSalesInstallation())
+                .append("findingOfAudit", getFindingOfAudit())
+                .append("reviewComments", getReviewComments())
                 .append("createBy", getCreateBy())
                 .append("createTime", getCreateTime())
                 .append("updateBy", getUpdateBy())
@@ -372,7 +535,7 @@ public class HeadReceipt extends BaseEntity {
                 .append("supplier", getSupplier())
                 .append("customer", getCustomer())
                 .append("product", getProduct())
-                .append("detail", getDetail())
+                .append("details", getDetails())
                 .toString();
     }
 }

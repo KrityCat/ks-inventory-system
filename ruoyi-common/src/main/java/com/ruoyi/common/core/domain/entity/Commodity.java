@@ -1,6 +1,7 @@
 package com.ruoyi.common.core.domain.entity;
 
 import com.ruoyi.common.annotation.Excel;
+import com.ruoyi.common.annotation.Excels;
 import com.ruoyi.common.core.domain.BaseEntity;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -70,7 +71,7 @@ public class Commodity extends BaseEntity {
      * 商品条码
      */
     @Excel(name = "商品条码")
-    private String productBarcode;
+    private String commodityBarcode;
 
     /**
      * 库存上限
@@ -101,6 +102,14 @@ public class Commodity extends BaseEntity {
      */
     @Excel(name = "商品状态", readConverterExp = "0=正常,1=停用")
     private String status;
+
+    /**
+     * 货品类型名称
+     */
+    @Excels({
+            @Excel(name = "货品类型名称", targetAttr = "commodityTypeName", type = Excel.Type.EXPORT),
+    })
+    private CommodityType type;
 
     public Long getCommodityId() {
         return commodityId;
@@ -174,12 +183,12 @@ public class Commodity extends BaseEntity {
         this.price = price;
     }
 
-    public String getProductBarcode() {
-        return productBarcode;
+    public String getCommodityBarcode() {
+        return commodityBarcode;
     }
 
-    public void setProductBarcode(String productBarcode) {
-        this.productBarcode = productBarcode;
+    public void setCommodityBarcode(String commodityBarcode) {
+        this.commodityBarcode = commodityBarcode;
     }
 
     public String getUpperLimit() {
@@ -222,6 +231,14 @@ public class Commodity extends BaseEntity {
         this.status = status;
     }
 
+    public CommodityType getType() {
+        return type;
+    }
+
+    public void setType(CommodityType type) {
+        this.type = type;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
@@ -234,12 +251,13 @@ public class Commodity extends BaseEntity {
                 .append("producer", getProducer())
                 .append("costPrice", getCostPrice())
                 .append("price", getPrice())
-                .append("productBarcode", getProductBarcode())
+                .append("commodityBarcode", getCommodityBarcode())
                 .append("upperLimit", getUpperLimit())
                 .append("lowerLimit", getLowerLimit())
                 .append("defaultWarehouse", getDefaultWarehouse())
                 .append("notes", getNotes())
                 .append("status", getStatus())
+                .append("type", getType())
                 .append("createBy", getCreateBy())
                 .append("createTime", getCreateTime())
                 .append("updateBy", getUpdateBy())

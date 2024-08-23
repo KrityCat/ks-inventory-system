@@ -14,7 +14,7 @@
         <result property="producer" column="producer"/>
         <result property="costPrice" column="cost_price"/>
         <result property="price" column="price"/>
-        <result property="productBarcode" column="product_barcode"/>
+        <result property="commodityBarcode" column="commodity_barcode"/>
         <result property="upperLimit" column="upper_limit"/>
         <result property="lowerLimit" column="lower_limit"/>
         <result property="defaultWarehouse" column="default_warehouse"/>
@@ -24,41 +24,81 @@
         <result property="createTime" column="create_time"/>
         <result property="updateBy" column="update_by"/>
         <result property="updateTime" column="update_time"/>
+        <association property="type" javaType="CommodityType" resultMap="CommodityTypeResult"/>
     </resultMap>
 
+    <resultMap type="CommodityType" id="CommodityTypeResult">
+        <id property="commodityTypeId" column="commodity_type_id"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="ancestors" column="ancestors"/>
+        <result property="commodityTypeName" column="commodity_type_name"/>
+        <result property="orderNum" column="order_num"/>
+        <result property="status" column="status"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="parentName" column="parent_name"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <!--    查询商品公用方法    -->
     <sql id="selectCommodityVo">
-        select commodity_id, commodity_code, commodity_name, commodity_type, commodity_specifications, measure_unit,
-        producer, cost_price, price, product_barcode, upper_limit, lower_limit, default_warehouse, notes, status,
-        create_by, create_time, update_by, update_time from commodity
+        select c.commodity_id, c.commodity_code, c.commodity_name, c.commodity_type, c.commodity_specifications,
+        c.measure_unit,
+        c.producer, c.cost_price, c.price, c.commodity_barcode, c.upper_limit, c.lower_limit, c.default_warehouse,
+        c.notes, c.status,
+        c.create_by, c.create_time, c.update_by, c.update_time,
+        ct.commodity_type_id, ct.parent_id, ct.ancestors, ct.commodity_type_name, ct.order_num, ct.status,
+        ct.del_flag, ct.create_by, ct.create_time, ct.update_by, ct.update_time
+        from commodity c
+        JOIN commodity_type ct ON ct.commodity_type_id = c.commodity_type
     </sql>
 
+    <!--    商品资料查询      -->
     <select id="selectCommodityList" parameterType="Commodity" resultMap="CommodityResult">
         <include refid="selectCommodityVo"/>
         <where>
-            <if test="commodityCode != null  and commodityCode != ''">and commodity_code like concat('%',
-                #{commodityCode}, '%')
+            <if test="commodityCode != null  and commodityCode != ''">
+                and commodity_code like concat('%', #{commodityCode}, '%')
             </if>
-            <if test="commodityName != null  and commodityName != ''">and commodity_name like concat('%',
-                #{commodityName}, '%')
+            <if test="commodityName != null  and commodityName != ''">
+                and commodity_name like concat('%', #{commodityName}, '%')
             </if>
-            <if test="commodityType != null  and commodityType != ''">and commodity_type = #{commodityType}</if>
-            <if test="commoditySpecifications != null  and commoditySpecifications != ''">and commodity_specifications =
-                #{commoditySpecifications}
+            <if test="commodityType != null  and commodityType != ''">
+                and commodity_type = #{commodityType}
             </if>
-            <if test="productBarcode != null  and productBarcode != ''">and product_barcode = #{productBarcode}</if>
-            <if test="defaultWarehouse != null  and defaultWarehouse != ''">and default_warehouse =
-                #{defaultWarehouse}
+            <if test="commoditySpecifications != null  and commoditySpecifications != ''">
+                and commodity_specifications = #{commoditySpecifications}
             </if>
-            <if test="status != null  and status != ''">and status = #{status}</if>
-            <if test="createTime != null ">and create_time = #{createTime}</if>
+            <if test="commodityBarcode != null  and commodityBarcode != ''">
+                and commodity_barcode = #{commodityBarcode}
+            </if>
+            <if test="defaultWarehouse != null  and defaultWarehouse != ''">
+                and default_warehouse = #{defaultWarehouse}
+            </if>
+            <if test="status != null  and status != ''">
+                and status = #{status}
+            </if>
+            <if test="createTime != null ">
+                and create_time = #{createTime}
+            </if>
         </where>
     </select>
 
+    <!--    商品编号查询      -->
     <select id="selectCommodityByCommodityId" parameterType="Long" resultMap="CommodityResult">
         <include refid="selectCommodityVo"/>
         where commodity_id = #{commodityId}
     </select>
 
+    <!--    商品名称查询      -->
+    <select id="selectCommodityByCommodityName" parameterType="String" resultMap="CommodityResult">
+        <include refid="selectCommodityVo"/>
+        where p.commodity_name = #{commodityName}
+    </select>
+
+    <!--    商品资料新增      -->
     <insert id="insertCommodity" parameterType="Commodity" useGeneratedKeys="true" keyProperty="commodityId">
         insert into commodity
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -70,7 +110,7 @@
             <if test="producer != null">producer,</if>
             <if test="costPrice != null">cost_price,</if>
             <if test="price != null">price,</if>
-            <if test="productBarcode != null">product_barcode,</if>
+            <if test="commodityBarcode != null">commodity_barcode,</if>
             <if test="upperLimit != null">upper_limit,</if>
             <if test="lowerLimit != null">lower_limit,</if>
             <if test="defaultWarehouse != null">default_warehouse,</if>
@@ -90,7 +130,7 @@
             <if test="producer != null">#{producer},</if>
             <if test="costPrice != null">#{costPrice},</if>
             <if test="price != null">#{price},</if>
-            <if test="productBarcode != null">#{productBarcode},</if>
+            <if test="commodityBarcode != null">#{commodityBarcode},</if>
             <if test="upperLimit != null">#{upperLimit},</if>
             <if test="lowerLimit != null">#{lowerLimit},</if>
             <if test="defaultWarehouse != null">#{defaultWarehouse},</if>
@@ -114,7 +154,7 @@
             <if test="producer != null">producer = #{producer},</if>
             <if test="costPrice != null">cost_price = #{costPrice},</if>
             <if test="price != null">price = #{price},</if>
-            <if test="productBarcode != null">product_barcode = #{productBarcode},</if>
+            <if test="commodityBarcode != null">commodity_barcode = #{commodityBarcode},</if>
             <if test="upperLimit != null">upper_limit = #{upperLimit},</if>
             <if test="lowerLimit != null">lower_limit = #{lowerLimit},</if>
             <if test="defaultWarehouse != null">default_warehouse = #{defaultWarehouse},</if>

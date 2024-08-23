@@ -23,6 +23,10 @@ public interface FileMapper {
      */
     int upload(@Param("fileName") String fileName, @Param("fileUrl") String fileUrl);
 
+    /**
+     * 打印文件新增
+     */
+    int addFileName(File bo);
 
     /**
      * 打印文件修改

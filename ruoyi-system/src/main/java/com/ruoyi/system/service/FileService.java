@@ -26,6 +26,11 @@ public interface FileService {
     boolean upload(String fileName, String fileUrl);
 
     /**
+     * 打印文件新增
+     */
+    int addFileName(File bo);
+
+    /**
      * 打印文件修改
      */
     int updateFileName(File bo);

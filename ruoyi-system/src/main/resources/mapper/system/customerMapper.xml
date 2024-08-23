@@ -57,20 +57,23 @@
     <select id="CustomerQuery" parameterType="Customer" resultMap="CustomerResult">
         <include refid="selectCustomerVo"/>
         WHERE 1=1
+        <if test="customerId != null and customerId != ''">
+            AND c.customer_id like concat('%', #{customerId}, '%')
+        </if>
         <if test="customerCode != null and customerCode != ''">
-            AND c.customer_code = #{customerCode}
+            AND c.customer_code like concat('%', #{customerCode}, '%')
         </if>
         <if test="customerName != null and customerName != ''">
-            AND c.customer_name = #{customerName}
+            AND c.customer_name like concat('%', #{customerName}, '%')
         </if>
         <if test="customerSalesPerson != null and customerSalesPerson != ''">
-            AND c.customer_sales_person = #{customerSalesPerson}
+            AND c.customer_sales_person like concat('%', #{customerSalesPerson}, '%')
         </if>
         <if test="customerContacts != null and customerContacts != ''">
-            AND c.customer_contacts = #{customerContacts}
+            AND c.customer_contacts like concat('%', #{customerContacts}, '%')
         </if>
         <if test="customerContactNumber != null and customerContactNumber != ''">
-            AND c.customer_contact_number = #{customerContactNumber}
+            AND c.customer_contact_number like concat('%', #{customerContactNumber}, '%')
         </if>
         <if test="status != null">
             AND c.status = #{status}

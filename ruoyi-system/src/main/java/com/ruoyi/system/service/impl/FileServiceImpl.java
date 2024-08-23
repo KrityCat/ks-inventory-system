@@ -22,19 +22,22 @@ import java.util.List;
 public class FileServiceImpl implements FileService {
 
     private static final Logger log = LoggerFactory.getLogger(FileServiceImpl.class);
+
     @Autowired
     protected Validator validator;
+
     @Autowired
-    private WarehouseMapper WhMapper;
+    private WarehouseMapper warehouseMapper;
+
     @Autowired
-    private FileMapper FMapper;
+    private FileMapper fileMapper;
 
     /**
      * 打印文件上传
      */
     @Override
     public boolean upload(String fileName, String fileUrl) {
-        return FMapper.upload(fileName, fileUrl) > 0;
+        return fileMapper.upload(fileName, fileUrl) > 0;
     }
 
     /**
@@ -42,7 +45,7 @@ public class FileServiceImpl implements FileService {
      */
     @Override
     public List<File> fileQuery(File bo) {
-        return FMapper.fileQuery(bo);
+        return fileMapper.fileQuery(bo);
     }
 
     /**
@@ -50,7 +53,16 @@ public class FileServiceImpl implements FileService {
      */
     @Override
     public File selectFileById(Long fileId) {
-        return FMapper.selectFileById(fileId);
+        return fileMapper.selectFileById(fileId);
+    }
+
+    /**
+     * 打印文件新增
+     */
+    @Override
+    @Transactional
+    public int addFileName(File bo) {
+        return fileMapper.addFileName(bo);
     }
 
     /**
@@ -59,7 +71,7 @@ public class FileServiceImpl implements FileService {
     @Override
     @Transactional
     public int updateFileName(File bo) {
-        return FMapper.updateFileName(bo);
+        return fileMapper.updateFileName(bo);
     }
 
     /**
@@ -68,7 +80,7 @@ public class FileServiceImpl implements FileService {
     @Override
     @Transactional
     public int deleteFileByIds(Long[] fileId) {
-        return FMapper.deleteFileByIds(fileId);
+        return fileMapper.deleteFileByIds(fileId);
     }
 
 }

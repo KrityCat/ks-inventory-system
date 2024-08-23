@@ -169,6 +169,11 @@ public class DetailReceipt extends BaseEntity {
     private String OBPlanQuantity;
 
     /**
+     * 期初结存单价
+     */
+    private String OBUnivalence;
+
+    /**
      * 期初结存金额
      */
     private Double OBMoney;
@@ -199,9 +204,44 @@ public class DetailReceipt extends BaseEntity {
     private String CBPlanQuantity;
 
     /**
+     * 期末结存单价
+     */
+    private String CBUnivalence;
+
+    /**
      * 期末结存金额
      */
     private Double CBMoney;
+
+    /**
+     * 货品类型
+     */
+    private String productType;
+
+    /**
+     * 货品类型名称
+     */
+    private String productTypeName;
+
+    /**
+     * 商品规格
+     */
+    private String productSpecifications;
+
+    /**
+     * 计量单位
+     */
+    private String measureUnit;
+
+    /**
+     * 产地
+     */
+    private String producer;
+
+    /**
+     * 库存数量
+     */
+    private String inventoryQty;
 
     public String getSystematicReceipt() {
         return systematicReceipt;
@@ -281,6 +321,14 @@ public class DetailReceipt extends BaseEntity {
 
     public void setCurrentInventory(String currentInventory) {
         this.currentInventory = currentInventory;
+    }
+
+    public String getActualInventory() {
+        return actualInventory;
+    }
+
+    public void setActualInventory(String actualInventory) {
+        this.actualInventory = actualInventory;
     }
 
     public String getPlanQuantity() {
@@ -467,6 +515,14 @@ public class DetailReceipt extends BaseEntity {
         this.OBPlanQuantity = obPlanQuantity;
     }
 
+    public String getOBUnivalence() {
+        return OBUnivalence;
+    }
+
+    public void setOBUnivalence(String OBUnivalence) {
+        this.OBUnivalence = OBUnivalence;
+    }
+
     public Double getOBMoney() {
         return OBMoney;
     }
@@ -515,12 +571,68 @@ public class DetailReceipt extends BaseEntity {
         this.CBPlanQuantity = cbPlanQuantity;
     }
 
+    public String getCBUnivalence() {
+        return CBUnivalence;
+    }
+
+    public void setCBUnivalence(String CBUnivalence) {
+        this.CBUnivalence = CBUnivalence;
+    }
+
     public Double getCBMoney() {
         return CBMoney;
     }
 
     public void setCBMoney(Double cbMoney) {
         this.CBMoney = cbMoney;
+    }
+
+    public String getProductType() {
+        return productType;
+    }
+
+    public void setProductType(String productType) {
+        this.productType = productType;
+    }
+
+    public String getProductTypeName() {
+        return productTypeName;
+    }
+
+    public void setProductTypeName(String productTypeName) {
+        this.productTypeName = productTypeName;
+    }
+
+    public String getProductSpecifications() {
+        return productSpecifications;
+    }
+
+    public void setProductSpecifications(String productSpecifications) {
+        this.productSpecifications = productSpecifications;
+    }
+
+    public String getMeasureUnit() {
+        return measureUnit;
+    }
+
+    public void setMeasureUnit(String measureUnit) {
+        this.measureUnit = measureUnit;
+    }
+
+    public String getProducer() {
+        return producer;
+    }
+
+    public void setProducer(String producer) {
+        this.producer = producer;
+    }
+
+    public String getInventoryQty() {
+        return inventoryQty;
+    }
+
+    public void setInventoryQty(String inventoryQty) {
+        this.inventoryQty = inventoryQty;
     }
 
     @Override
@@ -536,7 +648,7 @@ public class DetailReceipt extends BaseEntity {
                 .append("supplierId", getSupplierId())
                 .append("customerId", getCustomerId())
                 .append("currentInventory", getCurrentInventory())
-                .append("currentInventory", getCurrentInventory())
+                .append("actualInventory", getActualInventory())
                 .append("planQuantity", getPlanQuantity())
                 .append("univalence", getUnivalence())
                 .append("discount", getDiscount())
@@ -560,13 +672,21 @@ public class DetailReceipt extends BaseEntity {
                 .append("supplier", getSupplier())
                 .append("customer", getCustomer())
                 .append("OBPlanQuantity", getOBPlanQuantity())
+                .append("OBUnivalence", getOBUnivalence())
                 .append("OBMoney", getOBMoney())
                 .append("EIPlanQuantity", getEIPlanQuantity())
                 .append("EIMoney", getEIMoney())
                 .append("ERPlanQuantity", getERPlanQuantity())
                 .append("ERMoney", getERMoney())
                 .append("CBPlanQuantity", getCBPlanQuantity())
+                .append("CBUnivalence", getCBUnivalence())
                 .append("CBMoney", getCBMoney())
+                .append("productType", getProductType())
+                .append("productTypeName", getProductTypeName())
+                .append("productSpecifications", getProductSpecifications())
+                .append("measureUnit", getMeasureUnit())
+                .append("producer", getProducer())
+                .append("inventoryQty", getInventoryQty())
                 .append("createBy", getCreateBy())
                 .append("createTime", getCreateTime())
                 .append("updateBy", getUpdateBy())

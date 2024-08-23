@@ -3,13 +3,13 @@ package com.ruoyi.system.service.impl;
 import com.ruoyi.common.core.domain.entity.DetailReceipt;
 import com.ruoyi.common.core.domain.entity.HeadReceipt;
 import com.ruoyi.common.core.domain.entity.InventoryProduct;
-import com.ruoyi.common.core.domain.entity.ReceiptFrom;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.bean.BeanValidators;
 import com.ruoyi.system.mapper.DetailReceiptMapper;
 import com.ruoyi.system.mapper.HeadReceiptMapper;
 import com.ruoyi.system.mapper.InventoryMapper;
+import com.ruoyi.system.mapper.ProductMapper;
 import com.ruoyi.system.service.InventoryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,8 +42,10 @@ public class InventoryServiceImpl implements InventoryService {
     @Autowired
     private InventoryMapper InventoryMapper;
 
+    @Autowired
+    private ProductMapper productMapper;
+
     /**
-     *
      * @param bo 单据信息
      * @return 库存货品查询
      */
@@ -53,7 +55,6 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     /**
-     *
      * @param bo 单据信息
      * @return 库存单据头表查询
      */
@@ -63,7 +64,6 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     /**
-     *
      * @param bo 单据信息
      * @return 库存单据明细查询
      */
@@ -73,7 +73,6 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     /**
-     *
      * @param bo 单据信息
      * @return 货品发生汇总查询
      */
@@ -83,7 +82,6 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     /**
-     *
      * @param bo 单据信息
      * @return 货品发生明细查询
      */
@@ -93,7 +91,6 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     /**
-     *
      * @param SystematicReceipt 系统单号
      * @return 库存指定单据查询
      */
@@ -103,114 +100,6 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     /**
-     *
-     * @param bo 单据信息
-     * @return 保存其他入库单据信息
-     */
-    @Override
-    public int saveStorageOther(ReceiptFrom bo) {
-        long count = HeadReceiptMapper.selectHeadReceiptByCount(bo).size();
-        List<DetailReceipt> details = bo.getDetails();
-        if (count == 0) {
-            long sizeInventory = InventoryMapper.selectInventoryById(details).size();
-            DetailReceiptMapper.addDetailReceipt(details);
-            if (sizeInventory == 0) {
-                InventoryMapper.addInventory(details);
-            } else {
-                InventoryMapper.updateInventory(details);
-            }
-            return HeadReceiptMapper.addHeadReceipt(bo);
-        } else {
-            DetailReceiptMapper.delDetailReceipt(details);
-            DetailReceiptMapper.addDetailReceipt(details);
-            HeadReceiptMapper.updateHeadReceipt(bo);
-            return InventoryMapper.updateInventory(details);
-        }
-    }
-
-    /**
-     *
-     * @param bo 单据信息
-     * @return 保存其他出库单据信息
-     */
-    @Override
-    public int saveOutboundOther(ReceiptFrom bo) {
-        long count = HeadReceiptMapper.selectHeadReceiptByCount(bo).size();
-        List<DetailReceipt> details = bo.getDetails();
-        if (count == 0) {
-            long sizeInventory = InventoryMapper.selectInventoryById(details).size();
-            if (sizeInventory == 0) {
-                throw new RuntimeException("货品明细中有货品库存为0，货品需入库后才能出库！");
-            } else {
-                DetailReceiptMapper.addDetailReceipt(details);
-                HeadReceiptMapper.addHeadReceipt(bo);
-                InventoryMapper.updateInventory(details);
-            }
-            return 1;
-        } else {
-            DetailReceiptMapper.delDetailReceipt(details);
-            DetailReceiptMapper.addDetailReceipt(details);
-            HeadReceiptMapper.updateHeadReceipt(bo);
-            return InventoryMapper.updateInventory(details);
-        }
-    }
-
-    /**
-     *
-     * @param bo 单据信息
-     * @return 保存库存调拨单据信息
-     */
-    @Override
-    public int saveInventoryTransfer(ReceiptFrom bo) {
-        long count = HeadReceiptMapper.selectHeadReceiptByCount(bo).size();
-        List<DetailReceipt> details = bo.getDetails();
-        if (count == 0) {
-            long sizeInventory = InventoryMapper.selectInventoryById(details).size();
-            DetailReceiptMapper.addDetailReceipt(details);
-            HeadReceiptMapper.addHeadReceipt(bo);
-            if (sizeInventory == 0) {
-                InventoryMapper.addInventory(details);
-            } else {
-                InventoryMapper.updateInventory(details);
-            }
-            return 1;
-        } else {
-            DetailReceiptMapper.delDetailReceipt(details);
-            DetailReceiptMapper.addDetailReceipt(details);
-            HeadReceiptMapper.updateHeadReceipt(bo);
-            return InventoryMapper.updateInventory(details);
-        }
-    }
-
-    /**
-     *
-     * @param bo 单据信息
-     * @return 保存库存盘点单据信息
-     */
-    @Override
-    public int saveInventoryCounting(ReceiptFrom bo) {
-        long count = HeadReceiptMapper.selectHeadReceiptByCount(bo).size();
-        List<DetailReceipt> details = bo.getDetails();
-        if (count == 0) {
-            long sizeInventory = InventoryMapper.selectInventoryById(details).size();
-            DetailReceiptMapper.addDetailReceipt(details);
-            HeadReceiptMapper.addHeadReceipt(bo);
-            if (sizeInventory == 0) {
-                InventoryMapper.addInventory(details);
-            } else {
-                InventoryMapper.updateInventory(details);
-            }
-            return 1;
-        } else {
-            DetailReceiptMapper.delDetailReceipt(details);
-            DetailReceiptMapper.addDetailReceipt(details);
-            HeadReceiptMapper.updateHeadReceipt(bo);
-            return InventoryMapper.updateInventory(details);
-        }
-    }
-
-    /**
-     *
      * @param bo 单据信息
      * @return 删除库存单据信息
      */
@@ -219,11 +108,11 @@ public class InventoryServiceImpl implements InventoryService {
     public int delInventoryReceipt(List<DetailReceipt> bo) {
         DetailReceiptMapper.delDetailReceipt(bo);
         HeadReceiptMapper.delHeadReceipt(bo);
-        return InventoryMapper.updateInventory(bo);
+        InventoryMapper.updateInventory(bo);
+        return productMapper.updateInventoryQty(bo);
     }
 
     /**
-     *
      * @param HeadDataList 单据信息
      * @return 导入单据头表
      */
@@ -275,7 +164,6 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     /**
-     *
      * @param DetailDataList 单据信息
      * @return 导入单据明细表
      */

@@ -22,7 +22,7 @@ import org.springframework.web.filter.CorsFilter;
 
 /**
  * spring security配置
- * 
+ *
  * @author KrityCat
  */
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
@@ -112,6 +112,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 // 静态资源，可匿名访问
                 .antMatchers(HttpMethod.GET, "/", "/*.html", "/**/*.html", "/**/*.css", "/**/*.js", "/profile/**").permitAll()
                 .antMatchers("/swagger-ui.html", "/swagger-resources/**", "/webjars/**", "/*/api-docs", "/druid/**").permitAll()
+                // 积木报表拦截排除
+                .antMatchers("/jmreport/**").permitAll()
                 // 除上面外的所有请求全部需要鉴权认证
                 .anyRequest().authenticated()
                 .and()

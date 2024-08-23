@@ -57,6 +57,9 @@
     <select id="SupplierQuery" parameterType="Supplier" resultMap="SupplierResult">
         <include refid="selectSupplierVo"/>
         WHERE 1=1
+        <if test="supplierId != null and supplierId != ''">
+            AND s.supplier_id = #{supplierId}
+        </if>
         <if test="supplierCode != null and supplierCode != ''">
             AND s.supplier_code = #{supplierCode}
         </if>

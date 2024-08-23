@@ -16,7 +16,47 @@ public interface ProductService {
      * @param bo 货品信息
      * @return 货品信息集合信息
      */
-    List<Product> ProductQuery(Product bo);
+    List<Product> productQuery(Product bo);
+
+    /**
+     * 根据货品库存积压预警查询货品列表
+     *
+     * @param bo 货品信息
+     * @return 货品信息集合信息
+     */
+    List<Product> productOverstockQuery(Product bo);
+
+    /**
+     * 根据货品库存不足预警查询货品列表
+     *
+     * @param bo 货品信息
+     * @return 货品信息集合信息
+     */
+    List<Product> productDangerQuery(Product bo);
+
+    /**
+     * 积压3个月未出预警查询
+     *
+     * @param bo 货品信息
+     * @return 货品信息集合信息
+     */
+    List<Product> productThreeDangerQuery(Product bo);
+
+    /**
+     * 积压6个月未出预警查询
+     *
+     * @param bo 货品信息
+     * @return 货品信息集合信息
+     */
+    List<Product> productSixDangerQuery(Product bo);
+
+    /**
+     * 积压12个月未出预警查询
+     *
+     * @param bo 货品信息
+     * @return 货品信息集合信息
+     */
+    List<Product> productTwelveDangerQuery(Product bo);
 
     /**
      * 通过货品CODE查询货品

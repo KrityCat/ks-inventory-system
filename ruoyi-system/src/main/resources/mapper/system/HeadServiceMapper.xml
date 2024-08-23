@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ruoyi.system.mapper.HeadServiceMapper">
+
+    <resultMap type="headService" id="headServiceResult">
+        <result property="systematicReceipt" column="systematic_receipt"/>
+        <result property="originalReceipt" column="original_receipt"/>
+        <result property="serviceType" column="service_type"/>
+        <result property="receiptStatus" column="receipt_status"/>
+        <result property="invoiceDate" column="invoice_date"/>
+        <result property="warehousingIds" column="warehousing_ids"/>
+        <result property="retrievalIds" column="retrieval_ids"/>
+        <result property="userIds" column="user_ids"/>
+        <result property="supplierIds" column="supplier_ids"/>
+        <result property="customerIds" column="customer_ids"/>
+        <result property="receiptNotes" column="receipt_notes"/>
+        <result property="deposit" column="deposit"/>
+        <result property="totalAmount" column="total_amount"/>
+        <result property="capitalizeTotalAmount" column="capitalize_total_amount"/>
+        <result property="installer" column="installer"/>
+        <result property="findingOfAudit" column="finding_of_audit"/>
+        <result property="reviewComments" column="review_comments"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <association property="sysUser" javaType="SysUser" resultMap="SysUserResult"/>
+        <association property="supplier" javaType="Supplier" resultMap="SupplierResult"/>
+        <association property="customer" javaType="Customer" resultMap="CustomerResult"/>
+        <collection property="warehousing" ofType="Warehouse">
+            <result property="warehousingId" column="warehousing_id"/>
+            <result property="warehousingName" column="warehousing_name"/>
+        </collection>
+        <collection property="retrieval" ofType="Warehouse">
+            <result property="retrievalId" column="retrieval_id"/>
+            <result property="retrievalName" column="retrieval_name"/>
+        </collection>
+        <collection property="details" ofType="detailService">
+            <result property="systematicReceipt" column="systematic_receipt"/>
+            <result property="productId" column="product_id"/>
+            <result property="productCode" column="product_code"/>
+            <result property="productName" column="product_name"/>
+            <result property="productType" column="product_type"/>
+            <result property="productTypeName" column="product_type_name"/>
+            <result property="productSpecifications" column="product_specifications"/>
+            <result property="measureUnit" column="measure_unit"/>
+            <result property="producer" column="producer"/>
+            <result property="inventoryQty" column="inventory_qty"/>
+            <result property="warehousingId" column="warehousing_id"/>
+            <result property="retrievalId" column="retrieval_id"/>
+            <result property="supplierId" column="supplier_id"/>
+            <result property="customerId" column="customer_id"/>
+            <result property="currentInventory" column="current_inventory"/>
+            <result property="actualInventory" column="actual_inventory"/>
+            <result property="planQuantity" column="plan_quantity"/>
+            <result property="univalence" column="univalence"/>
+            <result property="discount" column="discount"/>
+            <result property="money" column="money"/>
+            <result property="cost" column="cost"/>
+            <result property="remarks" column="remarks"/>
+        </collection>
+        <collection property="product" ofType="Product">
+            <result property="productId" column="product_id"/>
+            <result property="productCode" column="product_code"/>
+            <result property="productName" column="product_name"/>
+            <result property="productType" column="product_type"/>
+            <result property="productSpecifications" column="product_specifications"/>
+            <result property="measureUnit" column="measure_unit"/>
+            <result property="producer" column="producer"/>
+        </collection>
+    </resultMap>
+
+    <resultMap type="SysUser" id="SysUserResult">
+        <id property="userId" column="user_id"/>
+        <result property="userName" column="user_name"/>
+    </resultMap>
+
+    <resultMap type="Supplier" id="SupplierResult">
+        <result property="supplierId" column="supplier_id"/>
+        <result property="supplierCode" column="supplier_code"/>
+        <result property="supplierName" column="supplier_name"/>
+    </resultMap>
+
+    <resultMap type="Customer" id="CustomerResult">
+        <result property="customerId" column="customer_id"/>
+        <result property="customerCode" column="customer_code"/>
+        <result property="customerName" column="customer_name"/>
+    </resultMap>
+
+    <!--    库存头单查询      -->
+    <select id="headServiceQuery" parameterType="headService" resultMap="headServiceResult">
+        SELECT DISTINCT
+        hs.systematic_receipt, hs.original_receipt, hs.service_type, hs.receipt_status,
+        hs.invoice_date, hs.warehousing_ids, hs.retrieval_ids, hs.user_ids, hs.supplier_ids, hs.customer_ids,
+        hs.receipt_notes, hs.deposit, hs.total_amount, hs.capitalize_total_amount,
+        hs.installer, hs.finding_of_audit, hs.review_comments, hs.create_by, hs.create_time, hs.update_by,
+        hs.update_time,
+        (SELECT w1.warehouse_id FROM warehouse w1 WHERE w1.warehouse_id = hs.warehousing_ids) AS warehousing_id,
+        (SELECT w1.warehouse_name FROM warehouse w1 WHERE w1.warehouse_id = hs.warehousing_ids) AS warehousing_name,
+        (SELECT w2.warehouse_id FROM warehouse w2 WHERE w2.warehouse_id = hs.retrieval_ids) AS retrieval_id,
+        (SELECT w2.warehouse_name FROM warehouse w2 WHERE w2.warehouse_id = hs.retrieval_ids) AS retrieval_name,
+        su.user_id,
+        su.user_name,
+        (SELECT s.supplier_id FROM supplier s WHERE hs.supplier_ids = s.supplier_id) AS supplier_id,
+        (SELECT s.supplier_name FROM supplier s WHERE hs.supplier_ids = s.supplier_id) AS supplier_name,
+        (SELECT c.customer_id FROM customer c WHERE hs.customer_ids = c.customer_id) AS customer_id,
+        (SELECT c.customer_name FROM customer c WHERE hs.customer_ids = c.customer_id) AS customer_name
+        FROM (head_service hs, detail_service ds, product p)
+        JOIN sys_user su ON hs.user_ids = su.user_id
+        WHERE 1=1
+        AND hs.systematic_receipt = ds.systematic_receipt
+        AND ds.product_id = p.product_id
+        <if test="systematicReceipt != null and systematicReceipt != ''">
+            AND hs.systematic_receipt like concat('%', #{systematicReceipt}, '%')
+        </if>
+        <if test="originalReceipt != null and originalReceipt != ''">
+            AND hs.original_receipt like concat('%', #{originalReceipt}, '%')
+        </if>
+        <if test="serviceType != null and serviceType != ''">
+            AND hs.service_type = #{serviceType}
+        </if>
+        <if test="receiptStatus != null and receiptStatus != ''">
+            AND hs.receipt_status = #{receiptStatus}
+        </if>
+        <if test="warehousingIds != null and warehousingIds != ''">
+            AND hs.warehousing_ids = #{warehousingIds}
+        </if>
+        <if test="retrievalIds != null and retrievalIds != ''">
+            AND hs.retrieval_ids = #{retrievalIds}
+        </if>
+        <if test="userIds != null and userIds != ''">
+            AND hs.user_ids = #{userIds}
+        </if>
+        <if test="supplierIds != null and supplierIds != ''">
+            AND hs.supplier_ids = #{supplierIds}
+        </if>
+        <if test="customerIds != null and customerIds != ''">
+            AND hs.customer_ids = #{customerIds}
+        </if>
+        <if test="productCode != null and productCode != ''">
+            AND p.product_code like concat('%', #{productCode}, '%')
+        </if>
+        <if test="productName != null and productName != ''">
+            AND p.product_name like concat('%', #{productName}, '%')
+        </if>
+        <if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+            AND date_format(hs.create_time,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')
+        </if>
+        <if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+            AND date_format(hs.create_time,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')
+        </if>
+        order by create_time DESC
+    </select>
+
+    <!--    单据指定编号查询      -->
+    <select id="selectHeadServiceById" parameterType="String" resultMap="headServiceResult">
+        SELECT
+        hs.systematic_receipt, hs.original_receipt, hs.service_type, hs.receipt_status,
+        hs.invoice_date, hs.warehousing_ids, hs.retrieval_ids, hs.user_ids, hs.supplier_ids, hs.customer_ids,
+        hs.receipt_notes, hs.deposit, hs.total_amount, hs.capitalize_total_amount,
+        hs.installer, hs.finding_of_audit, hs.review_comments, hs.create_by, hs.create_time, hs.update_by,
+        hs.update_time,
+        ds.systematic_receipt, ds.product_id, ds.warehousing_id, ds.retrieval_id, ds.supplier_id, ds.customer_id,
+        ds.current_inventory, ds.actual_inventory, ds.plan_quantity, ds.univalence, ds.discount, ds.money, ds.cost,
+        ds.remarks, ds.product_specifications, ds.measure_unit,
+        p.product_id, p.product_code, p.product_name, p.product_type, p.producer,
+        p.inventory_qty, pt.product_type_id, pt.product_type_name,
+        su.user_id, su.user_name,
+        (SELECT w1.warehouse_name FROM warehouse w1 WHERE w1.warehouse_id = hs.warehousing_ids) AS warehousing_name,
+        (SELECT w2.warehouse_name FROM warehouse w2 WHERE w2.warehouse_id = hs.retrieval_ids) AS retrieval_name,
+        (SELECT s.supplier_name FROM supplier s WHERE hs.supplier_ids = s.supplier_id) AS supplier_name,
+        (SELECT c.customer_name FROM customer c WHERE hs.customer_ids = c.customer_id) AS customer_name
+        FROM head_service hs
+        JOIN detail_service ds ON ds.systematic_receipt = hs.systematic_receipt
+        JOIN product p ON p.product_id = ds.product_id
+        JOIN sys_user su ON su.user_id = hs.user_ids
+        JOIN product_type pt ON pt.product_type_id = p.product_type
+        WHERE hs.systematic_receipt = #{systematicReceipt}
+    </select>
+
+    <!--    单据指定编号查询      -->
+    <select id="selectHeadServiceByCount" parameterType="String" resultMap="headServiceResult">
+        SELECT hs.systematic_receipt
+        FROM head_service hs
+        JOIN detail_service ds ON ds.systematic_receipt = hs.systematic_receipt
+        WHERE hs.systematic_receipt = #{systematicReceipt}
+    </select>
+
+    <!--    单据头表新增      -->
+    <insert id="addHeadService" parameterType="headService">
+        insert into head_service(
+        <if test="systematicReceipt != null and systematicReceipt != ''">systematic_receipt,</if>
+        <if test="originalReceipt != null and originalReceipt != ''">original_receipt,</if>
+        <if test="serviceType != null and serviceType != ''">service_type,</if>
+        <if test="receiptStatus != null and receiptStatus != ''">receipt_status,</if>
+        <if test="invoiceDate != null and invoiceDate != ''">invoice_date,</if>
+        <if test="warehousingIds != null and warehousingIds != ''">warehousing_ids,</if>
+        <if test="retrievalIds != null and retrievalIds != ''">retrieval_ids,</if>
+        <if test="userIds != null and userIds != ''">user_ids,</if>
+        <if test="supplierIds != null and supplierIds != ''">supplier_ids,</if>
+        <if test="customerIds != null and customerIds != ''">customer_ids,</if>
+        <if test="receiptNotes != null and receiptNotes != ''">receipt_notes,</if>
+        <if test="deposit != null and deposit != ''">deposit,</if>
+        <if test="totalAmount != null and totalAmount != ''">total_amount,</if>
+        <if test="capitalizeTotalAmount != null and capitalizeTotalAmount != ''">capitalize_total_amount,</if>
+        installer,
+        <if test="findingOfAudit != null and findingOfAudit != ''">finding_of_audit,</if>
+        <if test="reviewComments != null and reviewComments != ''">review_comments,</if>
+        <if test="createBy != null and createBy != ''">create_by,</if>
+        create_time
+        )values(
+        <if test="systematicReceipt != null and systematicReceipt != ''">#{systematicReceipt},</if>
+        <if test="originalReceipt != null and originalReceipt != ''">#{originalReceipt},</if>
+        <if test="serviceType != null and serviceType != ''">#{serviceType},</if>
+        <if test="receiptStatus != null and receiptStatus != ''">#{receiptStatus},</if>
+        <if test="invoiceDate != null and invoiceDate != ''">#{invoiceDate},</if>
+        <if test="warehousingIds != null and warehousingIds != ''">#{warehousingIds},</if>
+        <if test="retrievalIds != null and retrievalIds != ''">#{retrievalIds},</if>
+        <if test="userIds != null and userIds != ''">#{userIds},</if>
+        <if test="supplierIds != null and supplierIds != ''">#{supplierIds},</if>
+        <if test="customerIds != null and customerIds != ''">#{customerIds},</if>
+        <if test="receiptNotes != null and receiptNotes != ''">#{receiptNotes},</if>
+        <if test="deposit != null and deposit != ''">#{deposit},</if>
+        <if test="totalAmount != null and totalAmount != ''">#{totalAmount},</if>
+        <if test="capitalizeTotalAmount != null and capitalizeTotalAmount != ''">#{capitalizeTotalAmount},</if>
+        installer,
+        <if test="findingOfAudit != null and findingOfAudit != ''">#{findingOfAudit},</if>
+        <if test="reviewComments != null and reviewComments != ''">#{reviewComments},</if>
+        <if test="createBy != null and createBy != ''">#{createBy},</if>
+        sysdate()
+        )
+    </insert>
+
+    <!--    单据头表修改      -->
+    <update id="updateHeadService" parameterType="headService">
+        update head_service
+        <set>
+            systematic_receipt = #{systematicReceipt},
+            original_receipt = #{originalReceipt},
+            service_type = #{serviceType},
+            receipt_status = #{receiptStatus},
+            invoice_date = #{invoiceDate},
+            warehousing_ids = #{warehousingIds},
+            retrieval_ids = #{retrievalIds},
+            user_ids = #{userIds},
+            supplier_ids = #{supplierIds},
+            customer_ids = #{customerIds},
+            receipt_notes = #{receiptNotes},
+            deposit = #{deposit},
+            total_amount = #{totalAmount},
+            capitalize_total_amount = #{capitalizeTotalAmount},
+            installer = #{installer},
+            finding_of_audit = #{findingOfAudit},
+            review_comments = #{reviewComments},
+            update_by = #{updateBy},
+            update_time = sysdate()
+        </set>
+        where systematic_receipt = #{systematicReceipt}
+    </update>
+
+    <!--    单据头表删除      -->
+    <delete id="delHeadService" parameterType="java.util.List">
+        delete from head_service where systematic_receipt in
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item.systematicReceipt}
+        </foreach>
+    </delete>
+
+</mapper>

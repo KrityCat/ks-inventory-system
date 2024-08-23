@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ruoyi.system.mapper.HeadOrderFormMapper">
+
+    <resultMap type="HeadOrderForm" id="headOrderFormResult">
+        <result property="systematicOrderForm" column="systematic_order_form"/>
+        <result property="originalOrderForm" column="original_order_form"/>
+        <result property="orderFormType" column="order_form_type"/>
+        <result property="orderFormStatus" column="order_form_status"/>
+        <result property="orderDate" column="order_date"/>
+        <result property="deliveryDate" column="delivery_date"/>
+        <result property="warehousingIds" column="warehousing_ids"/>
+        <result property="retrievalIds" column="retrieval_ids"/>
+        <result property="userIds" column="user_ids"/>
+        <result property="supplierIds" column="supplier_ids"/>
+        <result property="customerIds" column="customer_ids"/>
+        <result property="planReceipt" column="plan_receipt"/>
+        <result property="orderFormNotes" column="order_form_notes"/>
+        <result property="deposit" column="deposit"/>
+        <result property="orderFormAmount" column="order_form_amount"/>
+        <result property="orderCapitalizeAmount" column="order_capitalize_amount"/>
+        <result property="afterSalesInstallation" column="after_sales_installation"/>
+        <result property="findingOfAudit" column="finding_of_audit"/>
+        <result property="reviewComments" column="review_comments"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <association property="sysUser" javaType="SysUser" resultMap="SysUserResult"/>
+        <association property="supplier" javaType="Supplier" resultMap="SupplierResult"/>
+        <association property="customer" javaType="Customer" resultMap="CustomerResult"/>
+        <collection property="warehousing" ofType="Warehouse">
+            <result property="warehousingId" column="warehousing_id"/>
+            <result property="warehousingName" column="warehousing_name"/>
+        </collection>
+        <collection property="retrieval" ofType="Warehouse">
+            <result property="retrievalId" column="retrieval_id"/>
+            <result property="retrievalName" column="retrieval_name"/>
+        </collection>
+        <collection property="details" ofType="DetailOrderForm">
+            <result property="systematicOrderForm" column="systematic_order_form"/>
+            <result property="productId" column="product_id"/>
+            <result property="productCode" column="product_code"/>
+            <result property="productName" column="product_name"/>
+            <result property="productType" column="product_type"/>
+            <result property="productTypeName" column="product_type_name"/>
+            <result property="productSpecifications" column="product_specifications"/>
+            <result property="measureUnit" column="measure_unit"/>
+            <result property="producer" column="producer"/>
+            <result property="inventoryQty" column="inventory_qty"/>
+            <result property="warehousingId" column="warehousing_id"/>
+            <result property="retrievalId" column="retrieval_id"/>
+            <result property="supplierId" column="supplier_id"/>
+            <result property="customerId" column="customer_id"/>
+            <result property="currentInventory" column="current_inventory"/>
+            <result property="actualInventory" column="actual_inventory"/>
+            <result property="planQuantity" column="plan_quantity"/>
+            <result property="univalence" column="univalence"/>
+            <result property="discount" column="discount"/>
+            <result property="money" column="money"/>
+            <result property="cost" column="cost"/>
+            <result property="remarks" column="remarks"/>
+        </collection>
+        <collection property="product" ofType="Product">
+            <result property="productId" column="product_id"/>
+            <result property="productType" column="product_type"/>
+            <result property="productCode" column="product_code"/>
+            <result property="productName" column="product_name"/>
+            <result property="productType" column="product_type"/>
+            <result property="productSpecifications" column="product_specifications"/>
+            <result property="measureUnit" column="measure_unit"/>
+            <result property="producer" column="producer"/>
+        </collection>
+        <!--        <collection property="type"                  ofType="ProductType">-->
+        <!--            <result property="productTypeId" column="product_type_id"/>-->
+        <!--            <result property="productTypeName" column="product_type_name"/>-->
+        <!--        </collection>-->
+    </resultMap>
+
+    <resultMap type="SysUser" id="SysUserResult">
+        <id property="userId" column="user_id"/>
+        <result property="userName" column="user_name"/>
+    </resultMap>
+
+    <resultMap type="Supplier" id="SupplierResult">
+        <result property="supplierId" column="supplier_id"/>
+        <result property="supplierCode" column="supplier_code"/>
+        <result property="supplierName" column="supplier_name"/>
+    </resultMap>
+
+    <resultMap type="Customer" id="CustomerResult">
+        <result property="customerId" column="customer_id"/>
+        <result property="customerCode" column="customer_code"/>
+        <result property="customerName" column="customer_name"/>
+    </resultMap>
+
+    <!--    库存头单查询      -->
+    <select id="headOrderFormQuery" parameterType="headOrderForm" resultMap="headOrderFormResult">
+        SELECT DISTINCT
+        hof.systematic_order_form, hof.original_order_form, hof.order_form_type, hof.order_form_status, hof.order_date,
+        hof.delivery_date, hof.warehousing_ids, hof.retrieval_ids, hof.user_ids, hof.supplier_ids, hof.customer_ids,
+        hof.plan_receipt, hof.order_form_notes, hof.deposit, hof.order_form_amount, hof.order_capitalize_amount,
+        hof.after_sales_installation, hof.finding_of_audit, hof.review_comments, hof.create_by, hof.create_time,
+        hof.update_by, hof.update_time,
+        (SELECT w1.warehouse_id FROM warehouse w1 WHERE w1.warehouse_id = hof.warehousing_ids) AS warehousing_id,
+        (SELECT w1.warehouse_name FROM warehouse w1 WHERE w1.warehouse_id = hof.warehousing_ids) AS warehousing_name,
+        (SELECT w2.warehouse_id FROM warehouse w2 WHERE w2.warehouse_id = hof.retrieval_ids) AS retrieval_id,
+        (SELECT w2.warehouse_name FROM warehouse w2 WHERE w2.warehouse_id = hof.retrieval_ids) AS retrieval_name,
+        su.user_id,
+        su.user_name,
+        (SELECT s.supplier_id FROM supplier s WHERE hof.supplier_ids = s.supplier_id) AS supplier_id,
+        (SELECT s.supplier_name FROM supplier s WHERE hof.supplier_ids = s.supplier_id) AS supplier_name,
+        (SELECT c.customer_id FROM customer c WHERE hof.customer_ids = c.customer_id) AS customer_id,
+        (SELECT c.customer_name FROM customer c WHERE hof.customer_ids = c.customer_id) AS customer_name
+        FROM head_order_form hof
+        JOIN detail_order_form dof ON hof.systematic_order_form = dof.systematic_order_form
+        JOIN product p ON dof.product_id = p.product_id
+        JOIN sys_user su ON hof.user_ids = su.user_id
+        WHERE 1=1
+        <if test="systematicOrderForm != null and systematicOrderForm != ''">
+            AND hof.systematic_order_form like concat('%', #{systematicOrderForm}, '%')
+        </if>
+        <if test="originalOrderForm != null and originalOrderForm != ''">
+            AND hof.original_order_form like concat('%', #{originalOrderForm}, '%')
+        </if>
+        <if test="orderFormType != null and orderFormType != ''">
+            AND hof.order_form_type = #{orderFormType}
+        </if>
+        <if test="orderFormStatus != null and orderFormStatus != ''">
+            AND hof.order_form_status = #{orderFormStatus}
+        </if>
+        <if test="deliveryDate != null and deliveryDate != ''">
+            AND hof.delivery_date = #{deliveryDate}
+        </if>
+        <if test="warehousingIds != null and warehousingIds != ''">
+            AND hof.warehousing_ids = #{warehousingIds}
+        </if>
+        <if test="retrievalIds != null and retrievalIds != ''">
+            AND hof.retrieval_ids = #{retrievalIds}
+        </if>
+        <if test="userIds != null and userIds != ''">
+            AND hof.user_ids = #{userIds}
+        </if>
+        <if test="supplierIds != null and supplierIds != ''">
+            AND hof.supplier_ids = #{supplierIds}
+        </if>
+        <if test="customerIds != null and customerIds != ''">
+            AND hof.customer_ids = #{customerIds}
+        </if>
+        <if test="productCode != null and productCode != ''">
+            AND p.product_code like concat('%', #{productCode}, '%')
+        </if>
+        <if test="productName != null and productName != ''">
+            AND p.product_name like concat('%', #{productName}, '%')
+        </if>
+        <if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+            AND date_format(hof.create_time,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')
+        </if>
+        <if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+            AND date_format(hof.create_time,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')
+        </if>
+        order by create_time DESC
+    </select>
+
+    <!--    单据指定编号查询      -->
+    <select id="selectHeadOrderFormById" parameterType="String" resultMap="headOrderFormResult">
+        SELECT
+        hof.systematic_order_form, hof.original_order_form, hof.order_form_type, hof.order_form_status, hof.order_date,
+        hof.delivery_date, hof.warehousing_ids, hof.retrieval_ids, hof.user_ids, hof.supplier_ids, hof.customer_ids,
+        hof.plan_receipt, hof.order_form_notes, hof.deposit, hof.order_form_amount, hof.order_capitalize_amount,
+        hof.after_sales_installation, hof.finding_of_audit, hof.review_comments, hof.create_by, hof.create_time,
+        hof.update_by, hof.update_time,
+        dof.systematic_order_form, dof.product_id, dof.warehousing_id, dof.retrieval_id, dof.supplier_id,
+        dof.customer_id,
+        dof.current_inventory, dof.actual_inventory, dof.plan_quantity, dof.univalence, dof.discount, dof.money,
+        dof.cost,
+        dof.remarks, dof.product_specifications, dof.measure_unit,
+        p.product_id, p.product_code, p.product_name, p.product_type, p.producer,
+        p.inventory_qty, pt.product_type_id, pt.product_type_name,
+        (SELECT w1.warehouse_name FROM warehouse w1 WHERE w1.warehouse_id = hof.warehousing_ids) AS warehousing_name,
+        (SELECT w2.warehouse_name FROM warehouse w2 WHERE w2.warehouse_id = hof.retrieval_ids) AS retrieval_name,
+        su.user_id, su.user_name,
+        (SELECT s.supplier_name FROM supplier s WHERE hof.supplier_ids = s.supplier_id) AS supplier_name,
+        (SELECT c.customer_name FROM customer c WHERE hof.customer_ids = c.customer_id) AS customer_name
+        FROM head_order_form hof
+        JOIN detail_order_form dof ON dof.systematic_order_form = hof.systematic_order_form
+        JOIN product p ON p.product_id = dof.product_id
+        JOIN sys_user su ON su.user_id = hof.user_ids
+        JOIN product_type pt ON pt.product_type_id = p.product_type
+        WHERE hof.systematic_order_form = #{systematicOrderForm}
+    </select>
+
+    <!--    单据指定编号查询      -->
+    <select id="selectHeadOrderFormByCount" parameterType="String" resultMap="headOrderFormResult">
+        SELECT hof.systematic_order_form
+        FROM head_order_form hof
+        JOIN detail_order_form dof ON dof.systematic_order_form = hof.systematic_order_form
+        WHERE hof.systematic_order_form = #{systematicOrderForm}
+    </select>
+
+    <!--    单据头表新增      -->
+    <insert id="addHeadOrderForm" parameterType="headOrderForm">
+        insert into head_order_form(
+        <if test="systematicOrderForm != null and systematicOrderForm != ''">systematic_order_form,</if>
+        <if test="originalOrderForm != null and originalOrderForm != ''">original_order_form,</if>
+        <if test="orderFormType != null and orderFormType != ''">order_form_type,</if>
+        <if test="orderFormStatus != null and orderFormStatus != ''">order_form_status,</if>
+        <if test="orderDate != null and orderDate != ''">order_date,</if>
+        <if test="deliveryDate != null and deliveryDate != ''">delivery_date,</if>
+        <if test="warehousingIds != null and warehousingIds != ''">warehousing_ids,</if>
+        <if test="retrievalIds != null and retrievalIds != ''">retrieval_ids,</if>
+        <if test="userIds != null and userIds != ''">user_ids,</if>
+        <if test="supplierIds != null and supplierIds != ''">supplier_ids,</if>
+        <if test="customerIds != null and customerIds != ''">customer_ids,</if>
+        <if test="planReceipt != null and planReceipt != ''">plan_receipt,</if>
+        <if test="orderFormNotes != null and orderFormNotes != ''">order_form_notes,</if>
+        <if test="deposit != null and deposit != ''">deposit,</if>
+        <if test="orderFormAmount != null and orderFormAmount != ''">order_form_amount,</if>
+        <if test="orderCapitalizeAmount != null and orderCapitalizeAmount != ''">order_capitalize_amount,</if>
+        <if test="afterSalesInstallation != null and afterSalesInstallation != ''">after_sales_installation,</if>
+        <if test="findingOfAudit != null and findingOfAudit != ''">finding_of_audit,</if>
+        <if test="reviewComments != null and reviewComments != ''">review_comments,</if>
+        <if test="createBy != null and createBy != ''">create_by,</if>
+        create_time
+        )values(
+        <if test="systematicOrderForm != null and systematicOrderForm != ''">#{systematicOrderForm},</if>
+        <if test="originalOrderForm != null and originalOrderForm != ''">#{originalOrderForm},</if>
+        <if test="orderFormType != null and orderFormType != ''">#{orderFormType},</if>
+        <if test="orderFormStatus != null and orderFormStatus != ''">#{orderFormStatus},</if>
+        <if test="orderDate != null and orderDate != ''">#{orderDate},</if>
+        <if test="deliveryDate != null and deliveryDate != ''">#{deliveryDate},</if>
+        <if test="warehousingIds != null and warehousingIds != ''">#{warehousingIds},</if>
+        <if test="retrievalIds != null and retrievalIds != ''">#{retrievalIds},</if>
+        <if test="userIds != null and userIds != ''">#{userIds},</if>
+        <if test="supplierIds != null and supplierIds != ''">#{supplierIds},</if>
+        <if test="customerIds != null and customerIds != ''">#{customerIds},</if>
+        <if test="planReceipt != null and planReceipt != ''">#{planReceipt},</if>
+        <if test="orderFormNotes != null and orderFormNotes != ''">#{orderFormNotes},</if>
+        <if test="deposit != null and deposit != ''">#{deposit},</if>
+        <if test="orderFormAmount != null and orderFormAmount != ''">#{orderFormAmount},</if>
+        <if test="orderCapitalizeAmount != null and orderCapitalizeAmount != ''">#{orderCapitalizeAmount},</if>
+        <if test="afterSalesInstallation != null and afterSalesInstallation != ''">#{afterSalesInstallation},</if>
+        <if test="findingOfAudit != null and findingOfAudit != ''">#{findingOfAudit},</if>
+        <if test="reviewComments != null and reviewComments != ''">#{reviewComments},</if>
+        <if test="createBy != null and createBy != ''">#{createBy},</if>
+        sysdate()
+        )
+    </insert>
+
+    <!--    单据头表修改      -->
+    <update id="updateHeadOrderForm" parameterType="headOrderForm">
+        update head_order_form
+        <set>
+            systematic_order_form = #{systematicOrderForm},
+            original_order_form = #{originalOrderForm},
+            order_form_type = #{orderFormType},
+            order_form_status = #{orderFormStatus},
+            order_date = #{orderDate},
+            delivery_date = #{deliveryDate},
+            warehousing_ids = #{warehousingIds},
+            retrieval_ids = #{retrievalIds},
+            user_ids = #{userIds},
+            supplier_ids = #{supplierIds},
+            customer_ids = #{customerIds},
+            plan_receipt = #{planReceipt},
+            order_form_notes = #{orderFormNotes},
+            deposit = #{deposit},
+            order_form_amount = #{orderFormAmount},
+            order_capitalize_amount = #{orderCapitalizeAmount},
+            after_sales_installation = #{afterSalesInstallation},
+            finding_of_audit = #{findingOfAudit},
+            review_comments = #{reviewComments},
+            update_by = #{updateBy},
+            update_time = sysdate()
+        </set>
+        where systematic_order_form = #{systematicOrderForm}
+    </update>
+
+    <!--    单据头表删除      -->
+    <delete id="delHeadOrderForm" parameterType="java.util.List">
+        delete from head_order_form where systematic_order_form in
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item.systematicOrderForm}
+        </foreach>
+    </delete>
+
+</mapper>

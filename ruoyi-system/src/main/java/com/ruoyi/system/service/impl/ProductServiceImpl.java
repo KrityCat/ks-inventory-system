@@ -16,7 +16,7 @@ import javax.validation.Validator;
 import java.util.List;
 
 /**
- * 货品资料
+ * 货品资料Service业务层处理
  *
  * @author KrityCat
  */
@@ -24,17 +24,59 @@ import java.util.List;
 public class ProductServiceImpl implements ProductService {
 
     private static final Logger log = LoggerFactory.getLogger(ProductServiceImpl.class);
+
     @Autowired
     protected Validator validator;
+
     @Autowired
-    private ProductMapper PdMapper;
+    private ProductMapper productMapper;
 
     /**
      * 货品资料查询
      */
     @Override
-    public List<Product> ProductQuery(Product bo) {
-        return PdMapper.ProductQuery(bo);
+    public List<Product> productQuery(Product bo) {
+        return productMapper.productQuery(bo);
+    }
+
+    /**
+     * 货品库存积压预警查询
+     */
+    @Override
+    public List<Product> productOverstockQuery(Product bo) {
+        return productMapper.productOverstockQuery(bo);
+    }
+
+    /**
+     * 货品库存不足预警查询
+     */
+    @Override
+    public List<Product> productDangerQuery(Product bo) {
+        return productMapper.productDangerQuery(bo);
+    }
+
+    /**
+     * 积压3个月未出预警查询
+     */
+    @Override
+    public List<Product> productThreeDangerQuery(Product bo) {
+        return productMapper.productThreeDangerQuery(bo);
+    }
+
+    /**
+     * 积压6个月未出预警查询
+     */
+    @Override
+    public List<Product> productSixDangerQuery(Product bo) {
+        return productMapper.productThreeDangerQuery(bo);
+    }
+
+    /**
+     * 积压12个月未出预警查询
+     */
+    @Override
+    public List<Product> productTwelveDangerQuery(Product bo) {
+        return productMapper.productThreeDangerQuery(bo);
     }
 
     /**
@@ -42,7 +84,7 @@ public class ProductServiceImpl implements ProductService {
      */
     @Override
     public Product selectProductById(Long productId) {
-        return PdMapper.selectProductById(productId);
+        return productMapper.selectProductById(productId);
     }
 
 
@@ -55,7 +97,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public int insertProduct(Product bo) {
-        return PdMapper.insertProduct(bo);
+        return productMapper.insertProduct(bo);
     }
 
     /**
@@ -67,7 +109,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public int updateProduct(Product bo) {
-        return PdMapper.updateProduct(bo);
+        return productMapper.updateProduct(bo);
     }
 
     /**
@@ -79,7 +121,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public int deleteProductByIds(Long[] productIds) {
-        return PdMapper.deleteProductByIds(productIds);
+        return productMapper.deleteProductByIds(productIds);
     }
 
     /**
@@ -102,7 +144,7 @@ public class ProductServiceImpl implements ProductService {
         for (Product bo : productList) {
             try {
                 // 验证是否存在这个货品
-                Product w = PdMapper.selectProductByProductName(bo.getProductName());
+                Product w = productMapper.selectProductByProductName(bo.getProductName());
                 if (StringUtils.isBlank(bo.getProductCode()) || StringUtils.isBlank(bo.getProductName()) || StringUtils.isBlank(bo.getProductType()) || StringUtils.isBlank(bo.getMeasureUnit())) {
                     failureNum++;
                     throw new ServiceException("货品编号、货品名称、货品类型与计量单位不能为空！");
@@ -110,7 +152,7 @@ public class ProductServiceImpl implements ProductService {
                     BeanValidators.validateWithException(validator, bo);
                     bo.setProductName(bo.getProductName());
                     bo.setCreateBy(operName);
-                    PdMapper.insertProduct(bo);
+                    productMapper.insertProduct(bo);
                     successNum++;
                     successMsg.append("<br/>" + successNum + "、货品 " + bo.getProductName() + " 导入成功");
                 } else if (isUpdateSupport) {
@@ -118,7 +160,7 @@ public class ProductServiceImpl implements ProductService {
 //                    checkUserAllowed(w);
                     bo.setProductId(w.getProductId());
                     bo.setUpdateBy(operName);
-                    PdMapper.updateProduct(bo);
+                    productMapper.updateProduct(bo);
                     successNum++;
                     successMsg.append("<br/>" + successNum + "、货品 " + bo.getProductName() + " 更新成功");
                 } else {

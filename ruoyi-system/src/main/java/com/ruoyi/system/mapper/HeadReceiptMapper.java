@@ -12,6 +12,11 @@ public interface HeadReceiptMapper {
     List<HeadReceipt> headReceiptQuery(HeadReceipt bo);
 
     /**
+     * 销售金额与毛利润查询
+     */
+    HeadReceipt salesAmountQuery(HeadReceipt bo);
+
+    /**
      * 单据编号查询
      */
     HeadReceipt selectHeadReceiptById(String systematicReceipt);

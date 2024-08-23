@@ -16,7 +16,12 @@ public interface CommodityMapper {
      * @param commodityId 商品资料主键
      * @return 商品资料
      */
-    public Commodity selectCommodityByCommodityId(Long commodityId);
+    Commodity selectCommodityByCommodityId(Long commodityId);
+
+    /**
+     * 货品名称查询
+     */
+    Commodity selectCommodityByCommodityName(String commodityName);
 
     /**
      * 查询商品资料列表
@@ -24,7 +29,7 @@ public interface CommodityMapper {
      * @param commodity 商品资料
      * @return 商品资料集合
      */
-    public List<Commodity> selectCommodityList(Commodity commodity);
+    List<Commodity> selectCommodityList(Commodity commodity);
 
     /**
      * 新增商品资料
@@ -32,7 +37,7 @@ public interface CommodityMapper {
      * @param commodity 商品资料
      * @return 结果
      */
-    public int insertCommodity(Commodity commodity);
+    int insertCommodity(Commodity commodity);
 
     /**
      * 修改商品资料
@@ -40,7 +45,7 @@ public interface CommodityMapper {
      * @param commodity 商品资料
      * @return 结果
      */
-    public int updateCommodity(Commodity commodity);
+    int updateCommodity(Commodity commodity);
 
     /**
      * 删除商品资料
@@ -48,7 +53,7 @@ public interface CommodityMapper {
      * @param commodityId 商品资料主键
      * @return 结果
      */
-    public int deleteCommodityByCommodityId(Long commodityId);
+    int deleteCommodityByCommodityId(Long commodityId);
 
     /**
      * 批量删除商品资料
@@ -56,5 +61,5 @@ public interface CommodityMapper {
      * @param commodityIds 需要删除的数据主键集合
      * @return 结果
      */
-    public int deleteCommodityByCommodityIds(Long[] commodityIds);
+    int deleteCommodityByCommodityIds(Long[] commodityIds);
 }

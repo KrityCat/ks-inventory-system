@@ -19,10 +19,25 @@
         <result property="deposit"                      column="deposit"/>
         <result property="totalAmount"                  column="total_amount"/>
         <result property="capitalizeTotalAmount"        column="capitalize_total_amount"/>
+        <result property="afterSalesInstallation" column="after_sales_installation"/>
+        <result property="findingOfAudit" column="finding_of_audit"/>
+        <result property="reviewComments" column="review_comments"/>
         <result property="createBy"                     column="create_by"/>
         <result property="createTime"                   column="create_time"/>
         <result property="updateBy"                     column="update_by"/>
         <result property="updateTime"                   column="update_time"/>
+        <result property="dailySalesAmount" column="dailySalesAmount"/>
+        <result property="lastMonthSalesAmount" column="lastMonthSalesAmount"/>
+        <result property="lastSixMonthsSalesAmount" column="lastSixMonthsSalesAmount"/>
+        <result property="thisYearSalesAmount" column="thisYearSalesAmount"/>
+        <result property="lastYearSalesAmount" column="lastYearSalesAmount"/>
+        <result property="lastTwoYearsSalesAmount" column="lastTwoYearsSalesAmount"/>
+        <result property="dailyGrossProfit" column="dailyGrossProfit"/>
+        <result property="lastMonthGrossProfit" column="lastMonthGrossProfit"/>
+        <result property="lastSixMonthsGrossProfit" column="lastSixMonthsGrossProfit"/>
+        <result property="thisYearGrossProfit" column="thisYearGrossProfit"/>
+        <result property="lastYearGrossProfit" column="lastYearGrossProfit"/>
+        <result property="lastTwoYearsGrossProfit" column="lastTwoYearsGrossProfit"/>
         <association property="sysUser"                 javaType="SysUser" resultMap="SysUserResult"/>
         <association property="supplier"                javaType="Supplier" resultMap="SupplierResult"/>
         <association property="customer"                javaType="Customer" resultMap="CustomerResult"/>
@@ -34,9 +49,17 @@
             <result property="retrievalId"              column="retrieval_id"/>
             <result property="retrievalName"            column="retrieval_name"/>
         </collection>
-        <collection property="detail"                   ofType="detailReceipt">
+        <collection property="details" ofType="detailReceipt">
             <result property="systematicReceipt"        column="systematic_receipt"/>
             <result property="productId"                column="product_id"/>
+            <result property="productCode" column="product_code"/>
+            <result property="productName" column="product_name"/>
+            <result property="productType" column="product_type"/>
+            <result property="productTypeName" column="product_type_name"/>
+            <result property="productSpecifications" column="product_specifications"/>
+            <result property="measureUnit" column="measure_unit"/>
+            <result property="producer" column="producer"/>
+            <result property="inventoryQty" column="inventory_qty"/>
             <result property="warehousingId"            column="warehousing_id"/>
             <result property="retrievalId"              column="retrieval_id"/>
             <result property="supplierId"               column="supplier_id"/>
@@ -84,7 +107,8 @@
         hr.systematic_receipt, hr.original_receipt, hr.receipt_category, hr.receipt_type, hr.receipt_status,
         hr.invoice_date, hr.warehousing_ids, hr.retrieval_ids, hr.user_ids, hr.supplier_ids, hr.customer_ids,
         hr.plan_receipt, hr.receipt_notes, hr.deposit, hr.total_amount, hr.capitalize_total_amount,
-        hr.create_by, hr.create_time, hr.update_by, hr.update_time,
+        hr.after_sales_installation, hr.finding_of_audit, hr.review_comments, hr.create_by, hr.create_time,
+        hr.update_by, hr.update_time,
         (SELECT w1.warehouse_id FROM warehouse w1 WHERE w1.warehouse_id = hr.warehousing_ids) AS warehousing_id,
         (SELECT w1.warehouse_name FROM warehouse w1 WHERE w1.warehouse_id = hr.warehousing_ids) AS warehousing_name,
         (SELECT w2.warehouse_id FROM warehouse w2 WHERE w2.warehouse_id = hr.retrieval_ids) AS retrieval_id,
@@ -106,11 +130,17 @@
         <if test="originalReceipt != null and originalReceipt != ''">
             AND hr.original_receipt like concat('%', #{originalReceipt}, '%')
         </if>
+        <if test="receiptCategory != null and receiptCategory != ''">
+            AND hr.receipt_category = #{receiptCategory}
+        </if>
         <if test="receiptType != null and receiptType != ''">
             AND hr.receipt_type = #{receiptType}
         </if>
         <if test="receiptStatus != null and receiptStatus != ''">
             AND hr.receipt_status = #{receiptStatus}
+        </if>
+        <if test="invoiceDate != null and invoiceDate != ''">
+            AND hr.invoice_date = #{invoiceDate}
         </if>
         <if test="warehousingIds != null and warehousingIds != ''">
             AND hr.warehousing_ids = #{warehousingIds}
@@ -142,30 +172,73 @@
         order by create_time DESC
     </select>
 
+    <!--    销售金额与毛利润查询      -->
+    <select id="salesAmountQuery" parameterType="headReceipt" resultMap="headReceiptResult">
+        select
+        SUM(case when receipt_type = 3 and receipt_status = 2 and create_time = STR_TO_DATE(NOW(), '%Y-%m-%d') then
+        total_amount when receipt_type = 4 and receipt_status = 2 and create_time = STR_TO_DATE(NOW(), '%Y-%m-%d') then
+        -total_amount else 0 end) as dailySalesAmount,
+        SUM(case when receipt_type = 3 and receipt_status = 2 and create_time >= DATE_SUB(CURDATE(), interval 1 month)
+        then total_amount when receipt_type = 4 and receipt_status = 2 and create_time >= DATE_SUB(CURDATE(), interval 1
+        month) then -total_amount else 0 end) as lastMonthSalesAmount,
+        SUM(case when receipt_type = 3 and receipt_status = 2 and create_time >= DATE_SUB(CURDATE(), interval 6 month)
+        then total_amount when receipt_type = 4 and receipt_status = 2 and create_time >= DATE_SUB(CURDATE(), interval 6
+        month) then -total_amount else 0 end) as lastSixMonthsSalesAmount,
+        SUM(case when receipt_type = 3 and receipt_status = 2 and year(create_time) = year(now()) then total_amount when
+        receipt_type = 4 and receipt_status = 2 and year(create_time) = year(now()) then -total_amount else 0 end) as
+        thisYearSalesAmount,
+        SUM(case when receipt_type = 3 and receipt_status = 2 and year(create_time) = year(date_sub(now(), interval 1
+        year)) then total_amount when receipt_type = 4 and receipt_status = 2 and year(create_time) =
+        year(date_sub(now(), interval 1 year)) then -total_amount else 0 end) as lastYearSalesAmount,
+        SUM(case when receipt_type = 3 and receipt_status = 2 and year(create_time) = year(date_sub(now(), interval 2
+        year)) then total_amount when receipt_type = 4 and receipt_status = 2 and year(create_time) =
+        year(date_sub(now(), interval 2 year)) then -total_amount else 0 end) as lastTwoYearsSalesAmount,
+        SUM(case when receipt_type in (2, 3, 6) and receipt_status = 2 and create_time = STR_TO_DATE(NOW(), '%Y-%m-%d')
+        then total_amount when receipt_type in (1, 4, 5) and receipt_status = 2 and create_time = STR_TO_DATE(NOW(),
+        '%Y-%m-%d') then -total_amount else 0 end) as dailyGrossProfit,
+        SUM(case when receipt_type in (2, 3, 6) and receipt_status = 2 and create_time >= DATE_SUB(CURDATE(), interval 1
+        month) then total_amount when receipt_type in (1, 4, 5) and receipt_status = 2 and create_time >=
+        DATE_SUB(CURDATE(), interval 1 month) then -total_amount else 0 end) as lastMonthGrossProfit,
+        SUM(case when receipt_type in (2, 3, 6) and receipt_status = 2 and create_time >= DATE_SUB(CURDATE(), interval 6
+        month) then total_amount when receipt_type in (1, 4, 5) and receipt_status = 2 and create_time >=
+        DATE_SUB(CURDATE(), interval 6 month) then -total_amount else 0 end) as lastSixMonthsGrossProfit,
+        SUM(case when receipt_type in (2, 3, 6) and receipt_status = 2 and year(create_time) = year(now()) then
+        total_amount when receipt_type in (1, 4, 5) and receipt_status = 2 and year(create_time) = year(now()) then
+        -total_amount else 0 end) as thisYearGrossProfit,
+        SUM(case when receipt_type in (2, 3, 6) and receipt_status = 2 and year(create_time) = year(date_sub(now(),
+        interval 1 year)) then total_amount when receipt_type in (1, 4, 5) and receipt_status = 2 and year(create_time)
+        = year(date_sub(now(), interval 1 year)) then -total_amount else 0 end) as lastYearGrossProfit,
+        SUM(case when receipt_type in (2, 3, 6) and receipt_status = 2 and year(create_time) = year(date_sub(now(),
+        interval 2 year)) then total_amount when receipt_type in (1, 4, 5) and receipt_status = 2 and year(create_time)
+        = year(date_sub(now(), interval 2 year)) then -total_amount else 0 end) as lastTwoYearsGrossProfit
+        from
+        head_receipt
+    </select>
+
     <!--    单据指定编号查询      -->
     <select id="selectHeadReceiptById" parameterType="String" resultMap="headReceiptResult">
         SELECT
         hr.systematic_receipt, hr.original_receipt, hr.receipt_category, hr.receipt_type, hr.receipt_status,
         hr.invoice_date, hr.warehousing_ids, hr.retrieval_ids, hr.user_ids, hr.supplier_ids, hr.customer_ids,
         hr.plan_receipt, hr.receipt_notes, hr.deposit, hr.total_amount, hr.capitalize_total_amount,
-        hr.create_by, hr.create_time, hr.update_by, hr.update_time,
+        hr.after_sales_installation, hr.finding_of_audit, hr.review_comments, hr.create_by, hr.create_time,
+        hr.update_by, hr.update_time,
         dr.systematic_receipt, dr.product_id, dr.warehousing_id, dr.retrieval_id, dr.supplier_id, dr.customer_id,
         dr.current_inventory, dr.actual_inventory, dr.plan_quantity, dr.univalence, dr.discount, dr.money, dr.cost,
-        dr.remarks,
-        p.product_id, p.product_code, p.product_name, p.product_type, p.product_specifications, p.measure_unit,
-        p.producer,
-        w.warehouse_id, w.warehouse_name,
-        su.user_id, su.user_name,
-        s.supplier_id, s.supplier_name,
-        c.customer_id, c.customer_name
-        FROM (head_receipt hr, detail_receipt dr, product p)
-        JOIN warehouse w ON w.warehouse_id = hr.warehousing_ids OR w.warehouse_id = hr.retrieval_ids
-        JOIN supplier s ON s.supplier_id = hr.supplier_ids OR hr.supplier_ids IS NULL
-        JOIN customer c ON c.customer_id = hr.customer_ids OR hr.customer_ids IS NULL
+        dr.remarks, dr.product_specifications, dr.measure_unit,
+        (SELECT w1.warehouse_name FROM warehouse w1 WHERE w1.warehouse_id = hr.warehousing_ids) AS warehousing_name,
+        (SELECT w2.warehouse_name FROM warehouse w2 WHERE w2.warehouse_id = hr.retrieval_ids) AS retrieval_name,
+        (SELECT s.supplier_name FROM supplier s WHERE hr.supplier_ids = s.supplier_id) AS supplier_name,
+        (SELECT c.customer_name FROM customer c WHERE hr.customer_ids = c.customer_id) AS customer_name,
+        p.product_id, p.product_code, p.product_name, p.product_type, p.producer,
+        p.inventory_qty, pt.product_type_id, pt.product_type_name,
+        su.user_id, su.user_name
+        FROM head_receipt hr
+        JOIN detail_receipt dr ON dr.systematic_receipt = hr.systematic_receipt
+        JOIN product p ON p.product_id = dr.product_id
         JOIN sys_user su ON su.user_id = hr.user_ids
-        WHERE dr.systematic_receipt = hr.systematic_receipt
-        AND p.product_id = dr.product_id
-        AND hr.systematic_receipt = #{systematicReceipt}
+        JOIN product_type pt ON pt.product_type_id = p.product_type
+        WHERE hr.systematic_receipt = #{systematicReceipt}
     </select>
 
     <!--    单据指定编号查询      -->
@@ -195,6 +268,9 @@
         <if test="deposit != null and deposit != ''">deposit,</if>
         <if test="totalAmount != null and totalAmount != ''">total_amount,</if>
         <if test="capitalizeTotalAmount != null and capitalizeTotalAmount != ''">capitalize_total_amount,</if>
+        <if test="afterSalesInstallation != null and afterSalesInstallation != ''">after_sales_installation,</if>
+        <if test="findingOfAudit != null and findingOfAudit != ''">finding_of_audit,</if>
+        <if test="reviewComments != null and reviewComments != ''">review_comments,</if>
         <if test="createBy != null and createBy != ''">create_by,</if>
         create_time
         )values(
@@ -214,6 +290,9 @@
         <if test="deposit != null and deposit != ''">#{deposit},</if>
         <if test="totalAmount != null and totalAmount != ''">#{totalAmount},</if>
         <if test="capitalizeTotalAmount != null and capitalizeTotalAmount != ''">#{capitalizeTotalAmount},</if>
+        <if test="afterSalesInstallation != null and afterSalesInstallation != ''">#{afterSalesInstallation},</if>
+        <if test="findingOfAudit != null and findingOfAudit != ''">#{findingOfAudit},</if>
+        <if test="reviewComments != null and reviewComments != ''">#{reviewComments},</if>
         <if test="createBy != null and createBy != ''">#{createBy},</if>
         sysdate()
         )
@@ -239,6 +318,9 @@
             deposit = #{deposit},
             total_amount = #{totalAmount},
             capitalize_total_amount = #{capitalizeTotalAmount},
+            after_sales_installation = #{afterSalesInstallation},
+            finding_of_audit = #{findingOfAudit},
+            review_comments = #{reviewComments},
             update_by = #{updateBy},
             update_time = sysdate()
         </set>

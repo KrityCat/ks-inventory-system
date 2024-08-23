@@ -11,8 +11,10 @@
         <result property="measureUnit" column="measure_unit"/>
         <result property="producer" column="producer"/>
         <result property="costPrice" column="cost_price"/>
-        <result property="price" column="price"/>
+        <result property="univalence" column="univalence"/>
+        <result property="discount" column="discount"/>
         <result property="productBarcode" column="product_barcode"/>
+        <result property="inventoryQty" column="inventory_qty"/>
         <result property="upperLimit" column="upper_limit"/>
         <result property="lowerLimit" column="lower_limit"/>
         <result property="defaultWarehouse" column="default_warehouse"/>
@@ -22,6 +24,7 @@
         <result property="createTime" column="create_time"/>
         <result property="updateBy" column="update_by"/>
         <result property="updateTime" column="update_time"/>
+        <result property="productTypeName" column="product_type_name"/>
         <association property="type" javaType="ProductType" resultMap="ProductTypeResult"/>
     </resultMap>
 
@@ -44,8 +47,9 @@
     <sql id="selectProductVo">
         SELECT
         p.product_id, p.product_code, p.product_name, p.product_type, p.product_specifications, p.measure_unit,
-        p.producer, p.cost_price, p.price, p.product_barcode, p.upper_limit, p.lower_limit, p.default_warehouse,
-        p.notes, p.status, p.create_by, p.create_time, p.update_by, p.update_time,
+        p.producer, p.cost_price, p.univalence, p.discount, p.product_barcode, p.upper_limit, p.lower_limit,
+        p.default_warehouse,
+        p.notes, p.status, p.inventory_qty, p.create_by, p.create_time, p.update_by, p.update_time,
         pt.product_type_id, pt.parent_id, pt.ancestors, pt.product_type_name, pt.order_num, pt.status, pt.del_flag,
         pt.create_by, pt.create_time, pt.update_by, pt.update_time
         FROM product p
@@ -53,12 +57,12 @@
     </sql>
 
     <!--    货品资料查询      -->
-    <select id="ProductQuery" parameterType="Product" resultMap="ProductResult">
+    <select id="productQuery" parameterType="Product" resultMap="ProductResult">
         <include refid="selectProductVo"/>
         WHERE 1=1
         <!-- 货品编号 -->
         <if test="productCode != null and productCode != ''">
-            AND p.product_code = #{productCode}
+            AND p.product_code like concat('%', #{productCode}, '%')
         </if>
         <!-- 货品名称 -->
         <if test="productName != null and productName != ''">
@@ -70,11 +74,11 @@
         </if>
         <!-- 商品规格 -->
         <if test="productSpecifications != null and productSpecifications != ''">
-            AND p.product_specifications = #{productSpecifications}
+            AND p.product_specifications like concat('%', #{productSpecifications}, '%')
         </if>
         <!-- 计量单位 -->
         <if test="measureUnit != null and measureUnit != ''">
-            AND p.measure_unit = #{measureUnit}
+            AND p.measure_unit like concat('%', #{measureUnit}, '%')
         </if>
         <!-- 货品条码 -->
         <if test="productBarcode != null and productBarcode != ''">
@@ -96,8 +100,54 @@
         <if test="status != null">
             AND p.status = #{status}
         </if>
-        <!-- 数据范围过滤 -->
-        ${params.dataScope}
+    </select>
+
+    <!--    货品库存积压预警查询      -->
+    <select id="productOverstockQuery" parameterType="Product" resultMap="ProductResult">
+        <include refid="selectProductVo"/>
+        WHERE p.inventory_qty &gt; p.upper_limit
+    </select>
+
+    <!--    货品库存不足预警查询      -->
+    <select id="productDangerQuery" parameterType="Product" resultMap="ProductResult">
+        <include refid="selectProductVo"/>
+        WHERE p.inventory_qty &lt; p.lower_limit
+    </select>
+
+    <!--    积压3个月未出预警查询      -->
+    <select id="productThreeDangerQuery" parameterType="Product" resultMap="ProductResult">
+        <include refid="selectProductVo"/>
+        join detail_receipt d on p.product_id = d.product_id
+        join head_receipt h on h.systematic_receipt = d.systematic_receipt
+        where p.inventory_qty > 0 and h.receipt_type in (3)
+        and not exists (select 1 from head_receipt h2 where h2.systematic_receipt = h.systematic_receipt and
+        h2.invoice_date &gt;= DATE_SUB(CURDATE(), interval 3 month))
+        and exists (select 1 from head_receipt h2 where h2.systematic_receipt = h.systematic_receipt and h2.invoice_date
+        &lt; DATE_SUB(CURDATE(), interval 3 month))
+    </select>
+
+    <!--    积压6个月未出预警查询      -->
+    <select id="productSixDangerQuery" parameterType="Product" resultMap="ProductResult">
+        <include refid="selectProductVo"/>
+        join detail_receipt d on p.product_id = d.product_id
+        join head_receipt h on h.systematic_receipt = d.systematic_receipt
+        where p.inventory_qty > 0 and h.receipt_type in (3)
+        and not exists (select 1 from head_receipt h2 where h2.systematic_receipt = h.systematic_receipt and
+        h2.invoice_date &gt;= DATE_SUB(CURDATE(), interval 6 month))
+        and exists (select 1 from head_receipt h2 where h2.systematic_receipt = h.systematic_receipt and h2.invoice_date
+        &lt; DATE_SUB(CURDATE(), interval 6 month))
+    </select>
+
+    <!--    积压12个月未出预警查询      -->
+    <select id="productTwelveDangerQuery" parameterType="Product" resultMap="ProductResult">
+        <include refid="selectProductVo"/>
+        join detail_receipt d on p.product_id = d.product_id
+        join head_receipt h on h.systematic_receipt = d.systematic_receipt
+        where p.inventory_qty > 0 and h.receipt_type in (3)
+        and not exists (select 1 from head_receipt h2 where h2.systematic_receipt = h.systematic_receipt and
+        h2.invoice_date &gt;= DATE_SUB(CURDATE(), interval 12 month))
+        and exists (select 1 from head_receipt h2 where h2.systematic_receipt = h.systematic_receipt and h2.invoice_date
+        &lt; DATE_SUB(CURDATE(), interval 12 month))
     </select>
 
     <!--    货品编号查询      -->
@@ -122,7 +172,8 @@
         <if test="measureUnit != null and measureUnit != ''">measure_unit,</if>
         <if test="producer != null and producer != ''">producer,</if>
         <if test="costPrice != null and costPrice != ''">cost_price,</if>
-        <if test="price != null and price != ''">price,</if>
+        <if test="univalence != null and univalence != ''">univalence,</if>
+        <if test="discount != null and discount != ''">discount,</if>
         <if test="productBarcode != null and productBarcode != ''">product_barcode,</if>
         <if test="upperLimit != null and upperLimit != ''">upper_limit,</if>
         <if test="lowerLimit != null and lowerLimit != ''">lower_limit,</if>
@@ -139,7 +190,8 @@
         <if test="measureUnit != null and measureUnit != ''">#{measureUnit},</if>
         <if test="producer != null and producer != ''">#{producer},</if>
         <if test="costPrice != null and costPrice != ''">#{costPrice},</if>
-        <if test="price != null and price != ''">#{price},</if>
+        <if test="univalence != null and univalence != ''">#{univalence},</if>
+        <if test="discount != null and discount != ''">#{discount},</if>
         <if test="productBarcode != null and productBarcode != ''">#{productBarcode},</if>
         <if test="upperLimit != null and upperLimit != ''">#{upperLimit},</if>
         <if test="lowerLimit != null and lowerLimit != ''">#{lowerLimit},</if>
@@ -164,7 +216,8 @@
             <if test="measureUnit != null and measureUnit != ''">measure_unit = #{measureUnit},</if>
             <if test="producer != null and producer != ''">producer = #{producer},</if>
             <if test="costPrice != null and costPrice != ''">cost_price = #{costPrice},</if>
-            <if test="price != null and price != ''">price = #{price},</if>
+            <if test="univalence != null and univalence != ''">univalence = #{univalence},</if>
+            <if test="discount != null and discount != ''">discount = #{discount},</if>
             <if test="productBarcode != null and productBarcode != ''">product_barcode = #{productBarcode},</if>
             <if test="upperLimit != null and upperLimit != ''">upper_limit = #{upperLimit},</if>
             <if test="lowerLimit != null and lowerLimit != ''">lower_limit = #{lowerLimit},</if>
@@ -175,6 +228,24 @@
             update_time = sysdate()
         </set>
         where product_id = #{productId}
+    </update>
+
+    <!--    库存数量更新      -->
+    <update id="updateInventoryQty" parameterType="java.util.List">
+        <foreach collection="list" index="index" item="item" separator=";">
+            update product
+            set inventory_qty = (
+            SELECT
+            COALESCE(SUM(CASE WHEN hr.receipt_status = 2 AND hr.receipt_type IN (1,4,5,8) THEN dr.plan_quantity ELSE 0
+            END), 0) -
+            COALESCE(SUM(CASE WHEN hr.receipt_status = 2 AND hr.receipt_type IN (2,3,6) THEN dr.plan_quantity ELSE 0
+            END), 0)
+            FROM detail_receipt dr
+            JOIN head_receipt hr ON dr.systematic_receipt = hr.systematic_receipt
+            WHERE dr.product_id = #{item.productId,jdbcType=VARCHAR}
+            )
+            where product_id = #{item.productId,jdbcType=VARCHAR}
+        </foreach>
     </update>
 
     <!--    货品资料删除      -->

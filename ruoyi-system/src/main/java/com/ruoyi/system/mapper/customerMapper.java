@@ -13,12 +13,12 @@ public interface customerMapper {
     /**
      * 客户详情查询
      */
-    Customer selectCustomerById(Long CustomerId);
+    Customer selectCustomerById(Long customerId);
 
     /**
      * 客户名称查询
      */
-    Customer selectCustomerByCustomerName(String CustomerName);
+    Customer selectCustomerByCustomerName(String customerName);
 
     /**
      * 客户资料新增
@@ -33,7 +33,7 @@ public interface customerMapper {
     /**
      * 客户资料删除
      */
-    int deleteCustomerByIds(Long[] CustomerId);
+    int deleteCustomerByIds(Long[] customerId);
 
 
 }

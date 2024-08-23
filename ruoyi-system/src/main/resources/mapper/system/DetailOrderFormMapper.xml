@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ruoyi.system.mapper.DetailOrderFormMapper">
+
+    <resultMap type="DetailOrderForm" id="detailOrderFormResult">
+        <result property="systematicOrderForm" column="systematic_order_form"/>
+        <result property="productId" column="product_id"/>
+        <result property="warehousingId" column="warehousing_id"/>
+        <result property="warehousingName" column="warehousing_name"/>
+        <result property="retrievalId" column="retrieval_id"/>
+        <result property="retrievalName" column="retrieval_name"/>
+        <result property="supplierId" column="supplier_id"/>
+        <result property="customerId" column="customer_id"/>
+        <result property="productSpecifications" column="product_specifications"/>
+        <result property="measureUnit" column="measure_unit"/>
+        <result property="planQuantity" column="plan_quantity"/>
+        <result property="univalence" column="univalence"/>
+        <result property="discount" column="discount"/>
+        <result property="money" column="money"/>
+        <result property="cost" column="cost"/>
+        <result property="remarks" column="remarks"/>
+        <association property="product" javaType="Product" resultMap="ProductResult"/>
+        <association property="type" javaType="ProductType" resultMap="ProductTypeResult"/>
+        <association property="headOrderForm" javaType="HeadOrderForm" resultMap="headOrderFormResult"/>
+        <association property="supplier" javaType="Supplier" resultMap="SupplierResult"/>
+        <association property="customer" javaType="Customer" resultMap="CustomerResult"/>
+    </resultMap>
+
+    <resultMap type="Product" id="ProductResult">
+        <result property="productId" column="product_id"/>
+        <result property="productCode" column="product_code"/>
+        <result property="productName" column="product_name"/>
+        <result property="productType" column="product_type"/>
+        <result property="productSpecifications" column="product_specifications"/>
+        <result property="measureUnit" column="measure_unit"/>
+        <result property="producer" column="producer"/>
+    </resultMap>
+
+    <resultMap type="ProductType" id="ProductTypeResult">
+        <id property="productTypeId" column="product_type_id"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="ancestors" column="ancestors"/>
+        <result property="productTypeName" column="product_type_name"/>
+    </resultMap>
+
+    <resultMap type="headOrderForm" id="headOrderFormResult">
+        <result property="systematicOrderForm" column="systematic_order_form"/>
+        <result property="originalOrderForm" column="original_order_form"/>
+        <result property="orderFormCategory" column="order_form_category"/>
+        <result property="orderFormType" column="order_form_type"/>
+        <result property="orderFormStatus" column="order_form_status"/>
+        <result property="invoiceDate" column="invoice_date"/>
+        <result property="warehousingIds" column="warehousing_ids"/>
+        <result property="retrievalIds" column="retrieval_ids"/>
+        <result property="userIds" column="user_ids"/>
+        <result property="supplierIds" column="supplier_ids"/>
+        <result property="customerIds" column="customer_ids"/>
+        <result property="planReceipt" column="plan_receipt"/>
+        <result property="orderFormNotes" column="order_form_notes"/>
+        <result property="deposit" column="deposit"/>
+        <result property="OrderFormAmount" column="order_form_amount"/>
+        <result property="orderCapitalizeAmount" column="order_capitalize_amount"/>
+        <result property="afterSalesInstallation" column="after_sales_installation"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <resultMap type="Supplier" id="SupplierResult">
+        <result property="supplierId" column="supplier_id"/>
+        <result property="supplierCode" column="supplier_code"/>
+        <result property="supplierName" column="supplier_name"/>
+    </resultMap>
+
+    <resultMap type="Customer" id="CustomerResult">
+        <result property="customerId" column="customer_id"/>
+        <result property="customerCode" column="customer_code"/>
+        <result property="customerName" column="customer_name"/>
+    </resultMap>
+
+    <!--    单据明细单查询      -->
+    <select id="selectDetailOrderFormQuery" parameterType="DetailOrderForm" resultMap="detailOrderFormResult">
+        SELECT
+        dof.systematic_order_form, dof.product_id, dof.warehousing_id, dof.retrieval_id, dof.supplier_id,
+        dof.customer_id,
+        dof.plan_quantity, dof.univalence, dof.discount, dof.money, dof.cost,
+        dof.remarks, dof.product_specifications, dof.measure_unit,
+        p.product_id, p.product_code, p.product_name, p.product_type, p.product_specifications,
+        p.measure_unit, p.producer,
+        pt.product_type_id, pt.parent_id, pt.ancestors, pt.product_type_name
+        FROM head_order_form hof
+        JOIN detail_order_form dof ON hof.systematic_order_form = dof.systematic_order_form
+        JOIN product p ON dof.product_id = p.product_id
+        JOIN product_type pt ON pt.product_type_id = p.product_type
+        WHERE 1=1
+        <if test="systematicOrderForm != null and systematicOrderForm != ''">
+            AND hof.systematic_order_form like concat('%', #{systematicOrderForm}, '%')
+        </if>
+        <if test="originalOrderForm != null and originalOrderForm != ''">
+            AND hof.original_order_form like concat('%', #{originalOrderForm}, '%')
+        </if>
+        <if test="orderFormType != null and orderFormType != ''">
+            AND hof.order_form_type = #{orderFormType}
+        </if>
+        <if test="orderFormStatus != null and orderFormStatus != ''">
+            AND hof.order_form_status = #{orderFormStatus}
+        </if>
+        <if test="warehousingIds != null and warehousingIds != ''">
+            AND hof.warehousing_ids = #{warehousingIds}
+        </if>
+        <if test="retrievalIds != null and retrievalIds != ''">
+            AND hof.retrieval_ids = #{retrievalIds}
+        </if>
+        <if test="userIds != null and userIds != ''">
+            AND hof.user_ids = #{userIds}
+        </if>
+        <if test="supplierIds != null and supplierIds != ''">
+            AND hof.supplier_ids = #{supplierIds}
+        </if>
+        <if test="customerIds != null and customerIds != ''">
+            AND hof.customer_ids = #{customerIds}
+        </if>
+        <if test="productCode != null and productCode != ''">
+            AND p.product_code like concat('%', #{productCode}, '%')
+        </if>
+        <if test="productName != null and productName != ''">
+            AND p.product_name like concat('%', #{productName}, '%')
+        </if>
+        <if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+            AND date_format(hof.create_time,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')
+        </if>
+        <if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+            AND date_format(hof.create_time,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')
+        </if>
+    </select>
+
+    <!--    单据明细表新增   -->
+    <insert id="addDetailOrderForm" parameterType="java.util.List">
+        insert into detail_order_form(
+        systematic_order_form,
+        product_id,
+        warehousing_id,
+        retrieval_id,
+        supplier_id,
+        customer_id,
+        product_specifications,
+        measure_unit,
+        plan_quantity,
+        univalence,
+        discount,
+        money,
+        cost,
+        remarks
+        )
+        <foreach collection="list" index="index" item="item" separator="union all">
+            select
+            #{item.systematicOrderForm,jdbcType=VARCHAR},
+            #{item.productId,jdbcType=VARCHAR},
+            #{item.warehousingId,jdbcType=VARCHAR},
+            #{item.retrievalId,jdbcType=VARCHAR},
+            #{item.supplierId,jdbcType=VARCHAR},
+            #{item.customerId,jdbcType=VARCHAR},
+            #{item.productSpecifications,jdbcType=VARCHAR},
+            #{item.measureUnit,jdbcType=VARCHAR},
+            #{item.planQuantity,jdbcType=VARCHAR},
+            #{item.univalence,jdbcType=VARCHAR},
+            #{item.discount,jdbcType=VARCHAR},
+            #{item.money,jdbcType=VARCHAR},
+            #{item.cost,jdbcType=VARCHAR},
+            #{item.remarks,jdbcType=VARCHAR}
+            from dual
+        </foreach>
+    </insert>
+
+    <!--    单据明细表导入新增   -->
+    <insert id="addImportDetailOrderForm" parameterType="DetailOrderForm">
+        insert into detail_order_form(
+        systematic_order_form,
+        product_id,
+        warehousing_id,
+        retrieval_id,
+        supplier_id,
+        customer_id,
+        product_specifications,
+        measure_unit,
+        plan_quantity,
+        univalence,
+        discount,
+        money,
+        cost,
+        remarks
+        )values(
+        #{systematicOrderForm},
+        #{productId},
+        #{warehousingId},
+        #{retrievalId},
+        #{supplierId},
+        #{customerId},
+        #{item.productSpecifications},
+        #{item.measureUnit},
+        #{planQuantity},
+        #{univalence},
+        #{discount},
+        #{money},
+        #{cost},
+        #{remarks}
+        )
+    </insert>
+
+    <!--    单据明细表修改   -->
+    <update id="updateDetailOrderForm" parameterType="DetailOrderForm">
+        update detail_order_form
+        <set>
+            <if test="productId != null and productId != ''">product_id = #{productId},</if>
+            <if test="warehousingId != null and warehousingId != ''">warehousing_id = #{warehousingId},</if>
+            <if test="retrievalId != null and retrievalId != ''">retrieval_id = #{retrievalId},</if>
+            <if test="supplierId != null and supplierId != ''">supplier_id = #{supplierId},</if>
+            <if test="customerId != null and customerId != ''">customer_id = #{customerId},</if>
+            <if test="productSpecifications != null and productSpecifications != ''">product_specifications =
+                #{productSpecifications},
+            </if>
+            <if test="measureUnit != null and measureUnit != ''">measure_unit = #{measureUnit},</if>
+            <if test="planQuantity != null and planQuantity != ''">plan_quantity = #{planQuantity},</if>
+            <if test="univalence != null and univalence != ''">univalence = #{univalence},</if>
+            <if test="discount != null and discount != ''">discount = #{discount},</if>
+            <if test="money != null and money != ''">money = #{money},</if>
+            <if test="cost != null and cost != ''">cost = #{cost},</if>
+            <if test="remarks != null and remarks != ''">remarks = #{remarks},</if>
+        </set>
+        where systematic_order_form = #{systematicOrderForm}
+    </update>
+
+    <!--    单据明细表导入修改   -->
+    <update id="updateImportDetailOrderForm" parameterType="DetailOrderForm">
+        update detail_order_form
+        <set>
+            product_id = #{productId},
+            warehousing_id = #{warehousingId},
+            retrieval_id = #{retrievalId},
+            supplier_id = #{supplierId},
+            customer_id = #{customerId},
+            product_specifications = #{productSpecifications},
+            measure_unit = #{measureUnit},
+            plan_quantity = #{planQuantity},
+            univalence = #{univalence},
+            discount = #{discount},
+            money = #{money},
+            cost = #{cost},
+            remarks = #{remarks}
+        </set>
+        where systematic_order_form = #{systematicOrderForm}
+    </update>
+
+    <!--    单据明细表删除      -->
+    <delete id="delDetailOrderForm" parameterType="java.util.List">
+        delete from detail_order_form where systematic_order_form in
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item.systematicOrderForm}
+        </foreach>
+    </delete>
+
+</mapper>
