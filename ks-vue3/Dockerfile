@@ -1,4 +1,4 @@
-FROM nginx:1.22
+FROM nginx:latest
 
 # 构建参数,在Jenkinsfile中构建镜像时定义
 ARG PROFILE

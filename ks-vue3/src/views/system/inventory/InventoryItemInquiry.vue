@@ -15,7 +15,7 @@
               v-model="queryParams.productCode"
               placeholder="请输入货品编号"
               clearable
-              style="width: 200px"
+              class="form-item"
               @keyup.enter="handleQuery"
             />
           </el-form-item>
@@ -24,13 +24,13 @@
               v-model="queryParams.productName"
               placeholder="请输入货品名称"
               clearable
-              style="width: 200px"
+              class="form-item"
               @keyup.enter="handleQuery"
             />
           </el-form-item>
           <el-form-item label="货品类型" prop="productType">
             <el-tree-select
-              style="width: 200px"
+              class="form-item"
               v-model="form.productType"
               :data="typeOptions"
               :props="{ value: 'id', label: 'label', children: 'children' }"
@@ -45,13 +45,13 @@
               v-model="queryParams.productSpecifications"
               placeholder="请输入商品规格"
               clearable
-              style="width: 200px"
+              class="form-item"
               @keyup.enter="handleQuery"
             />
           </el-form-item>
           <el-form-item label="仓库" prop="warehousingId">
             <el-select
-              style="width: 200px"
+              class="form-item"
               v-model="queryParams.warehousingId"
               placeholder="请选择"
             >
@@ -68,7 +68,7 @@
               type="primary"
               icon="Search"
               @click="handleQuery"
-              v-hasPermi="['system:inventoryItemInquiry:list']"
+              v-hasPermi="['inventory:inventoryItemInquiry:list']"
               >查询</el-button
             >
             <el-button icon="Refresh" @click="resetQuery">重置</el-button>
@@ -81,7 +81,7 @@
               plain
               icon="Download"
               @click="handleDetailExport"
-              v-hasPermi="['system:inventoryItemInquiry:export']"
+              v-hasPermi="['inventory:inventoryItemInquiry:export']"
               >导出</el-button
             >
           </el-col>
@@ -157,7 +157,7 @@
             label="金额"
             align="center"
             prop="money"
-            v-if="columns[10].visible"
+            v-if="columns[9].visible"
           />
         </el-table>
         <!-- 分页组件 -->
@@ -173,7 +173,7 @@
   </div>
 </template>
 
-<script setup name="InventoryItemInquiry">
+<script setup name="inventoryItemInquiry">
 import { listWarehouse } from "@/api/basedate/warehouse";
 import { selectInventoryItemInquiry } from "@/api/inventory/InventoryItemInquiry";
 import { productTypeTreeSelect } from "@/api/basedate/product";
@@ -212,7 +212,7 @@ const data = reactive({
   form: {},
   queryParams: {
     pageNum: 1,
-    pageSize: 10,
+    pageSize: 50,
     productCode: undefined,
     productName: undefined,
     productType: undefined,
@@ -269,7 +269,7 @@ function reset() {
 /** 明细导出按钮操作 */
 function handleDetailExport() {
   proxy.download(
-    "system/inventoryItemInquiry/export",
+    "inventory/inventoryItemInquiry/export",
     {
       ...queryParams.value,
     },
@@ -279,3 +279,9 @@ function handleDetailExport() {
 getList();
 Options();
 </script>
+
+<style scoped>
+.form-item {
+  width: 200px;
+}
+</style>

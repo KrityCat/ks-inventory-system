@@ -140,7 +140,7 @@
               icon="Edit"
               :disabled="single"
               @click="handleUpdate"
-              v-hasPermi="['baseDate:commodity:edit']"
+              v-hasPermi="['baseDate:commodity:update']"
               >修改</el-button
             >
           </el-col>
@@ -340,7 +340,7 @@
                   type="primary"
                   icon="Edit"
                   @click="handleUpdate(scope.row)"
-                  v-hasPermi="['baseDate:commodity:edit']"
+                  v-hasPermi="['baseDate:commodity:update']"
                 ></el-button>
               </el-tooltip>
               <el-tooltip content="删除" placement="top">
@@ -641,7 +641,7 @@ const data = reactive({
   form: {},
   queryParams: {
     pageNum: 1,
-    pageSize: 10,
+    pageSize: 50,
     commodityId: undefined,
     commodityCode: undefined,
     commodityName: undefined,
@@ -717,7 +717,7 @@ function handleQuery() {
 function resetQuery() {
   dateRange.value = [];
   proxy.resetForm("queryRef");
-  queryParams.value.commodityId = undefined;
+  queryParams.value.commodityType = undefined;
   proxy.$refs.typeTreeRef.setCurrentKey(null);
   handleQuery();
 }
@@ -815,20 +815,19 @@ function cancel() {
 }
 /** 新增按钮操作 */
 function handleAdd() {
-  getCommodityTypeTree();
   reset();
   open.value = true;
   title.value = "添加商品";
 }
 /** 修改按钮操作 */
 function handleUpdate(row) {
-  getCommodityTypeTree();
   reset();
   const commodityId = row.commodityId || ids.value;
   getCommodity(commodityId).then((response) => {
     form.value = response.data;
     open.value = true;
     title.value = "修改商品";
+    form.value.commodityType = Number(response.data.commodityType);
   });
 }
 /** 提交按钮 */

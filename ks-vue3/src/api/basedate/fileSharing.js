@@ -18,6 +18,15 @@ export function getFile(fileId) {
   })
 }
 
+// 新增文件
+export function addFileName(data) {
+  return request({
+    url: '/baseDate/fileSharing/add',
+    method: 'put',
+    data: data
+  })
+}
+
 // 修改文件名称
 export function updateFileName(data) {
   return request({
@@ -32,6 +41,7 @@ export function fileUpload(data) {
   return request({
     url: '/baseDate/fileSharing/upload',
     method: 'post',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     data: data
   })
 }

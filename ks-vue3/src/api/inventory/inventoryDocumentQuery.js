@@ -2,35 +2,44 @@ import request from '@/utils/request'
 import { parseStrEmpty } from "@/utils/ruoyi";
 
 // 查询库存头单列表
-export function headReceiptQuery(query) {
+export function headQuery(query) {
   return request({
-    url: '/system/inventory/headReceiptQuery',
+    url: '/inventory/inventoryReceiptQuery/headQuery',
     method: 'get',
     params: query
   })
 }
 
 // 查询库存明细列表
-export function detailReceiptQuery(query) {
+export function detailQuery(query) {
   return request({
-    url: '/system/inventory/detailReceiptQuery',
+    url: '/inventory/inventoryReceiptQuery/detailQuery',
     method: 'get',
     params: query
   })
 }
 
-// 查询库存头单详情
-export function getHeadReceipt(SystematicReceipt) {
+// 销售金额与毛利润查询
+export function salesAmountQuery(query) {
   return request({
-    url: '/system/inventory/' + parseStrEmpty(SystematicReceipt),
+    url: '/inventory/inventoryReceiptQuery/salesAmountQuery',
+    method: 'get',
+    params: query
+  })
+}
+
+// 查询库存单据详情
+export function getReceipt(SystematicReceipt) {
+  return request({
+    url: '/inventory/inventoryReceiptQuery/' + parseStrEmpty(SystematicReceipt),
     method: 'get'
   })
 }
 
 /**   删除库存单据    */
-export function delInventoryReceipt(data) {
+export function delReceipt(data) {
   return request({
-    url: '/system/inventory/delete',
+    url: '/inventory/inventoryReceiptQuery/delete',
     method: 'post',
     data: data
   })

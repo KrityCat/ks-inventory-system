@@ -79,8 +79,8 @@
     <pagination
       v-show="total > 0"
       :total="total"
-      :page.sync="pageReq.page"
-      :limit.sync="pageReq.size"
+      v-model:page="pageReq.page"
+      v-model:limit="pageReq.size"
       @pagination="loadAll"/>
   </div>
 </template>

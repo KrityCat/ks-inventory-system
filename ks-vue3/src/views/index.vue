@@ -1,512 +1,900 @@
 <template>
-  <div class="app-container home">
-    <el-row :gutter="20">
-      <el-col :sm="24" :lg="24">
-        <el-card style="font-size: 20px">
-          <div><span>工作台</span></div>
-          <hr />
-          <div>
-            <el-row :gutter="40" class="panel-group">
-              <el-col :xs="12" :sm="12" :lg="1">
-                <img
-                  :src="userStore.avatar"
-                  style="
-                    width: 50px;
-                    height: 50px;
-                    float: left;
-                    margin-right: 10px;
-                    border-radius: 50%;
-                  "
-                />
-              </el-col>
-              <el-col :xs="12" :sm="12" :lg="8">
-                <p
-                  style="
-                    white-space: nowrap;
-                    font-size: 16px;
-                    margin-bottom: 8px;
-                  "
-                >
-                  {{ state.user.userName }}, {{ state.hello }}
-                </p>
-              </el-col>
-              <el-col :xs="12" :sm="12" :lg="6">
-                <el-countdown format="DD [天] HH:mm:ss" :value="value2">
-                  <template #title>
-                    <div style="display: inline-flex; align-items: center">
-                      <el-icon style="margin-right: 4px" :size="12">
-                        <Calendar />
-                      </el-icon>
-                      距离下个月01日还剩
-                    </div>
-                  </template>
-                </el-countdown>
-              </el-col>
-            </el-row>
-          </div>
+  <div>
+    <el-row :gutter="5">
+      <el-col :span="12" v-hasPermi="['inventory:inventoryReceiptQuery:salesAmountQuery']">
+        <el-card>
+          <template #header>
+            <div class="card-header">
+              <span>销售总金额</span>
+            </div>
+          </template>
+          <el-row>
+            <el-col :span="4">
+              <el-statistic title="当天" :value="dailySalesAmount" />
+            </el-col>
+            <el-col :span="4">
+              <el-statistic title="近1个月" :value="lastMonthSalesAmount" />
+            </el-col>
+            <el-col :span="4">
+              <el-statistic title="近半年" :value="lastSixMonthsSalesAmount" />
+            </el-col>
+            <el-col :span="4">
+              <el-statistic title="今年" :value="thisYearSalesAmount" />
+            </el-col>
+            <el-col :span="4">
+              <el-statistic title="上一年" :value="lastYearSalesAmount" />
+            </el-col>
+            <el-col :span="4">
+              <el-statistic title="上上一年" :value="lastTwoYearsSalesAmount" />
+            </el-col>
+          </el-row>
+        </el-card>
+      </el-col>
+      <el-col :span="12" v-hasPermi="['inventory:inventoryReceiptQuery:salesAmountQuery']">
+        <el-card>
+          <template #header>
+            <div class="card-header">
+              <span>毛利润</span>
+            </div>
+          </template>
+          <el-row>
+            <el-col :span="4">
+              <el-statistic title="当天" :value="dailyGrossProfit" />
+            </el-col>
+            <el-col :span="4">
+              <el-statistic title="近1个月" :value="lastMonthGrossProfit" />
+            </el-col>
+            <el-col :span="4">
+              <el-statistic title="近半年" :value="lastSixMonthsGrossProfit" />
+            </el-col>
+            <el-col :span="4">
+              <el-statistic title="今年" :value="thisYearGrossProfit" />
+            </el-col>
+            <el-col :span="4">
+              <el-statistic title="上一年" :value="lastYearGrossProfit" />
+            </el-col>
+            <el-col :span="4">
+              <el-statistic title="上上一年" :value="lastTwoYearsGrossProfit" />
+            </el-col>
+          </el-row>
         </el-card>
       </el-col>
     </el-row>
-    <el-divider />
-    <el-row :gutter="20">
-      <el-col :span="10">
-        <el-card shadow="always" style="padding-bottom: 0px">
-          <el-row :gutter="40" class="panel-group">
-            <el-col :xs="12" :sm="12" :lg="12" class="card-panel-col">
-              <div
-                class="card-panel"
-                @click="handleGo('/purchase/purchaseDocumentQuery')"
-                v-hasPermi="['system:purchase:PurchaseOrderQuery']"
-              >
-                <div class="card-panel-icon-wrapper icon-people">
-                  <svg-icon icon-class="search" class-name="card-panel-icon" />
-                </div>
-                <div class="card-panel-description">
-                  <div class="card-panel-text">采购单据查询</div>
-                  <el-statistic
-                    :value="purchaseTotal"
-                    :value-style="{
-                      color: '#40c9c6',
-                      'font-weight': 'bolder',
-                      'font-size': '35px',
-                    }"
-                  />
-                </div>
-              </div>
-            </el-col>
-            <el-col :xs="12" :sm="12" :lg="12" class="card-panel-col">
-              <div
-                class="card-panel"
-                @click="handleGo('/sales/salesDocumentQuery')"
-                v-hasPermi="['system:sales:salesHeadQuery']"
-              >
-                <div class="card-panel-icon-wrapper icon-money">
-                  <svg-icon icon-class="search" class-name="card-panel-icon" />
-                </div>
-                <div class="card-panel-description">
-                  <div class="card-panel-text">销售单据查询</div>
-                  <el-statistic
-                    :value="salesTotal"
-                    :value-style="{
-                      color: '#f4516c',
-                      'font-weight': 'bolder',
-                      'font-size': '35px',
-                    }"
-                  />
+    <el-row :gutter="5">
+      <el-col :span="12">
+        <el-card>
+          <template #header>
+            <div class="card-header">
+              <span>待审核</span>
+            </div>
+          </template>
+          <el-row>
+            <el-col :span="4" v-hasPermi="['purchase:purchaseOrderQuery:headShow']">
+              <el-statistic
+                title="采购订单"
+                :value="purchaseOrderNotTakeEffect"
+              />
+              <div class="statistic-footer">
+                <div class="footer-item">
+                  <span>当天新增</span>
+                  <span class="green">
+                    {{ purchaseOrderTodaySource }}
+                    <el-icon>
+                      <CaretTop />
+                    </el-icon>
+                  </span>
                 </div>
               </div>
             </el-col>
-            <el-col :xs="12" :sm="12" :lg="12" class="card-panel-col">
-              <div
-                class="card-panel"
-                @click="handleGo('/inventory/InventoryDocumentQuery')"
-                v-hasPermi="['system:inventory:headReceiptQuery']"
-              >
-                <div class="card-panel-icon-wrapper icon-message">
-                  <svg-icon icon-class="search" class-name="card-panel-icon" />
-                </div>
-                <div class="card-panel-description">
-                  <div class="card-panel-text">库存单据查询</div>
-                  <el-statistic
-                    :value="inventoryTotal"
-                    :value-style="{
-                      color: '#36a3f7',
-                      'font-weight': 'bolder',
-                      'font-size': '35px',
-                    }"
-                  />
+            <el-col :span="4" v-hasPermi="['inventory:inventoryReceiptQuery:headShow']">
+              <el-statistic
+                title="采购单据"
+                :value="purchaseReceiptNotTakeEffect"
+              />
+              <div class="statistic-footer">
+                <div class="footer-item">
+                  <span>当天新增</span>
+                  <span class="green">
+                    {{ purchaseReceiptTodaySource }}
+                    <el-icon>
+                      <CaretTop />
+                    </el-icon>
+                  </span>
                 </div>
               </div>
             </el-col>
-            <el-col :xs="12" :sm="12" :lg="12" class="card-panel-col">
-              <div
-                class="card-panel"
-                @click="handleGo('/basedate/warehouse')"
-                v-hasPermi="['baseDate:warehouse:list']"
-              >
-                <div class="card-panel-icon-wrapper icon-people">
-                  <svg-icon icon-class="table" class-name="card-panel-icon" />
-                </div>
-                <div class="card-panel-description">
-                  <div class="card-panel-text">仓库</div>
-                  <el-statistic
-                    :value="warehouseTotal"
-                    :value-style="{
-                      color: '#40c9c6',
-                      'font-weight': 'bolder',
-                      'font-size': '35px',
-                    }"
-                  />
+            <el-col :span="4" v-hasPermi="['purchase:purchaseOrderQuery:headShow']">
+              <el-statistic title="销售订单" :value="salesOrderNotTakeEffect" />
+              <div class="statistic-footer">
+                <div class="footer-item">
+                  <span>当天新增</span>
+                  <span class="green">
+                    {{ salesOrderTodaySource }}
+                    <el-icon>
+                      <CaretTop />
+                    </el-icon>
+                  </span>
                 </div>
               </div>
             </el-col>
-            <el-col :xs="12" :sm="12" :lg="12" class="card-panel-col">
-              <div
-                class="card-panel"
-                @click="handleGo('/basedate/supplier')"
-                v-hasPermi="['baseDate:supplier:list']"
-              >
-                <div class="card-panel-icon-wrapper icon-money">
-                  <svg-icon icon-class="peoples" class-name="card-panel-icon" />
-                </div>
-                <div class="card-panel-description">
-                  <div class="card-panel-text">供应商</div>
-                  <el-statistic
-                    :value="supplierTotal"
-                    :value-style="{
-                      color: '#f4516c',
-                      'font-weight': 'bolder',
-                      'font-size': '35px',
-                    }"
-                  />
+            <el-col :span="4" v-hasPermi="['inventory:inventoryReceiptQuery:headShow']">
+              <el-statistic
+                title="销售单据"
+                :value="salesReceiptNotTakeEffect"
+              />
+              <div class="statistic-footer">
+                <div class="footer-item">
+                  <span>当天新增</span>
+                  <span class="green">
+                    {{ salesReceiptTodaySource }}
+                    <el-icon>
+                      <CaretTop />
+                    </el-icon>
+                  </span>
                 </div>
               </div>
             </el-col>
-            <el-col :xs="12" :sm="12" :lg="12" class="card-panel-col">
-              <div
-                class="card-panel"
-                @click="handleGo('/basedate/customer')"
-                v-hasPermi="['baseDate:customer:list']"
-              >
-                <div class="card-panel-icon-wrapper icon-message">
-                  <svg-icon icon-class="star" class-name="card-panel-icon" />
-                </div>
-                <div class="card-panel-description">
-                  <div class="card-panel-text">客户</div>
-                  <el-statistic
-                    :value="customerTotal"
-                    :value-style="{
-                      color: '#36a3f7',
-                      'font-weight': 'bolder',
-                      'font-size': '35px',
-                    }"
-                  />
+            <el-col :span="4" v-hasPermi="['inventory:inventoryReceiptQuery:headShow']">
+              <el-statistic
+                title="库存单据"
+                :value="inventoryReceiptNotTakeEffect"
+              />
+              <div class="statistic-footer">
+                <div class="footer-item">
+                  <span>当天新增</span>
+                  <span class="green">
+                    {{ inventoryReceiptTodaySource }}
+                    <el-icon>
+                      <CaretTop />
+                    </el-icon>
+                  </span>
                 </div>
               </div>
             </el-col>
-            <el-col :xs="12" :sm="12" :lg="12" class="card-panel-col">
-              <div
-                class="card-panel"
-                @click="handleGo('/basedate/product')"
-                v-hasPermi="['baseDate:product:list']"
-              >
-                <div class="card-panel-icon-wrapper icon-message">
-                  <svg-icon icon-class="date" class-name="card-panel-icon" />
-                </div>
-                <div class="card-panel-description">
-                  <div class="card-panel-text">货品资料</div>
-                  <el-statistic
-                    :value="productTotal"
-                    :value-style="{
-                      color: '#36a3f7',
-                      'font-weight': 'bolder',
-                      'font-size': '35px',
-                    }"
-                  />
-                </div>
-              </div>
-            </el-col>
-            <el-col :xs="12" :sm="12" :lg="12" class="card-panel-col">
-              <div
-                class="card-panel"
-                @click="handleGo('/basedate/filesharing')"
-                v-hasPermi="['baseDate:fileSharing:list']"
-              >
-                <div class="card-panel-icon-wrapper icon-message">
-                  <svg-icon icon-class="upload" class-name="card-panel-icon" />
-                </div>
-                <div class="card-panel-description">
-                  <div class="card-panel-text">文件共享</div>
-                  <el-statistic
-                    :value="fileTotal"
-                    :value-style="{
-                      color: '#36a3f7',
-                      'font-weight': 'bolder',
-                      'font-size': '35px',
-                    }"
-                  />
+            <el-col :span="4" v-hasPermi="['inventory:inventoryReceiptQuery:headShow']">
+              <el-statistic
+                title="调拨单据"
+                :value="inventoryTransferNotTakeEffect"
+              />
+              <div class="statistic-footer">
+                <div class="footer-item">
+                  <span>当天新增</span>
+                  <span class="green">
+                    {{ inventoryTransferTodaySource }}
+                    <el-icon>
+                      <CaretTop />
+                    </el-icon>
+                  </span>
                 </div>
               </div>
             </el-col>
           </el-row>
         </el-card>
       </el-col>
-      <!-- <el-col :span="14">
-        <el-card
-          shadow="always"
-          style="padding-bottom: 20px; font-size: 14px; margin-bottom: 20px"
-        >
-          <div ref="warn"><strong>货品库存预警</strong></div>
+      <el-col :span="12">
+        <el-card>
+          <template #header>
+            <div class="card-header">
+              <span>已审核</span>
+            </div>
+          </template>
+          <el-row>
+            <el-col :span="4" v-hasPermi="['purchase:purchaseOrderQuery:headShow']">
+              <el-statistic title="采购订单" :value="purchaseOrderTakeEffect" />
+              <div class="statistic-footer">
+                <div class="footer-item">
+                  <span class="green">
+                    实时统计
+                    <el-icon>
+                      <Histogram />
+                    </el-icon>
+                  </span>
+                </div>
+              </div>
+            </el-col>
+            <el-col :span="4" v-hasPermi="['inventory:inventoryReceiptQuery:headShow']">
+              <el-statistic
+                title="采购单据"
+                :value="purchaseReceiptTakeEffect"
+              />
+            </el-col>
+            <el-col :span="4" v-hasPermi="['purchase:purchaseOrderQuery:headShow']">
+              <el-statistic title="销售订单" :value="salesOrderTakeEffect" />
+            </el-col>
+            <el-col :span="4" v-hasPermi="['inventory:inventoryReceiptQuery:headShow']">
+              <el-statistic title="销售单据" :value="salesReceiptTakeEffect" />
+            </el-col>
+            <el-col :span="4" v-hasPermi="['inventory:inventoryReceiptQuery:headShow']">
+              <el-statistic
+                title="库存单据"
+                :value="inventoryReceiptTakeEffect"
+              />
+            </el-col>
+            <el-col :span="4" v-hasPermi="['inventory:inventoryReceiptQuery:headShow']">
+              <el-statistic
+                title="调拨单据"
+                :value="inventoryTransferTakeEffect"
+              />
+            </el-col>
+          </el-row>
         </el-card>
-      </el-col> -->
+      </el-col>
+    </el-row>
+    <el-row :gutter="5">
+      <el-col :span="12" v-hasPermi="['baseDate:product:show']">
+        <el-card>
+          <template #header>
+            <div class="card-header">
+              <span>货品库存预警</span>
+            </div>
+          </template>
+          <el-tabs tab-position="left" style="height: 500px" class="demo-tabs">
+            <el-tab-pane label="积压"
+              ><el-table
+                border
+                v-loading="loading"
+                :data="overstockProductList"
+              >
+                <el-table-column
+                  label="货品编号"
+                  align="center"
+                  key="productCode"
+                  prop="productCode"
+                />
+                <el-table-column
+                  label="货品名称"
+                  align="center"
+                  key="productName"
+                  prop="productName"
+                  width="250"
+                />
+                <el-table-column
+                  label="货品类型"
+                  align="center"
+                  key="productTypeName"
+                  prop="type.productTypeName"
+                  width="100"
+                />
+                <el-table-column
+                  label="库存数量"
+                  align="center"
+                  key="inventoryQty"
+                  prop="inventoryQty"
+                />
+                <el-table-column
+                  label="库存上限"
+                  align="center"
+                  key="upperLimit"
+                  prop="upperLimit"
+                /> </el-table
+            ></el-tab-pane>
+            <el-tab-pane label="不足"
+              ><el-table
+                border
+                v-loading="loading"
+                :data="dangerProductList"
+                height="500"
+              >
+                <el-table-column
+                  label="货品编号"
+                  align="center"
+                  key="productCode"
+                  prop="productCode"
+                />
+                <el-table-column
+                  label="货品名称"
+                  align="center"
+                  key="productName"
+                  prop="productName"
+                  width="250"
+                />
+                <el-table-column
+                  label="货品类型"
+                  align="center"
+                  key="productTypeName"
+                  prop="type.productTypeName"
+                  width="100"
+                />
+                <el-table-column
+                  label="库存数量"
+                  align="center"
+                  key="inventoryQty"
+                  prop="inventoryQty"
+                />
+                <el-table-column
+                  label="库存下限"
+                  align="center"
+                  key="lowerLimit"
+                  prop="lowerLimit"
+                /> </el-table
+            ></el-tab-pane>
+          </el-tabs>
+        </el-card>
+      </el-col>
+      <el-col :span="12" v-hasPermi="['baseDate:product:show']">
+        <el-card>
+          <template #header>
+            <div class="card-header">
+              <span>货品库存未出库时间预警</span>
+            </div>
+          </template>
+          <el-tabs tab-position="left" style="height: 500px" class="demo-tabs">
+            <el-tab-pane label="3个月"
+              ><el-table
+                border
+                v-loading="loading"
+                :data="threeOverstockList"
+                height="500"
+              >
+                <el-table-column
+                  label="货品编号"
+                  align="center"
+                  key="productCode"
+                  prop="productCode" />
+                <el-table-column
+                  label="货品名称"
+                  align="center"
+                  key="productName"
+                  prop="productName"
+                  width="250" />
+                <el-table-column
+                  label="货品类型"
+                  align="center"
+                  key="productTypeName"
+                  prop="type.productTypeName"
+                  width="100" />
+                <el-table-column
+                  label="库存数量"
+                  align="center"
+                  key="inventoryQty"
+                  prop="inventoryQty" /></el-table
+            ></el-tab-pane>
+            <el-tab-pane label="6个月"
+              ><el-table
+                border
+                v-loading="loading"
+                :data="sixOverstockList"
+                height="500"
+              >
+                <el-table-column
+                  label="货品编号"
+                  align="center"
+                  key="productCode"
+                  prop="productCode" />
+                <el-table-column
+                  label="货品名称"
+                  align="center"
+                  key="productName"
+                  prop="productName"
+                  width="250" />
+                <el-table-column
+                  label="货品类型"
+                  align="center"
+                  key="productTypeName"
+                  prop="type.productTypeName"
+                  width="100" />
+                <el-table-column
+                  label="库存数量"
+                  align="center"
+                  key="inventoryQty"
+                  prop="inventoryQty" /></el-table
+            ></el-tab-pane>
+            <el-tab-pane label="1年"
+              ><el-table
+                border
+                v-loading="loading"
+                :data="twelveOverstockList"
+                height="500"
+              >
+                <el-table-column
+                  label="货品编号"
+                  align="center"
+                  key="productCode"
+                  prop="productCode" />
+                <el-table-column
+                  label="货品名称"
+                  align="center"
+                  key="productName"
+                  prop="productName"
+                  width="250" />
+                <el-table-column
+                  label="货品类型"
+                  align="center"
+                  key="productTypeName"
+                  prop="type.productTypeName"
+                  width="100" />
+                <el-table-column
+                  label="库存数量"
+                  align="center"
+                  key="inventoryQty"
+                  prop="inventoryQty" /></el-table
+            ></el-tab-pane>
+          </el-tabs>
+        </el-card>
+      </el-col>
     </el-row>
   </div>
 </template>
 
 <script setup name="Index">
-import { useRouter } from "vue-router";
-import dayjs from "dayjs";
-import useUserStore from "@/store/modules/user";
-import { getUserProfile } from "@/api/system/user";
-import { listPurchaseOrder } from "@/api/purchase/PurchaseDocumentQuery";
-import { listSalesOrder } from "@/api/sales/SalesDocumentQuery";
-import { headReceiptQuery } from "@/api/inventory/inventoryDocumentQuery";
-import { listCustomer } from "@/api/basedate/customer";
-import { listWarehouse } from "@/api/basedate/warehouse";
-import { listSupplier } from "@/api/basedate/supplier";
-import { listProduct } from "@/api/basedate/product";
-import { listFile } from "@/api/basedate/fileSharing";
+import { useTransition } from "@vueuse/core";
+import { purchaseOrderHeadQuery } from "@/api/purchase/purchaseOrderQuery";
+import {
+  headQuery,
+  salesAmountQuery,
+} from "@/api/inventory/inventoryDocumentQuery";
+import {
+  listOverstockProduct,
+  listDangerProduct,
+  listThreeOverstock,
+  listSixOverstock,
+  listTwelveOverstock,
+} from "@/api/basedate/product";
 
-const date = ref(new Date());
-const router = useRouter();
-const version = ref("1.0.1");
-const userStore = useUserStore();
-// 条数
-const purchaseTotal = ref(0);
-const salesTotal = ref(0);
-const inventoryTotal = ref(0);
-const warehouseTotal = ref(0);
-const supplierTotal = ref(0);
-const customerTotal = ref(0);
-const productTotal = ref(0);
-const fileTotal = ref(0);
-const value2 = ref(dayjs().add(1, "month").startOf("month"));
-const state = reactive({
-  user: {},
-  hello: {},
-  nowTime: "",
-});
-function helloTimes() {
-  let hh = new Date().getHours();
-  if (0 < hh && hh < 12) {
-    state.hello = "上午好";
-  } else if (hh < 18) {
-    state.hello = "下午好";
-  } else {
-    state.hello = "晚上好";
+// 销售总金额与毛利润
+const dailySalesAmount = ref(0);
+const lastMonthSalesAmount = ref(0);
+const lastSixMonthsSalesAmount = ref(0);
+const thisYearSalesAmount = ref(0);
+const lastYearSalesAmount = ref(0);
+const lastTwoYearsSalesAmount = ref(0);
+const dailyGrossProfit = ref(0);
+const lastMonthGrossProfit = ref(0);
+const lastSixMonthsGrossProfit = ref(0);
+const thisYearGrossProfit = ref(0);
+const lastYearGrossProfit = ref(0);
+const lastTwoYearsGrossProfit = ref(0);
+// 货品库存预警结果表
+const overstockProductList = ref([]);
+const dangerProductList = ref([]);
+const threeOverstockList = ref([]);
+const sixOverstockList = ref([]);
+const twelveOverstockList = ref([]);
+const loading = ref(false);
+const total = ref(0);
+// 采购订单待审核
+const purchaseOrderNotTakeEffectSource = ref(0);
+const purchaseOrderNotTakeEffect = useTransition(
+  purchaseOrderNotTakeEffectSource,
+  {
+    duration: 500,
   }
-}
-function handleGo(path) {
-  router.push(path);
-}
+);
+// 采购订单待审核当日新增
+const purchaseOrderTodaySource = ref(0);
+// 采购单据待审核当日新增
+const purchaseReceiptTodaySource = ref(0);
+// 销售订单待审核当日新增
+const salesOrderTodaySource = ref(0);
+// 销售单据待审核当日新增
+const salesReceiptTodaySource = ref(0);
+// 库存单据待审核当日新增
+const inventoryReceiptTodaySource = ref(0);
+// 调拨单据待审核当日新增
+const inventoryTransferTodaySource = ref(0);
+// 采购订单已审核
+const purchaseOrderTakeEffectSource = ref(0);
+const purchaseOrderTakeEffect = useTransition(purchaseOrderTakeEffectSource, {
+  duration: 500,
+});
+// 采购单据待审核
+const purchaseReceiptNotTakeEffectSource = ref(0);
+const purchaseReceiptNotTakeEffect = useTransition(
+  purchaseReceiptNotTakeEffectSource,
+  {
+    duration: 500,
+  }
+);
+// 采购单据已审核
+const purchaseReceiptTakeEffectSource = ref(0);
+const purchaseReceiptTakeEffect = useTransition(
+  purchaseReceiptTakeEffectSource,
+  {
+    duration: 500,
+  }
+);
+// 销售订单待审核
+const salesOrderNotTakeEffectSource = ref(0);
+const salesOrderNotTakeEffect = useTransition(salesOrderNotTakeEffectSource, {
+  duration: 500,
+});
+// 销售订单已审核
+const salesOrderTakeEffectSource = ref(0);
+const salesOrderTakeEffect = useTransition(salesOrderTakeEffectSource, {
+  duration: 500,
+});
+// 销售单据待审核
+const salesReceiptNotTakeEffectSource = ref(0);
+const salesReceiptNotTakeEffect = useTransition(
+  salesReceiptNotTakeEffectSource,
+  {
+    duration: 500,
+  }
+);
+// 销售单据已审核
+const salesReceiptTakeEffectSource = ref(0);
+const salesReceiptTakeEffect = useTransition(salesReceiptTakeEffectSource, {
+  duration: 500,
+});
+// 库存单据待审核
+const inventoryReceiptNotTakeEffectSource = ref(0);
+const inventoryReceiptNotTakeEffect = useTransition(
+  inventoryReceiptNotTakeEffectSource,
+  {
+    duration: 500,
+  }
+);
+// 库存单据已审核
+const inventoryReceiptTakeEffectSource = ref(0);
+const inventoryReceiptTakeEffect = useTransition(
+  inventoryReceiptTakeEffectSource,
+  {
+    duration: 500,
+  }
+);
+// 调拨单据待审核
+const inventoryTransferNotTakeEffectSource = ref(0);
+const inventoryTransferNotTakeEffect = useTransition(
+  inventoryTransferNotTakeEffectSource,
+  {
+    duration: 500,
+  }
+);
+// 调拨单据已审核
+const inventoryTransferTakeEffectSource = ref(0);
+const inventoryTransferTakeEffect = useTransition(
+  inventoryTransferTakeEffectSource,
+  {
+    duration: 500,
+  }
+);
 
-function getUser() {
-  getUserProfile().then((response) => {
-    state.user = response.data;
+const data = reactive({
+  queryParams: {
+    pageNum: 1,
+    pageSize: 1,
+    orderFormType: undefined,
+    orderFormStatus: undefined,
+    receiptCategory: undefined,
+    receiptType: undefined,
+    receiptStatus: undefined,
+    deliveryDate: undefined,
+    invoiceDate: undefined,
+  },
+  rules: {},
+});
+
+const { queryParams, rules } = toRefs(data);
+
+function getNowTime() {
+  var now = new Date();
+  var year = now.getFullYear(); //得到年份
+  var month = now.getMonth(); //得到月份
+  var date = now.getDate(); //得到日期
+  month = month + 1;
+  month = month.toString().padStart(2, "0");
+  date = date.toString().padStart(2, "0");
+  var defaultDate = `${year}-${month}-${date}`;
+  return defaultDate;
+}
+/** 重置表单 */
+function Reset() {
+  queryParams.value = {
+    pageSize: 1,
+    orderFormType: undefined,
+    orderFormStatus: undefined,
+    receiptCategory: undefined,
+    receiptType: undefined,
+    receiptStatus: undefined,
+    deliveryDate: undefined,
+    invoiceDate: undefined,
+  };
+}
+// 采购订单待审核查询
+function purchaseOrderNotTakeEffectQuery() {
+  queryParams.value.orderFormType = 1;
+  queryParams.value.orderFormStatus = 1;
+  purchaseOrderHeadQuery(queryParams.value).then((response) => {
+    purchaseOrderNotTakeEffectSource.value = response.total;
+  });
+  Reset();
+}
+// 销售金额与毛利润查询
+function amountQuery() {
+  salesAmountQuery().then((response) => {
+    dailySalesAmount.value = response.dailySalesAmount;
+    lastMonthSalesAmount.value = response.lastMonthSalesAmount;
+    lastSixMonthsSalesAmount.value = response.lastSixMonthsSalesAmount;
+    thisYearSalesAmount.value = response.thisYearSalesAmount;
+    lastYearSalesAmount.value = response.lastYearSalesAmount;
+    lastTwoYearsSalesAmount.value = response.lastTwoYearsSalesAmount;
+    dailyGrossProfit.value = response.dailyGrossProfit;
+    lastMonthGrossProfit.value = response.lastMonthGrossProfit;
+    lastSixMonthsGrossProfit.value = response.lastSixMonthsGrossProfit;
+    thisYearGrossProfit.value = response.thisYearGrossProfit;
+    lastYearGrossProfit.value = response.lastYearGrossProfit;
+    lastTwoYearsGrossProfit.value = response.lastTwoYearsGrossProfit;
+  });
+}
+// 采购订单当天待审核查询
+function purchaseOrderTodayQuery() {
+  queryParams.value.orderFormType = 1;
+  queryParams.value.orderFormStatus = 1;
+  queryParams.value.deliveryDate = getNowTime();
+  purchaseOrderHeadQuery(queryParams.value).then((response) => {
+    purchaseOrderTodaySource.value = response.total;
+  });
+  Reset();
+}
+// 采购订单已审核查询
+function purchaseOrderTakeEffectQuery() {
+  queryParams.value.orderFormType = 1;
+  queryParams.value.orderFormStatus = 2;
+  purchaseOrderHeadQuery(queryParams.value).then((response) => {
+    purchaseOrderTakeEffectSource.value = response.total;
+  });
+  Reset();
+}
+// 采购单据待审核查询
+function purchaseReceiptNotTakeEffectQuery() {
+  queryParams.value.receiptCategory = 1;
+  queryParams.value.receiptStatus = 1;
+  headQuery(queryParams.value).then((response) => {
+    purchaseReceiptNotTakeEffectSource.value = response.total;
+  });
+  Reset();
+}
+// 采购单据当天待审核查询
+function purchaseReceiptTodayQuery() {
+  queryParams.value.receiptCategory = 1;
+  queryParams.value.receiptStatus = 1;
+  queryParams.value.invoiceDate = getNowTime();
+  headQuery(queryParams.value).then((response) => {
+    purchaseReceiptTodaySource.value = response.total;
+  });
+  Reset();
+}
+// 采购单据已审核查询
+function purchaseReceiptTakeEffectQuery() {
+  queryParams.value.receiptCategory = 1;
+  queryParams.value.receiptStatus = 2;
+  headQuery(queryParams.value).then((response) => {
+    purchaseReceiptTakeEffectSource.value = response.total;
+  });
+  Reset();
+}
+// 销售订单待审核查询
+function salesOrderNotTakeEffectQuery() {
+  queryParams.value.orderFormType = 2;
+  queryParams.value.orderFormStatus = 1;
+  purchaseOrderHeadQuery(queryParams.value).then((response) => {
+    salesOrderNotTakeEffectSource.value = response.total;
+  });
+  Reset();
+}
+// 销售订单当天待审核查询
+function salesOrderTodayQuery() {
+  queryParams.value.orderFormType = 2;
+  queryParams.value.orderFormStatus = 1;
+  queryParams.value.deliveryDate = getNowTime();
+  purchaseOrderHeadQuery(queryParams.value).then((response) => {
+    salesOrderTodaySource.value = response.total;
+  });
+  Reset();
+}
+// 销售订单已审核查询
+function salesOrderTakeEffectQuery() {
+  queryParams.value.orderFormType = 2;
+  queryParams.value.orderFormStatus = 2;
+  purchaseOrderHeadQuery(queryParams.value).then((response) => {
+    salesOrderTakeEffectSource.value = response.total;
+  });
+  Reset();
+}
+// 销售单据待审核查询
+function salesReceiptNotTakeEffectQuery() {
+  queryParams.value.receiptCategory = 2;
+  queryParams.value.receiptStatus = 1;
+  headQuery(queryParams.value).then((response) => {
+    salesReceiptNotTakeEffectSource.value = response.total;
+  });
+  Reset();
+}
+// 销售单据待审核查询
+function salesReceiptTodayQuery() {
+  queryParams.value.receiptCategory = 2;
+  queryParams.value.receiptStatus = 1;
+  queryParams.value.invoiceDate = getNowTime();
+  headQuery(queryParams.value).then((response) => {
+    salesReceiptTodaySource.value = response.total;
+  });
+  Reset();
+}
+// 销售单据已审核查询
+function salesReceiptTakeEffectQuery() {
+  queryParams.value.receiptCategory = 2;
+  queryParams.value.receiptStatus = 2;
+  headQuery(queryParams.value).then((response) => {
+    salesReceiptTakeEffectSource.value = response.total;
+  });
+  Reset();
+}
+// 库存单据待审核查询
+function inventoryReceiptNotTakeEffectQuery() {
+  queryParams.value.receiptCategory = 3;
+  queryParams.value.receiptStatus = 1;
+  headQuery(queryParams.value).then((response) => {
+    inventoryReceiptNotTakeEffectSource.value = response.total;
+  });
+  Reset();
+}
+// 库存单据当天待审核查询
+function inventoryReceiptTodayQuery() {
+  queryParams.value.receiptCategory = 3;
+  queryParams.value.receiptStatus = 1;
+  queryParams.value.invoiceDate = getNowTime();
+  headQuery(queryParams.value).then((response) => {
+    inventoryReceiptTodaySource.value = response.total;
+  });
+  Reset();
+}
+// 库存单据已审核查询
+function inventoryReceiptTakeEffectQuery() {
+  queryParams.value.receiptCategory = 3;
+  queryParams.value.receiptStatus = 2;
+  headQuery(queryParams.value).then((response) => {
+    inventoryReceiptTakeEffectSource.value = response.total;
+  });
+  Reset();
+}
+// 调拨单据待审核查询
+function inventoryTransferNotTakeEffectQuery() {
+  queryParams.value.receiptCategory = 3;
+  queryParams.value.receiptType = 7;
+  queryParams.value.receiptStatus = 1;
+  headQuery(queryParams.value).then((response) => {
+    inventoryTransferNotTakeEffectSource.value = response.total;
+  });
+  Reset();
+}
+// 调拨单据当日待审核查询
+function inventoryTransferTodayQuery() {
+  queryParams.value.receiptCategory = 3;
+  queryParams.value.receiptType = 7;
+  queryParams.value.receiptStatus = 1;
+  queryParams.value.invoiceDate = getNowTime();
+  headQuery(queryParams.value).then((response) => {
+    inventoryTransferTodaySource.value = response.total;
+  });
+  Reset();
+}
+// 调拨单据已审核查询
+function inventoryTransferTakeEffectQuery() {
+  queryParams.value.receiptCategory = 3;
+  queryParams.value.receiptType = 7;
+  queryParams.value.receiptStatus = 2;
+  headQuery(queryParams.value).then((response) => {
+    inventoryTransferTakeEffectSource.value = response.total;
+  });
+  Reset();
+}
+/** 查询货品库存积压预警列表 */
+function overstockProductQuery() {
+  queryParams.value.pageSize = 50;
+  loading.value = true;
+  listOverstockProduct(queryParams.value).then((res) => {
+    loading.value = false;
+    overstockProductList.value = res.rows;
+    total.value = res.total;
+  });
+}
+/** 查询货品库存不足预警列表 */
+function dangerProductQuery() {
+  queryParams.value.pageSize = 50;
+  loading.value = true;
+  listDangerProduct(queryParams.value).then((res) => {
+    loading.value = false;
+    dangerProductList.value = res.rows;
+    total.value = res.total;
+  });
+}
+/** 积压3个月未出预警列表 */
+function threeOverstockQuery() {
+  queryParams.value.pageSize = 50;
+  loading.value = true;
+  listThreeOverstock(queryParams.value).then((res) => {
+    loading.value = false;
+    threeOverstockList.value = res.rows;
+    total.value = res.total;
+  });
+}
+/** 积压6个月未出预警列表 */
+function sixOverstockQuery() {
+  queryParams.value.pageSize = 50;
+  loading.value = true;
+  listSixOverstock(queryParams.value).then((res) => {
+    loading.value = false;
+    sixOverstockList.value = res.rows;
+    total.value = res.total;
+  });
+}
+/** 积压12个月未出预警列表 */
+function twelveOverstockQuery() {
+  queryParams.value.pageSize = 50;
+  loading.value = true;
+  listTwelveOverstock(queryParams.value).then((res) => {
+    loading.value = false;
+    twelveOverstockList.value = res.rows;
+    total.value = res.total;
   });
 }
 /** 查询数据总条数列表 */
 function getList() {
-  listPurchaseOrder().then((response) => {
-    purchaseTotal.value = response.total;
-  });
-  listSalesOrder().then((response) => {
-    salesTotal.value = response.total;
-  });
-  headReceiptQuery().then((response) => {
-    inventoryTotal.value = response.total;
-  });
-  listWarehouse().then((response) => {
-    warehouseTotal.value = response.total;
-  });
-  listSupplier().then((response) => {
-    supplierTotal.value = response.total;
-  });
-  listCustomer().then((response) => {
-    customerTotal.value = response.total;
-  });
-  listProduct().then((res) => {
-    productTotal.value = res.total;
-  });
-  listFile().then((response) => {
-    fileTotal.value = response.total;
-  });
+  amountQuery();
+  purchaseOrderNotTakeEffectQuery();
+  purchaseOrderTodayQuery();
+  purchaseOrderTakeEffectQuery();
+  purchaseReceiptNotTakeEffectQuery();
+  purchaseReceiptTodayQuery();
+  purchaseReceiptTakeEffectQuery();
+  salesOrderNotTakeEffectQuery();
+  salesOrderTodayQuery();
+  salesOrderTakeEffectQuery();
+  salesReceiptNotTakeEffectQuery();
+  salesReceiptTodayQuery();
+  salesReceiptTakeEffectQuery();
+  inventoryReceiptNotTakeEffectQuery();
+  inventoryReceiptTodayQuery();
+  inventoryReceiptTakeEffectQuery();
+  inventoryTransferNotTakeEffectQuery();
+  inventoryTransferTodayQuery();
+  inventoryTransferTakeEffectQuery();
+  overstockProductQuery();
+  dangerProductQuery();
+  threeOverstockQuery();
+  sixOverstockQuery();
+  twelveOverstockQuery();
 }
-getUser();
+
 getList();
-helloTimes();
 </script>
 
-<style scoped lang="scss">
-.home {
-  blockquote {
-    padding: 10px 20px;
-    margin: 0 0 20px;
-    font-size: 17.5px;
-    border-left: 5px solid #eee;
-  }
-  hr {
-    margin-top: 20px;
-    margin-bottom: 20px;
-    border: 0;
-    border-top: 1px solid #eee;
-  }
-  .col-item {
-    margin-bottom: 20px;
-  }
-
-  ul {
-    padding: 0;
-    margin: 0;
-  }
-
-  font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: 13px;
-  color: #676a6c;
-  overflow-x: hidden;
-
-  ul {
-    list-style-type: none;
-  }
-
-  h4 {
-    margin-top: 0px;
-  }
-
-  h2 {
-    margin-top: 10px;
-    font-size: 26px;
-    font-weight: 100;
-  }
-
-  p {
-    margin-top: 10px;
-
-    b {
-      font-weight: 700;
-    }
-  }
-
-  .update-log {
-    ol {
-      display: block;
-      list-style-type: decimal;
-      margin-block-start: 1em;
-      margin-block-end: 1em;
-      margin-inline-start: 0;
-      margin-inline-end: 0;
-      padding-inline-start: 40px;
-    }
-  }
-}
-.home-wrapper .li {
-  float: left;
-  width: 25%;
+<style scoped>
+.statistic-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
   font-size: 12px;
-  color: rgb(185, 181, 189);
+  color: var(--el-text-color-regular);
+  margin-top: 16px;
 }
 
-.da {
-  float: left;
-  width: 25%;
-  font-size: 20px;
+.statistic-footer .footer-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.first {
-  float: left;
-  margin-bottom: 20px;
+.statistic-footer .footer-item span:last-child {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 4px;
 }
 
-.el-table .warning-row {
-  background: rgb(39, 138, 230);
-}
-.panel-group {
-  margin-top: 18px;
-
-  .card-panel-col {
-    margin-bottom: 10px;
-  }
-
-  .card-panel {
-    height: 108px;
-    cursor: pointer;
-    font-size: 12px;
-    position: relative;
-    overflow: hidden;
-    color: #666;
-    background: #fff;
-    box-shadow: 4px 4px 40px rgba(0, 0, 0, 0.05);
-    border-color: rgba(0, 0, 0, 0.05);
-
-    &:hover {
-      .card-panel-icon-wrapper {
-        color: #fff;
-      }
-
-      .icon-people {
-        background: #40c9c6;
-      }
-
-      .icon-message {
-        background: #36a3f7;
-      }
-
-      .icon-money {
-        background: #f4516c;
-      }
-    }
-
-    .icon-people {
-      color: #40c9c6;
-    }
-
-    .icon-message {
-      color: #36a3f7;
-    }
-
-    .icon-money {
-      color: #f4516c;
-    }
-
-    .card-panel-icon-wrapper {
-      float: left;
-      margin: 14px 0 0 14px;
-      padding: 16px;
-      transition: all 0.38s ease-out;
-      border-radius: 6px;
-    }
-
-    .card-panel-icon {
-      float: left;
-      font-size: 48px;
-    }
-
-    .card-panel-description {
-      // float: right;
-      font-weight: bold;
-      margin: 26px;
-      margin-left: 0px;
-
-      .card-panel-text {
-        line-height: 18px;
-        color: rgba(0, 0, 0, 0.45);
-        font-size: 16px;
-        margin-bottom: 12px;
-      }
-
-      .card-panel-num {
-        font-size: 20px;
-      }
-    }
-  }
+.green {
+  color: var(--el-color-success);
 }
 
-@media (max-width: 550px) {
-  .card-panel-description {
-    display: none;
-  }
+.demo-tabs > .el-tabs__content {
+  padding: 32px;
+  color: #6b778c;
+  font-size: 32px;
+  font-weight: 600;
+}
 
-  .card-panel-icon-wrapper {
-    float: none !important;
-    width: 100%;
-    height: 100%;
-    margin: 0 !important;
-
-    .svg-icon {
-      display: block;
-      margin: 14px auto !important;
-      float: none !important;
-    }
-  }
+.el-tabs--right .el-tabs__content,
+.el-tabs--left .el-tabs__content {
+  height: 100%;
 }
 </style>

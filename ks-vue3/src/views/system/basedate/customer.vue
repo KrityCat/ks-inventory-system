@@ -640,7 +640,7 @@ const data = reactive({
   form: {},
   queryParams: {
     pageNum: 1,
-    pageSize: 10,
+    pageSize: 50,
     customerCode: undefined,
     customerName: undefined,
     customerSalesPerson: undefined,

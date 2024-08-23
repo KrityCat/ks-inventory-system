@@ -13,7 +13,7 @@
             <el-input
               v-model="queryParams.systematicReceipt"
               placeholder="请输入"
-              style="width: 200px"
+              class="form-item"
               clearable
             />
           </el-form-item>
@@ -21,7 +21,7 @@
             <el-input
               v-model="queryParams.originalReceipt"
               placeholder="请输入"
-              style="width: 200px"
+              class="form-item"
               clearable
             />
           </el-form-item>
@@ -31,7 +31,7 @@
               placeholder="单据类型"
               filterable
               clearable
-              style="width: 200px"
+              class="form-item"
             >
               <el-option
                 v-for="dict in receipt_type"
@@ -47,7 +47,7 @@
               placeholder="单据状态"
               filterable
               clearable
-              style="width: 200px"
+              class="form-item"
             >
               <el-option
                 v-for="dict in receipt_status"
@@ -513,7 +513,8 @@ const uploadHead = reactive({
   headers: { Authorization: "Bearer " + getToken() },
   // 上传的地址
   url:
-    import.meta.env.VITE_APP_BASE_API + "/system/historicalDocuments/importHeadData",
+    import.meta.env.VITE_APP_BASE_API +
+    "/system/historicalDocuments/importHeadData",
 });
 /*** 单据明细表导入参数 */
 const uploadDetail = reactive({
@@ -529,7 +530,8 @@ const uploadDetail = reactive({
   headers: { Authorization: "Bearer " + getToken() },
   // 上传的地址
   url:
-    import.meta.env.VITE_APP_BASE_API + "/system/historicalDocuments/importDetailData",
+    import.meta.env.VITE_APP_BASE_API +
+    "/system/historicalDocuments/importDetailData",
 });
 
 const data = reactive({
@@ -537,7 +539,7 @@ const data = reactive({
   fileForm: {},
   queryParams: {
     pageNum: 1,
-    pageSize: 10,
+    pageSize: 50,
     systematicReceipt: undefined,
     originalReceipt: undefined,
     receiptType: undefined,
@@ -617,7 +619,7 @@ function reset() {
 function handleDelete(row) {
   const systematicReceipt = row.systematicReceipt;
   getHeadReceipt(systematicReceipt).then((response) => {
-    const details = response.data.detail;
+    const details = response.data.details;
     proxy.$modal
       .confirm("确认要删除编号为" + systematicReceipt + "的单据?")
       .then(function () {
@@ -703,7 +705,7 @@ function submitDetailFileForm() {
 /** 导出按钮操作 */
 function handleExport() {
   proxy.download(
-    "system/historicalDocuments/headReceiptExport",
+    "inventory/historicalDocuments/headReceiptExport",
     {
       ...queryParams.value,
     },
@@ -713,7 +715,7 @@ function handleExport() {
 /** 明细导出按钮操作 */
 function handleDetailExport() {
   proxy.download(
-    "system/historicalDocuments/detailReceiptExport",
+    "inventory/historicalDocuments/detailReceiptExport",
     {
       ...queryParams.value,
     },
@@ -722,3 +724,9 @@ function handleDetailExport() {
 }
 getList();
 </script>
+
+<style scoped>
+.form-item {
+  width: 200px;
+}
+</style>

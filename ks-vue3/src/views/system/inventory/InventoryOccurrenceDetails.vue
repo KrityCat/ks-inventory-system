@@ -68,14 +68,14 @@
               type="primary"
               icon="Search"
               @click="handleQuery"
-              v-hasPermi="['system:inventoryOccurrenceDetails:list']"
+              v-hasPermi="['inventory:inventoryOccurrenceDetails:list']"
               >查询</el-button
             >
             <el-button icon="Refresh" @click="resetQuery">重置</el-button>
           </el-form-item>
         </el-form>
         <el-row :gutter="10" class="mb8">
-          <el-col :span="1.5">
+          <!-- <el-col :span="1.5">
             <el-button
               type="danger"
               plain
@@ -85,11 +85,11 @@
               v-hasPermi="['system:inventoryOccurrenceDetails:export']"
               >导出</el-button
             >
-          </el-col>
+          </el-col> -->
           <right-toolbar
-              v-model:showSearch="showSearch"
-              @queryTable="getList"
-            ></right-toolbar>
+            v-model:showSearch="showSearch"
+            @queryTable="getList"
+          ></right-toolbar>
         </el-row>
 
         <el-table
@@ -135,43 +135,69 @@
               align="center"
               prop="obplanQuantity"
             />
-            <el-table-column
-              label="单价"
-              align="center"
-              prop="obunivalence"
-            />
-            <el-table-column 
-              label="金额" 
-              align="center" 
-              prop="obmoney" 
-            />
+            <el-table-column label="单价" align="center" prop="obunivalence" />
+            <el-table-column label="金额" align="center" prop="obmoney" />
           </el-table-column>
-          <el-table-column label="业务类型" align="center" prop="headReceipt.receiptType" />
-          <el-table-column label="开单日期" align="center" prop="headReceipt.invoiceDate" />
-          <el-table-column label="系统单号" align="center" prop="headReceipt.systematicReceipt" />
-          <el-table-column label="原始单号" align="center" prop="headReceipt.originalReceipt" />
-          <el-table-column label="供应商" align="center" prop="supplier.supplierName" />
-          <el-table-column label="客户" align="center" prop="customer.customerName" />
+          <el-table-column
+            label="业务类型"
+            align="center"
+            prop="receiptType"
+            width="100"
+          >
+            <template #default="scope">
+              <dict-tag
+                :options="receipt_type"
+                :value="scope.row.receiptType"
+              />
+            </template>
+          </el-table-column>
+          <el-table-column
+            label="开单日期"
+            align="center"
+            prop="headReceipt.invoiceDate"
+            width="100"
+          />
+          <el-table-column
+            label="系统单号"
+            align="center"
+            prop="headReceipt.systematicReceipt"
+            width="180"
+          />
+          <el-table-column
+            label="原始单号"
+            align="center"
+            prop="headReceipt.originalReceipt"
+            width="180"
+          />
+          <el-table-column
+            label="供应商"
+            align="center"
+            prop="supplier.supplierName"
+            idth="100"
+          />
+          <el-table-column
+            label="客户"
+            align="center"
+            prop="customer.customerName"
+            idth="100"
+          />
           <el-table-column label="数量" align="center" prop="planQuantity" />
           <el-table-column label="单价" align="center" prop="univalence" />
           <el-table-column label="金额" align="center" prop="money" />
-          <el-table-column label="创建日期" align="center" prop="headReceipt.createDate" />
+          <el-table-column
+            label="创建日期"
+            align="center"
+            prop="headReceipt.createTime"
+            width="180"
+          />
           <el-table-column label="期末结存" align="center">
             <el-table-column
               label="数量"
               align="center"
               prop="cbplanQuantity"
             />
-            <el-table-column
-              label="单价"
-              align="center"
-              prop="cbunivalence"
-            />
-            <el-table-column 
-              label="金额" 
-              align="center" 
-              prop="cbmoney" 
-            />
+            <el-table-column label="单价" align="center" prop="cbunivalence" />
+            <el-table-column label="金额" align="center" prop="cbmoney" />
           </el-table-column>
         </el-table>
         <!-- 分页组件 -->
@@ -193,6 +219,7 @@ import { occurrenceDetailsQuery } from "@/api/inventory/inventoryOccurrenceDetai
 import { productTypeTreeSelect } from "@/api/basedate/product";
 
 const { proxy } = getCurrentInstance();
+const { receipt_type } = proxy.useDict("receipt_type");
 
 // 查询结果表
 const occurrenceDetailList = ref([]);
@@ -211,7 +238,7 @@ const data = reactive({
   form: {},
   queryParams: {
     pageNum: 1,
-    pageSize: 10,
+    pageSize: 50,
     productCode: undefined,
     productName: undefined,
     productType: undefined,
@@ -269,7 +296,7 @@ function reset() {
 /** 导出按钮操作 */
 function handleDetailExport() {
   proxy.download(
-    "system/inventoryOccurrenceDetails/export",
+    "inventory/inventoryOccurrenceDetails/export",
     {
       ...queryParams.value,
     },

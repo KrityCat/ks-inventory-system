@@ -25,7 +25,7 @@
               v-model="queryParams.productCode"
               placeholder="请输入货品编号"
               clearable
-              style="width: 200px"
+              class="form-item"
               @keyup.enter="handleQuery"
             />
           </el-form-item>
@@ -34,13 +34,13 @@
               v-model="queryParams.productName"
               placeholder="请输入货品名称"
               clearable
-              style="width: 200px"
+              class="form-item"
               @keyup.enter="handleQuery"
             />
           </el-form-item>
           <el-form-item label="货品类型" prop="productType">
             <el-tree-select
-              style="width: 200px"
+              class="form-item"
               v-model="form.productType"
               :data="typeOptions"
               :props="{ value: 'id', label: 'label', children: 'children' }"
@@ -55,13 +55,13 @@
               v-model="queryParams.productSpecifications"
               placeholder="请输入商品规格"
               clearable
-              style="width: 200px"
+              class="form-item"
               @keyup.enter="handleQuery"
             />
           </el-form-item>
           <el-form-item label="仓库" prop="warehousingId">
             <el-select
-              style="width: 200px"
+              class="form-item"
               v-model="queryParams.warehousingId"
               placeholder="请选择"
               filterable
@@ -80,14 +80,14 @@
               type="primary"
               icon="Search"
               @click="handleQuery"
-              v-hasPermi="['system:inventoryOccurrenceSummary:list']"
+              v-hasPermi="['inventory:inventoryOccurrenceSummary:list']"
               >查询</el-button
             >
             <el-button icon="Refresh" @click="resetQuery">重置</el-button>
           </el-form-item>
         </el-form>
         <el-row :gutter="10" class="mb8">
-          <el-col :span="1.5">
+          <!-- <el-col :span="1.5">
             <el-button
               type="danger"
               plain
@@ -97,7 +97,7 @@
               v-hasPermi="['system:inventoryOccurrenceSummary:export']"
               >导出</el-button
             >
-          </el-col>
+          </el-col> -->
           <right-toolbar
             v-model:showSearch="showSearch"
             @queryTable="getList"
@@ -212,7 +212,7 @@ const data = reactive({
   form: {},
   queryParams: {
     pageNum: 1,
-    pageSize: 10,
+    pageSize: 50,
     productCode: undefined,
     productName: undefined,
     productType: undefined,
@@ -270,7 +270,7 @@ function reset() {
 /** 导出按钮操作 */
 function handleDetailExport() {
   proxy.download(
-    "system/inventoryOccurrenceSummary/export",
+    "inventory/inventoryOccurrenceSummary/export",
     {
       ...queryParams.value,
     },
@@ -280,3 +280,9 @@ function handleDetailExport() {
 getList();
 Options();
 </script>
+
+<style scoped>
+.form-item {
+  width: 200px;
+}
+</style>

@@ -3,7 +3,10 @@ import { createApp } from 'vue'
 import Cookies from 'js-cookie'
 
 import ElementPlus from 'element-plus'
-import locale from 'element-plus/lib/locale/lang/zh-cn' // 中文语言
+import 'element-plus/dist/index.css'
+import locale from 'element-plus/es/locale/lang/zh-cn'
+/** element-plus暗黑主题 */
+import 'element-plus/theme-chalk/dark/css-vars.css'
 
 import '@/assets/styles/index.scss' // global css
 
@@ -42,17 +45,6 @@ import ImagePreview from "@/components/ImagePreview"
 import TreeSelect from '@/components/TreeSelect'
 // 字典标签组件
 import DictTag from '@/components/DictTag'
-// 添加物料组件
-import ItemSelect from '@/components/ItemSelect'
-// 打印组件
-import print from 'vue3-print-nb'
-// 滚动加载数字组件
-import countTo from 'vue3-count-to'
-import dayjs from 'dayjs'
-import VueUeditorWrap from 'vue-ueditor-wrap'
-// import VuePluginHiPrint from 'vue-plugin-hiprint'
-// import KrPrintDesigner from "kr-print-designer"
-// import "kr-print-designer/lib/kr-print-designer.css"
 
 const app = createApp(App)
 
@@ -67,7 +59,6 @@ app.config.globalProperties.selectDictLabel = selectDictLabel
 app.config.globalProperties.selectDictLabels = selectDictLabels
 
 // 全局组件挂载
-app.component('ItemSelect', ItemSelect)
 app.component('DictTag', DictTag)
 app.component('Pagination', Pagination)
 app.component('TreeSelect', TreeSelect)
@@ -79,12 +70,7 @@ app.component('Editor', Editor)
 
 app.use(router)
 app.use(store)
-app.use(print)
-app.use(VueUeditorWrap)
-// app.use(KrPrintDesigner)
 app.use(plugins)
-app.use(countTo)
-app.use(dayjs)
 app.use(elementIcons)
 app.component('svg-icon', SvgIcon)
 

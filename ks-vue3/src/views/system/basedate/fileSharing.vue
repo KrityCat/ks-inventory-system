@@ -58,7 +58,7 @@
             width="60"
           />
           <el-table-column label="文件名称" align="center" prop="fileName" />
-          <el-table-column label="文件" align="center" prop="fileName">
+          <el-table-column label="文件下载" align="center" prop="fileName">
             <template #default="scope">
               <el-link type="primary">
                 <a
@@ -68,6 +68,38 @@
                   >{{ scope.row.fileName }}</a
                 >
               </el-link>
+            </template>
+          </el-table-column>
+          <el-table-column
+            label="创建者"
+            align="center"
+            prop="createBy"
+            width="100"
+          />
+          <el-table-column
+            label="创建时间"
+            align="center"
+            prop="createTime"
+            width="180"
+          >
+            <template #default="scope">
+              <span>{{ parseTime(scope.row.createTime) }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column
+            label="更新者"
+            align="center"
+            prop="updateBy"
+            width="100"
+          />
+          <el-table-column
+            label="更新时间"
+            align="center"
+            prop="updateTime"
+            width="180"
+          >
+            <template #default="scope">
+              <span>{{ parseTime(scope.row.updateTime) }}</span>
             </template>
           </el-table-column>
           <el-table-column
@@ -144,6 +176,7 @@
 import {
   listFile,
   getFile,
+  addFileName,
   updateFileName,
   fileUpload,
   delFile,
@@ -171,7 +204,7 @@ const data = reactive({
   form: {},
   queryParams: {
     pageNum: 1,
-    pageSize: 10,
+    pageSize: 50,
     fileName: undefined,
   },
   rules: {
@@ -240,13 +273,13 @@ function submitForm() {
   });
 }
 /** 上传按钮 */
-function uploadFile(file) {
+async function uploadFile(file) {
   const formData = new FormData();
   formData.append("file", file.file);
-  fileUpload(formData).then((response) => {
-    proxy.$modal.msgSuccess("上传成功");
-    getList();
-  });
+  await fileUpload(formData);
+  await addFileName(form.value);
+  proxy.$modal.msgSuccess("上传成功");
+  getList();
 }
 /** 删除按钮操作 */
 function handleDelete(row) {

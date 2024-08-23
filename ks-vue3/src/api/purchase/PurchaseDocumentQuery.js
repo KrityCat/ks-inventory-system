@@ -2,35 +2,35 @@ import request from '@/utils/request'
 import { parseStrEmpty } from "@/utils/ruoyi";
 
 // 查询采购头单列表
-export function listPurchaseOrder(query) {
+export function headQuery(query) {
   return request({
-    url: '/system/purchase/PurchaseOrderQuery',
+    url: '/purchase/purchaseReceiptQuery/headQuery',
     method: 'get',
     params: query
   })
 }
 
 // 查询采购明细列表
-export function listPurchaseDetailOrder(query) {
+export function detailQuery(query) {
   return request({
-    url: '/system/purchase/PurchaseDetailOrderQuery',
+    url: '/purchase/purchaseReceiptQuery/detailQuery',
     method: 'get',
     params: query
   })
 }
 
 // 查询采购头单详情
-export function getPurchaseOrder(systematicReceipt) {
+export function getPurchaseReceipt(systematicReceipt) {
   return request({
-    url: '/system/purchase/' + parseStrEmpty(systematicReceipt),
+    url: '/purchase/purchaseReceiptQuery/' + parseStrEmpty(systematicReceipt),
     method: 'get'
   })
 }
 
 // 删除采购单据
-export function delWarehouseReceipt(data) {
+export function delPurchaseReceipt(data) {
   return request({
-    url: '/system/purchase/delete',
+    url: '/purchase/purchaseReceiptQuery/delete',
     method: 'post',
     data: data
   })

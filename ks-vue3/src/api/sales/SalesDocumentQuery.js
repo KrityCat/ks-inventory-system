@@ -2,27 +2,27 @@ import request from '@/utils/request'
 import { parseStrEmpty } from "@/utils/ruoyi";
 
 // 查询销售头单列表
-export function listSalesOrder(query) {
+export function headQuery(query) {
   return request({
-    url: '/system/sales/SalesHeadQuery',
+    url: '/sales/salesReceiptQuery/headQuery',
     method: 'get',
     params: query
   })
 }
 
 // 查询销售明细列表
-export function listSalesDetailOrder(query) {
+export function detailQuery(query) {
   return request({
-    url: '/system/sales/SalesDetailQuery',
+    url: '/sales/salesReceiptQuery/detailQuery',
     method: 'get',
     params: query
   })
 }
 
 // 查询销售头单详情
-export function getSalesOrder(systematicReceipt) {
+export function getSalesReceipt(systematicReceipt) {
   return request({
-    url: '/system/sales/' + parseStrEmpty(systematicReceipt),
+    url: '/sales/salesReceiptQuery/' + parseStrEmpty(systematicReceipt),
     method: 'get'
   })
 }
@@ -30,7 +30,7 @@ export function getSalesOrder(systematicReceipt) {
 // 删除销售单据
 export function delSalesReceipt(data) {
   return request({
-    url: '/system/sales/delete',
+    url: '/sales/salesReceiptQuery/delete',
     method: 'post',
     data: data
   })

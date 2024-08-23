@@ -28,7 +28,7 @@ export function getCommodityType(commodityTypeId) {
 // 新增商品类型
 export function addCommodityType(data) {
   return request({
-    url: '/baseDate/commodityType',
+    url: '/baseDate/commodityType/add',
     method: 'post',
     data: data
   })
@@ -37,7 +37,7 @@ export function addCommodityType(data) {
 // 修改商品类型
 export function updateCommodityType(data) {
   return request({
-    url: '/baseDate/commodityType',
+    url: '/baseDate/commodityType/edit',
     method: 'put',
     data: data
   })

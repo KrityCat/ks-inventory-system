@@ -14,7 +14,7 @@
             <el-input
               v-model="queryParams.systematicReceipt"
               placeholder="请输入"
-              style="width: 200px"
+              class="form-item"
               clearable
             />
           </el-form-item>
@@ -22,13 +22,13 @@
             <el-input
               v-model="queryParams.originalReceipt"
               placeholder="请输入"
-              style="width: 200px"
+              class="form-item"
               clearable
             />
           </el-form-item>
           <el-form-item label="单据类型" prop="receiptType">
             <el-select
-              style="width: 200px"
+              class="form-item"
               v-model="queryParams.receiptType"
               placeholder="单据类型"
               filterable
@@ -48,7 +48,7 @@
               placeholder="单据状态"
               filterable
               clearable
-              style="width: 200px"
+              class="form-item"
             >
               <el-option
                 v-for="dict in receipt_status"
@@ -60,7 +60,7 @@
           </el-form-item>
           <el-form-item label="调入仓库" prop="warehousingIds">
             <el-select
-              style="width: 200px"
+              class="form-item"
               v-model="queryParams.warehousingIds"
               placeholder="请选择"
               filterable
@@ -76,7 +76,7 @@
           </el-form-item>
           <el-form-item label="调出仓库" prop="retrievalIds">
             <el-select
-              style="width: 200px"
+              class="form-item"
               v-model="queryParams.retrievalIds"
               placeholder="请选择"
               filterable
@@ -90,9 +90,13 @@
               ></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="经手人" prop="userIds">
+          <el-form-item
+            label="经手人"
+            prop="userIds"
+            v-hasPermi="['purchase:purchaseReceiptQuery:selectUser']"
+          >
             <el-select
-              style="width: 200px"
+              class="form-item"
               v-model="queryParams.userIds"
               placeholder="请选择"
               filterable
@@ -108,11 +112,14 @@
           </el-form-item>
           <el-form-item label="供应商" prop="supplierIds">
             <el-select
-              style="width: 200px"
+              class="form-item"
               v-model="queryParams.supplierIds"
               placeholder="请选择"
               filterable
               clearable
+              remote
+              :remote-method="remoteSupplier"
+              remote-show-suffix
             >
               <el-option
                 v-for="item in supplierOptions"
@@ -126,7 +133,7 @@
             <el-input
               v-model="queryParams.productCode"
               placeholder="请输入货品编号"
-              style="width: 200px"
+              class="form-item"
               clearable
             />
           </el-form-item>
@@ -134,7 +141,7 @@
             <el-input
               v-model="queryParams.productName"
               placeholder="请输入货品名称"
-              style="width: 200px"
+              class="form-item"
               clearable
             />
           </el-form-item>
@@ -152,29 +159,47 @@
             <el-button
               type="primary"
               icon="Search"
+              round
               @click="handleQuery"
-              v-hasPermi="['system:purchase:PurchaseOrderQuery']"
+              v-hasPermi="['purchase:purchaseReceiptQuery:headQuery']"
               >查询</el-button
             >
             <el-button
               type="success"
               icon="Search"
+              round
               @click="handleDetailQuery"
-              v-hasPermi="['system:purchase:PurchaseDetailOrderQuery']"
+              v-hasPermi="['purchase:purchaseReceiptQuery:detailQuery']"
               >明细查询</el-button
             >
-            <el-button icon="Refresh" @click="resetQuery">重置</el-button>
+            <el-button type="info" icon="Refresh" round @click="resetQuery"
+              >重置</el-button
+            >
           </el-form-item>
         </el-form>
         <el-row :gutter="10" class="mb8">
+          <el-col :span="1.5">
+            <el-tooltip class="box-item" content="新建采购单据" placement="top">
+              <el-button
+                type="success"
+                icon="plus"
+                plain
+                round
+                @click="add"
+                v-hasPermi="['purchase:purchaseReceiptQuery:add']"
+                >新建</el-button
+              >
+            </el-tooltip>
+          </el-col>
           <el-col :span="1.5">
             <el-button
               :disabled="purchaseDetail"
               type="warning"
               plain
+              round
               icon="Download"
               @click="handleExport"
-              v-hasPermi="['system:purchase:purchaseOrderExport']"
+              v-hasPermi="['purchase:purchaseReceiptQuery:headExport']"
               >导出</el-button
             >
           </el-col>
@@ -183,9 +208,10 @@
               :disabled="purchaseHead"
               type="danger"
               plain
+              round
               icon="Download"
               @click="handleDetailExport"
-              v-hasPermi="['system:purchase:purchaseDetailOrderExport']"
+              v-hasPermi="['purchase:purchaseReceiptQuery:detailExport']"
               >明细导出</el-button
             >
           </el-col>
@@ -213,7 +239,15 @@
             align="center"
             prop="systematicReceipt"
             width="180"
-          />
+          >
+            <template #default="scope">
+              <el-link type="primary">
+                <a target="_blank" @click="handleUpdate(scope.row)">{{
+                  scope.row.systematicReceipt
+                }}</a>
+              </el-link>
+            </template>
+          </el-table-column>
           <el-table-column
             label="原始单号"
             align="center"
@@ -272,7 +306,7 @@
             width="100"
           />
           <el-table-column
-            label="订单号"
+            label="计划订单"
             align="center"
             prop="planReceipt"
             width="150"
@@ -301,6 +335,24 @@
             prop="capitalizeTotalAmount"
             width="150"
             :show-overflow-tooltip="true"
+          />
+          <el-table-column
+            label="审核结果"
+            align="center"
+            prop="findingOfAudit"
+            width="100"
+            ><template #default="scope">
+              <dict-tag
+                :options="finding_of_audit"
+                :value="scope.row.findingOfAudit"
+              />
+            </template>
+          </el-table-column>
+          <el-table-column
+            label="审核意见"
+            align="center"
+            prop="reviewComments"
+            width="100"
           />
           <el-table-column
             label="创建者"
@@ -342,31 +394,31 @@
             class-name="small-padding fixed-width"
           >
             <template #default="scope">
-              <el-tooltip content="打印" placement="top">
-                <el-button
-                  link
-                  type="primary"
-                  icon="Printer"
-                  @click="printOut(scope.row)"
-                  v-hasPermi="['system:purchase:printOut']"
-                ></el-button>
-              </el-tooltip>
-              <el-tooltip content="修改" placement="top">
+              <el-tooltip content="修改单据" placement="top">
                 <el-button
                   link
                   type="primary"
                   icon="Edit"
                   @click="handleUpdate(scope.row)"
-                  v-hasPermi="['system:purchase:update']"
+                  v-hasPermi="['purchase:purchaseReceiptQuery:update']"
                 ></el-button>
               </el-tooltip>
-              <el-tooltip content="删除" placement="top">
+              <el-tooltip content="打印单据" placement="top">
+                <el-button
+                  link
+                  type="primary"
+                  icon="Printer"
+                  @click="printOut(scope.row)"
+                  v-hasPermi="['purchase:purchaseReceiptQuery:printOut']"
+                ></el-button>
+              </el-tooltip>
+              <el-tooltip content="删除单据" placement="top">
                 <el-button
                   link
                   type="primary"
                   icon="Delete"
                   @click="handleDelete(scope.row)"
-                  v-hasPermi="['system:purchase:delete']"
+                  v-hasPermi="['purchase:purchaseReceiptQuery:delete']"
                 ></el-button>
               </el-tooltip>
             </template>
@@ -419,13 +471,9 @@
           <el-table-column
             label="规格"
             align="center"
-            prop="product.productSpecifications"
+            prop="productSpecifications"
           />
-          <el-table-column
-            label="单位"
-            align="center"
-            prop="product.measureUnit"
-          />
+          <el-table-column label="单位" align="center" prop="measureUnit" />
           <el-table-column
             label="产地"
             align="center"
@@ -455,76 +503,28 @@
       </el-col>
     </el-row>
   </div>
-
-  <!-- 打印对话框 -->
-  <el-dialog :title="title" v-model="open" width="900px" append-to-body>
-    <el-form :model="form" :rules="rules" ref="printRef" label-width="80px">
-      <el-row>
-        <el-col :span="8">
-          <el-form-item label="打印文件" prop="printId">
-            <el-select
-              style="width: 200px"
-              v-model="form.printId"
-              placeholder="请选择"
-              filterable
-              clearable
-            >
-              <el-option
-                v-for="item in printOptions"
-                :key="item.id"
-                :label="item.name"
-                :value="item.id"
-              ></el-option>
-            </el-select>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="系统编号" prop="systematicReceipt">
-            <el-input
-              style="width: 200px"
-              v-model="form.systematicReceipt"
-              maxlength="30"
-              disabled="isDisabled"
-            />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="原始单号" prop="originalReceipt">
-            <el-input
-              v-model="form.originalReceipt"
-              clearable
-              disabled="isDisabled"
-            />
-          </el-form-item>
-        </el-col>
-      </el-row>
-    </el-form>
-    <template #footer>
-      <div class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="cancel">取 消</el-button>
-      </div>
-    </template>
-  </el-dialog>
 </template>
 
-<script setup name="PurchaseDocumentQuery">
+<script setup name="purchaseDocumentQuery">
+import { getToken } from "@/utils/auth";
 import { useRouter } from "vue-router";
 import { listWarehouse } from "@/api/basedate/warehouse";
-import { listUser } from "@/api/system/user";
+import { listUser, getUserProfile } from "@/api/system/user";
 import { listSupplier } from "@/api/basedate/supplier";
-import { listJiMuReport } from "@/api/system/jiMuReport";
-import { listMenu } from "@/api/system/menu";
 import {
-  listPurchaseOrder,
-  listPurchaseDetailOrder,
-  getPurchaseOrder,
-  delWarehouseReceipt,
-} from "@/api/purchase/PurchaseDocumentQuery";
+  headQuery,
+  detailQuery,
+  getPurchaseReceipt,
+  delPurchaseReceipt,
+} from "@/api/purchase/purchaseDocumentQuery";
+import { viewUrl } from "@/api/jimu/jiMuReport";
 
 const { proxy } = getCurrentInstance();
 const { receipt_type } = proxy.useDict("receipt_type");
 const { receipt_status } = proxy.useDict("receipt_status");
+const { finding_of_audit } = proxy.useDict("finding_of_audit");
+const { print_selected_files } = proxy.useDict("print_selected_files");
+const { print_selected_sizes } = proxy.useDict("print_selected_sizes");
 
 // 查询结果表
 const purchaseOrderList = ref([]);
@@ -533,6 +533,7 @@ const userOptions = ref(undefined);
 const supplierOptions = ref(undefined);
 const warehouseOptions = ref(undefined);
 const printOptions = ref(undefined);
+const openUrl = ref("");
 // 查询表展示
 const purchaseHead = ref(true);
 // 查询明细表展示
@@ -552,22 +553,25 @@ const router = useRouter();
 
 const data = reactive({
   option: {
-    pageSize: 1000,
-  },
-  menuOption: {
-    menuName: "打印调用IP",
+    warehouseName: undefined,
+    supplierName: undefined,
+    customerName: undefined,
+    productCode: undefined,
+    productName: undefined,
+    pageSize: 50,
   },
   form: {
     printId: undefined,
-    path: undefined,
+    printSize: undefined,
     systematicReceipt: undefined,
     originalReceipt: undefined,
   },
   queryParams: {
     pageNum: 1,
-    pageSize: 10,
+    pageSize: 50,
     systematicReceipt: undefined,
     originalReceipt: undefined,
+    receiptCategory: 1,
     receiptType: undefined,
     receiptStatus: undefined,
     warehousingIds: undefined,
@@ -577,45 +581,49 @@ const data = reactive({
     productCode: undefined,
     productName: undefined,
   },
-  rules: {
-    printId: [{ required: true, message: "打印文件不能为空", trigger: "blur" }],
-  },
+  rules: {},
 });
 
-const { queryParams, form, option, menuOption, rules } = toRefs(data);
+const { queryParams, form, option, rules } = toRefs(data);
 
-function Options() {
+async function Options() {
+  loading.value = true;
   listWarehouse(option.value).then((response) => {
     warehouseOptions.value = response.rows;
   });
   listSupplier(option.value).then((response) => {
     supplierOptions.value = response.rows;
   });
-  listUser(option.value).then((response) => {
+  await listUser(option.value).then((response) => {
     userOptions.value = response.rows;
   });
+  await getUserProfile().then((response) => {
+    queryParams.value.userIds = response.data.userId;
+  });
+  getList();
+  loading.value = false;
 }
 /** 查询采购头单列表 */
 function getList() {
   loading.value = true;
-  listPurchaseOrder(
-    proxy.addDateRange(queryParams.value, dateRange.value)
-  ).then((response) => {
-    purchaseOrderList.value = response.rows;
-    total.value = response.total;
-    loading.value = false;
-  });
+  headQuery(proxy.addDateRange(queryParams.value, dateRange.value)).then(
+    (response) => {
+      purchaseOrderList.value = response.rows;
+      total.value = response.total;
+      loading.value = false;
+    }
+  );
 }
 /** 查询采购明细单列表 */
 function getDetailList() {
   loading.value = true;
-  listPurchaseDetailOrder(
-    proxy.addDateRange(queryParams.value, dateRange.value)
-  ).then((response) => {
-    purchaseDetailOrderList.value = response.rows;
-    total.value = response.total;
-    loading.value = false;
-  });
+  detailQuery(proxy.addDateRange(queryParams.value, dateRange.value)).then(
+    (response) => {
+      purchaseDetailOrderList.value = response.rows;
+      total.value = response.total;
+      loading.value = false;
+    }
+  );
 }
 /** 查询按钮操作 */
 function handleQuery() {
@@ -637,80 +645,61 @@ function resetQuery() {
   proxy.resetForm("queryRef");
   handleQuery();
 }
+/** 新增按钮 */
+function add() {
+  router.push({ path: "/purchase/purchaseDocumentProcessing" });
+}
 /** 重置操作表单 */
 function reset() {
   form.value = {
     printId: undefined,
-    path: undefined,
     systematicReceipt: undefined,
     originalReceipt: undefined,
   };
   proxy.resetForm("printRef");
 }
 /** 打印按钮 */
-function printOut(row) {
-  reset();
-  listJiMuReport(option.value).then((response) => {
-    printOptions.value = response.rows;
+async function printOut(row) {
+  form.value.printId = print_selected_files.value[1].label;
+  form.value.printSize = print_selected_sizes.value[1].label;
+  await viewUrl().then((res) => {
+    openUrl.value = res;
   });
-  listMenu(menuOption.value).then((response) => {
-    console.log(response.data[0].path);
-    form.value.path = response.data[0].path;
-  });
-  form.value.systematicReceipt = row.systematicReceipt;
-  form.value.originalReceipt = row.originalReceipt;
-  open.value = true;
-  title.value = "打印文件选择";
-}
-/** 确认按钮 */
-function submitForm() {
-  proxy.$refs["printRef"].validate((valid) => {
-    if (valid) {
-      const printUrl =
-        form.value.path +
-        "/jmreport/view/" +
-        form.value.printId +
-        "?systematicReceipt=" +
-        form.value.systematicReceipt;
-      window.open(printUrl, "_blank");
-      open.value = false;
-    }
-  });
-}
-/** 取消按钮 */
-function cancel() {
-  open.value = false;
-  reset();
+  const printUrl =
+    openUrl.value +
+    "/" +
+    form.value.printId +
+    "?token=Bearer " +
+    getToken() +
+    "&systematicReceipt=" +
+    row.systematicReceipt +
+    "&pageSize=" +
+    form.value.printSize;
+  window.open(printUrl, "_blank");
 }
 /** 修改按钮操作 */
 function handleUpdate(row) {
   const systematicReceipt = row.systematicReceipt;
-  const receiptType = row.receiptType;
-  if (receiptType == 1) {
-    router.push({
-      path: "/purchase/warehouseReceipt",
-      query: { systematicReceipt },
-    });
-  } else if (receiptType == 2) {
-    router.push({
-      path: "/purchase/retreatWarehouse",
-      query: { systematicReceipt },
-    });
-  }
+  router.push({
+    path: "/purchase/purchaseDocumentProcessing",
+    query: { systematicReceipt },
+  });
 }
 /** 删除按钮操作 */
 function handleDelete(row) {
   const systematicReceipt = row.systematicReceipt;
-  getPurchaseOrder(systematicReceipt).then((response) => {
-    const details = response.data.detail;
+  getPurchaseReceipt(systematicReceipt).then((response) => {
+    const details = response.data.details;
     proxy.$modal
       .confirm("确认要删除系统编号为" + systematicReceipt + "的采购单据?")
       .then(function () {
-        return delWarehouseReceipt(details);
+        return delPurchaseReceipt(details);
       })
       .then(() => {
         getList();
-        proxy.$modal.msgSuccess("删除成功");
+        proxy.$modal.msgSuccess(
+          "已删除系统编号为" + systematicReceipt + "的采购单据。"
+        );
       })
       .catch(() => {});
   });
@@ -718,23 +707,61 @@ function handleDelete(row) {
 /** 导出按钮操作 */
 function handleExport() {
   proxy.download(
-    "system/purchase/purchaseOrderExport",
+    "purchase/purchaseReceiptQuery/headExport",
     {
       ...queryParams.value,
     },
     `采购单据表_${new Date().getTime()}.xlsx`
   );
+  proxy.$modal.msgSuccess("浏览器正在下载，请稍等！");
 }
 /** 明细导出按钮操作 */
 function handleDetailExport() {
   proxy.download(
-    "system/purchase/purchaseDetailOrderExport",
+    "purchase/purchaseReceiptQuery/detailExport",
     {
       ...queryParams.value,
     },
     `采购单据明细表_${new Date().getTime()}.xlsx`
   );
+  proxy.$modal.msgSuccess("浏览器正在下载，请稍等！");
 }
-getList();
+/** 重置下拉框表单 */
+function optionReset() {
+  option.value = {
+    warehouseName: undefined,
+    supplierName: undefined,
+    customerName: undefined,
+    productCode: undefined,
+    productName: undefined,
+    pageSize: 50,
+  };
+}
+// 查询供应商名称
+function remoteSupplier(query) {
+  optionReset();
+  if (query) {
+    setTimeout(() => {
+      option.value.supplierName = query;
+      listSupplier(option.value).then((response) => {
+        supplierOptions.value = response.rows;
+      });
+      supplierOptions.value = list.value.filter((item) => {
+        return item.label.toLowerCase().includes(query.toLowerCase());
+      });
+    }, 200);
+  } else {
+    listSupplier(option.value).then((response) => {
+      supplierOptions.value = response.rows;
+    });
+  }
+}
+
 Options();
 </script>
+
+<style scoped>
+.form-item {
+  width: 200px;
+}
+</style>

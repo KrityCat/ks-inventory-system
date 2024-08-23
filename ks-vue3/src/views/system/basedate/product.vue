@@ -140,7 +140,7 @@
               icon="Edit"
               :disabled="single"
               @click="handleUpdate"
-              v-hasPermi="['baseDate:product:edit']"
+              v-hasPermi="['baseDate:product:update']"
               >修改</el-button
             >
           </el-col>
@@ -201,6 +201,7 @@
             align="center"
             key="productName"
             prop="productName"
+            width="250"
             v-if="columns[1].visible"
           />
           <el-table-column
@@ -208,6 +209,7 @@
             align="center"
             key="productTypeName"
             prop="type.productTypeName"
+            width="100"
             v-if="columns[2].visible"
           />
           <el-table-column
@@ -241,9 +243,16 @@
           <el-table-column
             label="参考售价"
             align="center"
-            key="price"
-            prop="price"
+            key="univalence"
+            prop="univalence"
             v-if="columns[7].visible"
+          />
+          <el-table-column
+            label="销售折扣"
+            align="center"
+            key="discount"
+            prop="discount"
+            v-if="columns[18].visible"
           />
           <el-table-column
             label="货品条码"
@@ -251,6 +260,12 @@
             key="productBarcode"
             prop="productBarcode"
             v-if="columns[8].visible"
+          />
+          <el-table-column
+            label="库存数量"
+            align="center"
+            key="inventoryQty"
+            prop="inventoryQty"
           />
           <el-table-column
             label="库存上限"
@@ -340,7 +355,7 @@
                   type="primary"
                   icon="Edit"
                   @click="handleUpdate(scope.row)"
-                  v-hasPermi="['baseDate:product:edit']"
+                  v-hasPermi="['baseDate:product:update']"
                 ></el-button>
               </el-tooltip>
               <el-tooltip content="删除" placement="top">
@@ -395,6 +410,7 @@
                 v-model="form.productType"
                 :data="typeOptions"
                 :props="{ value: 'id', label: 'label', children: 'children' }"
+                node-key="id"
                 value-key="id"
                 placeholder="请选择货品类型"
                 check-strictly
@@ -453,11 +469,31 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="参考售价" prop="price">
+            <el-form-item label="参考售价" prop="univalence">
               <el-input
-                v-model="form.price"
+                v-model="form.univalence"
                 placeholder="请输入参考售价"
                 maxlength="30"
+              />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="销售折扣" prop="discount">
+              <el-input
+                v-model="form.discount"
+                placeholder="请输入销售折扣"
+                maxlength="30"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="库存数量" prop="costPrice">
+              <el-input
+                v-model="form.inventoryQty"
+                placeholder="系统自动计算"
+                disabled
               />
             </el-form-item>
           </el-col>
@@ -625,6 +661,7 @@ const columns = ref([
   { key: 5, label: `产地`, visible: true },
   { key: 6, label: `成本价`, visible: true },
   { key: 7, label: `参考售价`, visible: true },
+  { key: 18, label: `销售折扣`, visible: true },
   { key: 8, label: `货品条码`, visible: true },
   { key: 9, label: `库存上限`, visible: true },
   { key: 10, label: `库存下限`, visible: true },
@@ -641,7 +678,7 @@ const data = reactive({
   form: {},
   queryParams: {
     pageNum: 1,
-    pageSize: 10,
+    pageSize: 50,
     productId: undefined,
     productCode: undefined,
     productName: undefined,
@@ -650,7 +687,7 @@ const data = reactive({
     measureUnit: undefined,
     producer: undefined,
     costPrice: undefined,
-    price: undefined,
+    univalence: undefined,
     productBarcode: undefined,
     upperLimit: undefined,
     lowerLimit: undefined,
@@ -717,7 +754,7 @@ function handleQuery() {
 function resetQuery() {
   dateRange.value = [];
   proxy.resetForm("queryRef");
-  queryParams.value.productId = undefined;
+  queryParams.value.productType = undefined;
   proxy.$refs.typeTreeRef.setCurrentKey(null);
   handleQuery();
 }
@@ -798,7 +835,7 @@ function reset() {
     phonenumber: undefined,
     producer: undefined,
     costPrice: undefined,
-    price: undefined,
+    univalence: undefined,
     productBarcode: undefined,
     upperLimit: undefined,
     lowerLimit: undefined,
@@ -815,20 +852,21 @@ function cancel() {
 }
 /** 新增按钮操作 */
 function handleAdd() {
-  getProductTypeTree();
   reset();
+  getProductTypeTree();
   open.value = true;
   title.value = "添加货品";
 }
 /** 修改按钮操作 */
 function handleUpdate(row) {
-  getProductTypeTree();
   reset();
+  getProductTypeTree();
   const productId = row.productId || ids.value;
   getProduct(productId).then((response) => {
     form.value = response.data;
     open.value = true;
     title.value = "修改货品";
+    form.value.productType = Number(response.data.productType);
   });
 }
 /** 提交按钮 */
