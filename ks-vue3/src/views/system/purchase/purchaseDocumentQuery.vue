@@ -249,12 +249,6 @@
             </template>
           </el-table-column>
           <el-table-column
-            label="原始单号"
-            align="center"
-            prop="originalReceipt"
-            width="180"
-          />
-          <el-table-column
             label="单据类型"
             align="center"
             prop="receiptType"
@@ -306,11 +300,11 @@
             width="100"
           />
           <el-table-column
-            label="计划订单"
+            label="原始单号"
             align="center"
-            prop="planReceipt"
-            width="150"
+            prop="originalReceipt"
           />
+          <el-table-column label="计划订单" align="center" prop="planReceipt" />
           <el-table-column
             label="备注"
             align="center"
@@ -408,7 +402,7 @@
                   link
                   type="primary"
                   icon="Printer"
-                  @click="printOut(scope.row)"
+                  @click="printCommon(scope.row)"
                   v-hasPermi="['purchase:purchaseReceiptQuery:printOut']"
                 ></el-button>
               </el-tooltip>
@@ -480,6 +474,7 @@
             prop="product.producer"
           />
           <el-table-column label="数量" align="center" prop="planQuantity" />
+          <el-table-column label="锁单数量" align="center" prop="lockInventoryQty" />
           <el-table-column label="单价" align="center" prop="univalence" />
           <el-table-column label="折扣" align="center" prop="discount" />
           <el-table-column label="金额" align="center" prop="money" />
@@ -503,28 +498,36 @@
       </el-col>
     </el-row>
   </div>
+
+  <!-- 查看打印模板对话框 -->
+  <print-template-dialog
+      v-model:visible="openPrintTemplate"
+      :systematic-receipt="systematicReceipt"
+  />
+
 </template>
 
-<script setup name="purchaseDocumentQuery">
-import { getToken } from "@/utils/auth";
+<script setup name="PurchaseDocumentQuery">
 import { useRouter } from "vue-router";
-import { listWarehouse } from "@/api/basedate/warehouse";
-import { listUser, getUserProfile } from "@/api/system/user";
-import { listSupplier } from "@/api/basedate/supplier";
+import { getUserProfile } from "@/api/system/user";
 import {
   headQuery,
   detailQuery,
   getPurchaseReceipt,
   delPurchaseReceipt,
 } from "@/api/purchase/purchaseDocumentQuery";
-import { viewUrl } from "@/api/jimu/jiMuReport";
+import {
+  userList,
+  warehouseList,
+  supplierList,
+} from "@/api/common/CommonReceipt";
+import { getStorageReceipt } from "@/utils/printDocuments/storageReceipt";
+import printTemplateDialog from '@/components/CommonDialog/printTemplateDialog.vue';
 
 const { proxy } = getCurrentInstance();
 const { receipt_type } = proxy.useDict("receipt_type");
 const { receipt_status } = proxy.useDict("receipt_status");
 const { finding_of_audit } = proxy.useDict("finding_of_audit");
-const { print_selected_files } = proxy.useDict("print_selected_files");
-const { print_selected_sizes } = proxy.useDict("print_selected_sizes");
 
 // 查询结果表
 const purchaseOrderList = ref([]);
@@ -550,6 +553,8 @@ const open = ref(false);
 // 数据范围
 const dateRange = ref([]);
 const router = useRouter();
+const openPrintTemplate = ref(false);
+const systematicReceipt = ref(null);
 
 const data = reactive({
   option: {
@@ -587,21 +592,33 @@ const data = reactive({
 const { queryParams, form, option, rules } = toRefs(data);
 
 async function Options() {
-  loading.value = true;
-  listWarehouse(option.value).then((response) => {
-    warehouseOptions.value = response.rows;
-  });
-  listSupplier(option.value).then((response) => {
-    supplierOptions.value = response.rows;
-  });
-  await listUser(option.value).then((response) => {
-    userOptions.value = response.rows;
-  });
-  await getUserProfile().then((response) => {
-    queryParams.value.userIds = response.data.userId;
-  });
-  getList();
-  loading.value = false;
+  loading.value = true; // 开始加载
+
+  try {
+    // 使用 Promise.all 并行执行无依赖关系的异步请求
+    const [warehouseResp, supplierResp, userResp] =
+      await Promise.all([
+        warehouseList(option.value),
+        supplierList(option.value),
+        userList(option.value),
+      ]);
+
+    // 同步更新响应式数据
+    warehouseOptions.value = warehouseResp.rows;
+    supplierOptions.value = supplierResp.rows;
+    userOptions.value = userResp.rows;
+
+    // 顺序执行有依赖关系的请求
+    const profileResp = await getUserProfile();
+    queryParams.value.userIds = profileResp.data.userId;
+
+    // 确保所有数据就绪后再获取列表
+    getList();
+  } catch (error) {
+    console.error("数据加载失败:", error);
+  } finally {
+    loading.value = false; // 无论成功失败都关闭加载状态
+  }
 }
 /** 查询采购头单列表 */
 function getList() {
@@ -658,25 +675,13 @@ function reset() {
   };
   proxy.resetForm("printRef");
 }
-/** 打印按钮 */
-async function printOut(row) {
-  form.value.printId = print_selected_files.value[1].label;
-  form.value.printSize = print_selected_sizes.value[1].label;
-  await viewUrl().then((res) => {
-    openUrl.value = res;
-  });
-  const printUrl =
-    openUrl.value +
-    "/" +
-    form.value.printId +
-    "?token=Bearer " +
-    getToken() +
-    "&systematicReceipt=" +
-    row.systematicReceipt +
-    "&pageSize=" +
-    form.value.printSize;
-  window.open(printUrl, "_blank");
+
+// 打印按钮
+function printCommon(row) {
+  systematicReceipt.value = row.systematicReceipt;
+  openPrintTemplate.value = true;
 }
+
 /** 修改按钮操作 */
 function handleUpdate(row) {
   const systematicReceipt = row.systematicReceipt;
@@ -689,11 +694,10 @@ function handleUpdate(row) {
 function handleDelete(row) {
   const systematicReceipt = row.systematicReceipt;
   getPurchaseReceipt(systematicReceipt).then((response) => {
-    const details = response.data.details;
     proxy.$modal
       .confirm("确认要删除系统编号为" + systematicReceipt + "的采购单据?")
       .then(function () {
-        return delPurchaseReceipt(details);
+        return delPurchaseReceipt(response.data);
       })
       .then(() => {
         getList();
@@ -743,7 +747,7 @@ function remoteSupplier(query) {
   if (query) {
     setTimeout(() => {
       option.value.supplierName = query;
-      listSupplier(option.value).then((response) => {
+      supplierList(option.value).then((response) => {
         supplierOptions.value = response.rows;
       });
       supplierOptions.value = list.value.filter((item) => {
@@ -751,7 +755,7 @@ function remoteSupplier(query) {
       });
     }, 200);
   } else {
-    listSupplier(option.value).then((response) => {
+    supplierList(option.value).then((response) => {
       supplierOptions.value = response.rows;
     });
   }

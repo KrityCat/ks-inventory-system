@@ -73,17 +73,36 @@ public class DetailReceipt extends BaseEntity {
     })
     private ProductType type;
 
+    @Excel(name = "调入仓库", targetAttr = "warehousingName", type = Excel.Type.EXPORT)
+    private Warehouse warehousing;
+
+    @Excel(name = "调出仓库", targetAttr = "retrievalName", type = Excel.Type.EXPORT)
+    private Warehouse retrieval;
+
     private HeadReceipt headReceipt;
 
     private Supplier supplier;
 
     private Customer customer;
 
+    @Excel(name = "是否锁单")
+    private Long lockedGoods;
+
+    private String lockQty;
+
     @Excel(name = "当前库存量")
     private String currentInventory;
 
     @Excel(name = "实际库存量")
     private String actualInventory;
+
+    /**
+     * 锁单数量
+     */
+    @Excel(name = "锁单数量")
+    private String lockInventoryQty;
+
+    private String inventoryQty;
 
     @Excel(name = "数量")
     private String planQuantity;
@@ -164,56 +183,6 @@ public class DetailReceipt extends BaseEntity {
     private String productName;
 
     /**
-     * 期初结存数量
-     */
-    private String OBPlanQuantity;
-
-    /**
-     * 期初结存单价
-     */
-    private String OBUnivalence;
-
-    /**
-     * 期初结存金额
-     */
-    private Double OBMoney;
-
-    /**
-     * 本期入库数量
-     */
-    private String EIPlanQuantity;
-
-    /**
-     * 本期入库金额
-     */
-    private Double EIMoney;
-
-    /**
-     * 本期出库数量
-     */
-    private String ERPlanQuantity;
-
-    /**
-     * 本期出库金额
-     */
-    private Double ERMoney;
-
-    /**
-     * 期末结存数量
-     */
-    private String CBPlanQuantity;
-
-    /**
-     * 期末结存单价
-     */
-    private String CBUnivalence;
-
-    /**
-     * 期末结存金额
-     */
-    private Double CBMoney;
-
-    /**
      * 货品类型
      */
     private String productType;
@@ -238,10 +207,9 @@ public class DetailReceipt extends BaseEntity {
      */
     private String producer;
 
-    /**
-     * 库存数量
-     */
-    private String inventoryQty;
+    private SysUser sysUser;
+
+    private String assembleLockQty;
 
     public String getSystematicReceipt() {
         return systematicReceipt;
@@ -313,6 +281,30 @@ public class DetailReceipt extends BaseEntity {
 
     public void setCustomerId(String customerId) {
         this.customerId = customerId;
+    }
+
+    public Long getLockedGoods() {
+        return lockedGoods;
+    }
+
+    public void setLockedGoods(Long lockedGoods) {
+        this.lockedGoods = lockedGoods;
+    }
+
+    public String getLockInventoryQty() {
+        return lockInventoryQty;
+    }
+
+    public void setLockInventoryQty(String lockInventoryQty) {
+        this.lockInventoryQty = lockInventoryQty;
+    }
+
+    public String getLockQty() {
+        return lockQty;
+    }
+
+    public void setLockQty(String lockQty) {
+        this.lockQty = lockQty;
     }
 
     public String getCurrentInventory() {
@@ -507,86 +499,6 @@ public class DetailReceipt extends BaseEntity {
         this.customer = customer;
     }
 
-    public String getOBPlanQuantity() {
-        return OBPlanQuantity;
-    }
-
-    public void setOBPlanQuantity(String obPlanQuantity) {
-        this.OBPlanQuantity = obPlanQuantity;
-    }
-
-    public String getOBUnivalence() {
-        return OBUnivalence;
-    }
-
-    public void setOBUnivalence(String OBUnivalence) {
-        this.OBUnivalence = OBUnivalence;
-    }
-
-    public Double getOBMoney() {
-        return OBMoney;
-    }
-
-    public void setOBMoney(Double obMoney) {
-        this.OBMoney = obMoney;
-    }
-
-    public String getEIPlanQuantity() {
-        return EIPlanQuantity;
-    }
-
-    public void setEIPlanQuantity(String eiPlanQuantity) {
-        this.EIPlanQuantity = eiPlanQuantity;
-    }
-
-    public Double getEIMoney() {
-        return EIMoney;
-    }
-
-    public void setEIMoney(Double eiMoney) {
-        this.EIMoney = eiMoney;
-    }
-
-    public String getERPlanQuantity() {
-        return ERPlanQuantity;
-    }
-
-    public void setERPlanQuantity(String erPlanQuantity) {
-        this.ERPlanQuantity = erPlanQuantity;
-    }
-
-    public Double getERMoney() {
-        return ERMoney;
-    }
-
-    public void setERMoney(Double erMoney) {
-        this.ERMoney = erMoney;
-    }
-
-    public String getCBPlanQuantity() {
-        return CBPlanQuantity;
-    }
-
-    public void setCBPlanQuantity(String cbPlanQuantity) {
-        this.CBPlanQuantity = cbPlanQuantity;
-    }
-
-    public String getCBUnivalence() {
-        return CBUnivalence;
-    }
-
-    public void setCBUnivalence(String CBUnivalence) {
-        this.CBUnivalence = CBUnivalence;
-    }
-
-    public Double getCBMoney() {
-        return CBMoney;
-    }
-
-    public void setCBMoney(Double cbMoney) {
-        this.CBMoney = cbMoney;
-    }
-
     public String getProductType() {
         return productType;
     }
@@ -635,6 +547,38 @@ public class DetailReceipt extends BaseEntity {
         this.inventoryQty = inventoryQty;
     }
 
+    public String getAssembleLockQty() {
+        return assembleLockQty;
+    }
+
+    public void setAssembleLockQty(String assembleLockQty) {
+        this.assembleLockQty = assembleLockQty;
+    }
+
+    public Warehouse getWarehousing() {
+        return warehousing;
+    }
+
+    public void setWarehousing(Warehouse warehousing) {
+        this.warehousing = warehousing;
+    }
+
+    public Warehouse getRetrieval() {
+        return retrieval;
+    }
+
+    public void setRetrieval(Warehouse retrieval) {
+        this.retrieval = retrieval;
+    }
+
+    public SysUser getSysUser() {
+        return sysUser;
+    }
+
+    public void setSysUser(SysUser sysUser) {
+        this.sysUser = sysUser;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
@@ -647,6 +591,10 @@ public class DetailReceipt extends BaseEntity {
                 .append("warehouseId", getWarehouseId())
                 .append("supplierId", getSupplierId())
                 .append("customerId", getCustomerId())
+                .append("lockedGoods", getLockedGoods())
+                .append("lockInventoryQty", getLockInventoryQty())
+                .append("lockQty", getLockInventoryQty())
+                .append("assembleLockQty", getAssembleLockQty())
                 .append("currentInventory", getCurrentInventory())
                 .append("actualInventory", getActualInventory())
                 .append("planQuantity", getPlanQuantity())
@@ -671,22 +619,15 @@ public class DetailReceipt extends BaseEntity {
                 .append("headReceipt", getHeadReceipt())
                 .append("supplier", getSupplier())
                 .append("customer", getCustomer())
-                .append("OBPlanQuantity", getOBPlanQuantity())
-                .append("OBUnivalence", getOBUnivalence())
-                .append("OBMoney", getOBMoney())
-                .append("EIPlanQuantity", getEIPlanQuantity())
-                .append("EIMoney", getEIMoney())
-                .append("ERPlanQuantity", getERPlanQuantity())
-                .append("ERMoney", getERMoney())
-                .append("CBPlanQuantity", getCBPlanQuantity())
-                .append("CBUnivalence", getCBUnivalence())
-                .append("CBMoney", getCBMoney())
+                .append("warehousing", getWarehousing())
+                .append("retrieval", getRetrieval())
                 .append("productType", getProductType())
                 .append("productTypeName", getProductTypeName())
                 .append("productSpecifications", getProductSpecifications())
                 .append("measureUnit", getMeasureUnit())
                 .append("producer", getProducer())
                 .append("inventoryQty", getInventoryQty())
+                .append("sysUser", getSysUser())
                 .append("createBy", getCreateBy())
                 .append("createTime", getCreateTime())
                 .append("updateBy", getUpdateBy())

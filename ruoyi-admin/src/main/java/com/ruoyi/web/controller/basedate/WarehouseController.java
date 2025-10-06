@@ -8,14 +8,14 @@ import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.poi.ExcelUtil;
-import com.ruoyi.system.service.WarehouseService;
+import com.ruoyi.inventory.service.WarehouseService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -28,7 +28,7 @@ import java.util.List;
 public class WarehouseController extends BaseController {
 
     @Autowired
-    private WarehouseService WhService;
+    private WarehouseService warehouseService;
 
     /**
      * 查询接口
@@ -37,7 +37,7 @@ public class WarehouseController extends BaseController {
     @GetMapping("/list")
     public TableDataInfo list(Warehouse bo) {
         startPage();
-        List<Warehouse> list = WhService.WarehouseQuery(bo);
+        List<Warehouse> list = warehouseService.WarehouseQuery(bo);
         return getDataTable(list);
     }
 
@@ -49,7 +49,7 @@ public class WarehouseController extends BaseController {
     public AjaxResult getInfo(@PathVariable(value = "warehouseId", required = false) Long warehouseId) {
         AjaxResult ajax = AjaxResult.success();
         if (StringUtils.isNotNull(warehouseId)) {
-            Warehouse warehouse = WhService.selectWarehouseById(warehouseId);
+            Warehouse warehouse = warehouseService.selectWarehouseById(warehouseId);
             ajax.put(AjaxResult.DATA_TAG, warehouse);
         }
         return ajax;
@@ -63,7 +63,7 @@ public class WarehouseController extends BaseController {
     @PostMapping("/add")
     public AjaxResult add(@Validated @RequestBody Warehouse bo) {
         bo.setCreateBy(getUsername());
-        return toAjax(WhService.insertWarehouse(bo));
+        return toAjax(warehouseService.insertWarehouse(bo));
     }
 
     /**
@@ -74,7 +74,7 @@ public class WarehouseController extends BaseController {
     @PutMapping("/update")
     public AjaxResult edit(@Validated @RequestBody Warehouse bo) {
         bo.setUpdateBy(getUsername());
-        return toAjax(WhService.updateWarehouse(bo));
+        return toAjax(warehouseService.updateWarehouse(bo));
     }
 
     /**
@@ -84,7 +84,7 @@ public class WarehouseController extends BaseController {
     @Log(title = "删除仓库资料", businessType = BusinessType.INSERT)
     @DeleteMapping("/{warehouseIds}")
     public AjaxResult remove(@PathVariable Long[] warehouseIds) {
-        return toAjax(WhService.deleteWarehouseByIds(warehouseIds));
+        return toAjax(warehouseService.deleteWarehouseByIds(warehouseIds));
     }
 
     /**
@@ -106,7 +106,7 @@ public class WarehouseController extends BaseController {
         ExcelUtil<Warehouse> util = new ExcelUtil<Warehouse>(Warehouse.class);
         List<Warehouse> warehousesList = util.importExcel(file.getInputStream());
         String operName = getUsername();
-        String message = WhService.importWarehouse(warehousesList, updateSupport, operName);
+        String message = warehouseService.importWarehouse(warehousesList, updateSupport, operName);
         return success(message);
     }
 
@@ -117,7 +117,7 @@ public class WarehouseController extends BaseController {
     @Log(title = "导出仓库资料", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, Warehouse bo) {
-        List<Warehouse> list = WhService.WarehouseQuery(bo);
+        List<Warehouse> list = warehouseService.WarehouseQuery(bo);
         ExcelUtil<Warehouse> util = new ExcelUtil<Warehouse>(Warehouse.class);
         util.exportExcel(response, list, "仓库数据");
     }

@@ -21,7 +21,7 @@ pipeline{
         stage('2.编译'){
             agent {
                 docker {
-                    image 'maven:3-alpine'
+                    image 'maven:latest'
                     args '-v maven-repository:/root/.m2'
                 }
 
@@ -30,7 +30,7 @@ pipeline{
                 sh 'pwd && ls -alh'
                 sh 'mvn -v'
                 sh 'cd ${WS} && mvn clean package -s "/var/jenkins_home/appconfig/maven/settings.xml" -Dmaven.test.skip=true'
-                // sh 'mvn -B -DskipTests clean package'
+                sh 'mvn -B -DskipTests clean package'
             }
         }
 
@@ -47,15 +47,8 @@ pipeline{
             steps {
                sh 'pwd && ls -alh'
                sh 'docker rm -f ${IMAGE_NAME} || true && docker rmi $(docker images -q -f dangling=true) || true'
-               sh 'docker run -d -p 8035:8035 --name ${IMAGE_NAME} -v /mydata/logs/${IMAGE_NAME}:/logs/${IMAGE_NAME} ${IMAGE_NAME}'
+               sh 'docker run -d -p 8035:8035 --name ${IMAGE_NAME} --restart=always -v /mydata/logs/${IMAGE_NAME}:/logs/${IMAGE_NAME} -v /mydata/home/ks:/home/ks ${IMAGE_NAME}'
             }
         }
     }
-
-    // 清理工作空间
-    // post {
-    //     always {
-    //         cleanWs()
-    //     }
-    // }
 }

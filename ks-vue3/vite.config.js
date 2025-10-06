@@ -6,6 +6,44 @@ import createVitePlugins from './vite/plugins'
 export default defineConfig(({ mode, command }) => {
   const env = loadEnv(mode, process.cwd())
   const { VITE_APP_ENV } = env
+
+  // 构建专用配置
+  const buildConfig = command === 'build' ? {
+    build: {
+      sourcemap: false, // 生产环境关闭 sourcemap
+      // minify: 'terser', // 使用更高效的压缩工具
+      terserOptions: {
+        compress: {
+          drop_console: true, // 移除 console
+          drop_debugger: true // 移除 debugger
+        }
+      },
+      // rollupOptions: {
+      //   output: {
+      //     manualChunks(id) {
+      //       // 精细化分包策略
+      //       if (id.includes('node_modules')) {
+      //         if (id.includes('lodash')) {
+      //           return 'vendor-lodash'
+      //         }
+      //         if (id.includes('element-plus')) {
+      //           return 'vendor-element'
+      //         }
+      //         return 'vendor'
+      //       }
+      //     },
+      //     entryFileNames: `assets/[name]-[hash].js`,
+      //     chunkFileNames: `assets/[name]-[hash].js`,
+      //     assetFileNames: `assets/[name]-[hash].[ext]`
+      //   }
+      // },
+      chunkSizeWarningLimit: 1500, // 提高 chunk 大小警告阈值
+      cssCodeSplit: true, // 启用 CSS 代码分割
+      target: 'esnext' // 使用最新 ES 标准减少 polyfill
+    }
+  } : {}
+
+
   return {
     // 部署生产环境和开发环境下的URL。
     // 默认情况下，vite 会假设你的应用是被部署在一个域名的根路径上
@@ -52,7 +90,11 @@ export default defineConfig(({ mode, command }) => {
             }
           }
         ]
-      }
-    }
+      },
+      // 开启构建缓存
+      devSourcemap: false
+    },
+    // 合并构建配置
+    ...buildConfig,
   }
 })

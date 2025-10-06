@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.inventory.mapper.PrintTemplateMapper">
+
+    <resultMap type="PrintTemplate" id="PrintTemplateResult">
+        <result property="templateId" column="template_id"/>
+        <result property="templateName" column="template_name"/>
+        <result property="htmlContent" column="html_content"/>
+        <result property="cssContent" column="css_content"/>
+        <result property="jsContent" column="js_content"/>
+        <result property="remark" column="remark"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectPrintTemplateVo">
+        select
+        template_id, template_name, html_content, css_content, js_content, remark, create_by,
+        create_time, update_by, update_time
+        from print_template
+    </sql>
+
+    <select id="selectPrintTemplateList" parameterType="PrintTemplate" resultMap="PrintTemplateResult">
+        <include refid="selectPrintTemplateVo"/>
+        WHERE 1=1
+    </select>
+
+    <select id="selectPrintTemplateByTemplateId" parameterType="Long" resultMap="PrintTemplateResult">
+        <include refid="selectPrintTemplateVo"/>
+        where template_id = #{templateId}
+    </select>
+
+    <insert id="insertPrintTemplate" parameterType="PrintTemplate">
+        insert into print_template(
+        <if test="templateName != null and templateName != ''">template_name,</if>
+        <if test="htmlContent != null and htmlContent != ''">html_content,</if>
+        <if test="cssContent != null and cssContent != ''">css_content,</if>
+        <if test="jsContent != null and jsContent != ''">js_content,</if>
+        <if test="remark != null and remark != ''">remark,</if>
+        <if test="createBy != null and createBy != ''">create_by,</if>
+        create_time
+        )values(
+        <if test="templateName != null and templateName != ''">#{templateName},</if>
+        <if test="htmlContent != null and htmlContent != ''">#{htmlContent},</if>
+        <if test="cssContent != null and cssContent != ''">#{cssContent},</if>
+        <if test="jsContent != null and jsContent != ''">#{jsContent},</if>
+        <if test="remark != null and remark != ''">#{remark},</if>
+        <if test="createBy != null and createBy != ''">#{createBy},</if>
+        sysdate()
+        )
+    </insert>
+
+    <update id="updatePrintTemplate" parameterType="PrintTemplate">
+        update print_template
+        <set>
+            <if test="templateName != null and templateName != ''">template_name = #{templateName},</if>
+            <if test="htmlContent != null and htmlContent != ''">html_content = #{htmlContent},</if>
+            <if test="cssContent != null and cssContent != ''">css_content = #{cssContent},</if>
+            <if test="jsContent != null and jsContent != ''">js_content = #{jsContent},</if>
+            <if test="remark != null and remark != ''">remark = #{remark},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            update_time = sysdate()
+        </set>
+        where template_id = #{templateId}
+    </update>
+
+    <delete id="deletePrintTemplateByTemplateId" parameterType="Long">
+        delete from print_template where template_id = #{templateId}
+    </delete>
+
+</mapper>

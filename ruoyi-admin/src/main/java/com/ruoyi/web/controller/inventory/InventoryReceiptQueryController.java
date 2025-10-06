@@ -5,16 +5,17 @@ import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.entity.DetailReceipt;
 import com.ruoyi.common.core.domain.entity.HeadReceipt;
+import com.ruoyi.common.core.domain.entity.ReceiptFrom;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.poi.ExcelUtil;
-import com.ruoyi.system.service.InventoryReceiptQueryService;
+import com.ruoyi.inventory.service.InventoryReceiptQueryService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -51,15 +52,6 @@ public class InventoryReceiptQueryController extends BaseController {
         return getDataTable(list);
     }
 
-    /**
-     * 销售金额与毛利润查询
-     */
-    @PreAuthorize("@ss.hasPermi('inventory:inventoryReceiptQuery:salesAmountQuery')")
-    @GetMapping("/salesAmountQuery")
-    public HeadReceipt salesAmountQuery(HeadReceipt bo) {
-        startPage();
-        return inventoryReceiptQueryService.salesAmountQuery(bo);
-    }
 
     /**
      * 库存指定单据查询
@@ -79,9 +71,9 @@ public class InventoryReceiptQueryController extends BaseController {
      * 删除库存单据
      */
     @PreAuthorize("@ss.hasPermi('inventory:inventoryReceiptQuery:delete')")
-    @Log(title = "删除库存单据", businessType = BusinessType.INSERT)
+    @Log(title = "删除库存单据", businessType = BusinessType.DELETE)
     @PostMapping("/delete")
-    public AjaxResult remove(@RequestBody List<DetailReceipt> bo) {
+    public AjaxResult remove(@RequestBody ReceiptFrom bo) {
         return toAjax(inventoryReceiptQueryService.delInventoryReceipt(bo));
     }
 

@@ -2,27 +2,27 @@ package com.ruoyi.common.utils.ip;
 
 import com.ruoyi.common.utils.ServletUtils;
 import com.ruoyi.common.utils.StringUtils;
+import jakarta.servlet.http.HttpServletRequest;
 
-import javax.servlet.http.HttpServletRequest;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 /**
  * 获取IP方法
- * 
+ *
  * @author KrityCat
  */
 public class IpUtils {
     public final static String REGX_0_255 = "(25[0-5]|2[0-4]\\d|1\\d{2}|[1-9]\\d|\\d)";
     // 匹配 ip
     public final static String REGX_IP = "((" + REGX_0_255 + "\\.){3}" + REGX_0_255 + ")";
-    public final static String REGX_IP_WILDCARD = "(((\\*\\.){3}\\*)|(" + REGX_0_255 + "(\\.\\*){3})|(" + REGX_0_255 + "\\." + REGX_0_255 + ")(\\.\\*){2}" + "|((" + REGX_0_255 + "\\.){3}\\*))";
     // 匹配网段
     public final static String REGX_IP_SEG = "(" + REGX_IP + "\\-" + REGX_IP + ")";
+    public final static String REGX_IP_WILDCARD = "(((\\*\\.){3}\\*)|(" + REGX_0_255 + "(\\.\\*){3})|(" + REGX_0_255 + "\\." + REGX_0_255 + ")(\\.\\*){2}" + "|((" + REGX_0_255 + "\\.){3}\\*))";
 
     /**
      * 获取客户端IP
-     * 
+     *
      * @return IP地址
      */
     public static String getIpAddr() {
@@ -31,7 +31,7 @@ public class IpUtils {
 
     /**
      * 获取客户端IP
-     * 
+     *
      * @param request 请求对象
      * @return IP地址
      */
@@ -62,7 +62,7 @@ public class IpUtils {
 
     /**
      * 检查是否为内部IP地址
-     * 
+     *
      * @param ip IP地址
      * @return 结果
      */
@@ -73,7 +73,7 @@ public class IpUtils {
 
     /**
      * 检查是否为内部IP地址
-     * 
+     *
      * @param addr byte地址
      * @return 结果
      */
@@ -111,7 +111,7 @@ public class IpUtils {
 
     /**
      * 将IPv4地址转换成字节
-     * 
+     *
      * @param text IPv4地址
      * @return byte 字节
      */
@@ -185,7 +185,7 @@ public class IpUtils {
 
     /**
      * 获取IP地址
-     * 
+     *
      * @return 本地IP地址
      */
     public static String getHostIp() {
@@ -198,7 +198,7 @@ public class IpUtils {
 
     /**
      * 获取主机名
-     * 
+     *
      * @return 本地主机名
      */
     public static String getHostName() {
@@ -220,7 +220,7 @@ public class IpUtils {
         if (ip != null && ip.indexOf(",") > 0) {
             final String[] ips = ip.trim().split(",");
             for (String subIp : ips) {
-                if (false == isUnknown(subIp)) {
+                if (!isUnknown(subIp)) {
                     ip = subIp;
                     break;
                 }
@@ -300,9 +300,9 @@ public class IpUtils {
 
     /**
      * 校验ip是否符合过滤串规则
-     * 
+     *
      * @param filter 过滤IP列表,支持后缀'*'通配,支持网段如:`10.10.10.1-10.10.10.99`
-     * @param ip 校验IP地址
+     * @param ip     校验IP地址
      * @return boolean 结果
      */
     public static boolean isMatchedIp(String filter, String ip) {

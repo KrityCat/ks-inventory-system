@@ -64,6 +64,9 @@ public class InventoryProduct extends BaseEntity {
     @Excel(name = "货品数量")
     private String planQuantity;
 
+    @Excel(name = "库存锁单数量")
+    private String lockInventoryQty;
+
     @Excel(name = "单价")
     private String univalence;
 
@@ -72,6 +75,9 @@ public class InventoryProduct extends BaseEntity {
 
     @Excel(name = "金额")
     private String money;
+
+    @Excel(name = "发生日期")
+    private String invoiceDate;
 
     public String getProductId() {
         return productId;
@@ -103,6 +109,14 @@ public class InventoryProduct extends BaseEntity {
 
     public void setPlanQuantity(String planQuantity) {
         this.planQuantity = planQuantity;
+    }
+
+    public String getLockInventoryQty() {
+        return lockInventoryQty;
+    }
+
+    public void setLockInventoryQty(String lockInventoryQty) {
+        this.lockInventoryQty = lockInventoryQty;
     }
 
     public String getUnivalence() {
@@ -185,6 +199,14 @@ public class InventoryProduct extends BaseEntity {
         this.productSpecifications = productSpecifications;
     }
 
+    public String getInvoiceDate() {
+        return invoiceDate;
+    }
+
+    public void setInvoiceDate(String invoiceDate) {
+        this.invoiceDate = invoiceDate;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
@@ -192,6 +214,7 @@ public class InventoryProduct extends BaseEntity {
                 .append("warehouseId", getWarehouseId())
                 .append("supplierId", getSupplierId())
                 .append("planQuantity", getPlanQuantity())
+                .append("lockInventoryQty", getLockInventoryQty())
                 .append("univalence", getUnivalence())
                 .append("discount", getDiscount())
                 .append("money", getMoney())
@@ -206,6 +229,7 @@ public class InventoryProduct extends BaseEntity {
                 .append("createTime", getCreateTime())
                 .append("updateBy", getUpdateBy())
                 .append("updateTime", getUpdateTime())
+                .append("invoiceDate", getInvoiceDate())
                 .toString();
     }
 }

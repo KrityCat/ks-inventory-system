@@ -1,7 +1,10 @@
 <template>
   <div>
-    <el-row :gutter="5">
-      <el-col :span="12" v-hasPermi="['inventory:inventoryReceiptQuery:salesAmountQuery']">
+    <el-row
+      :gutter="2"
+      v-hasPermi="['index:salesAmountQuery']"
+    >
+      <el-col :span="12">
         <el-card>
           <template #header>
             <div class="card-header">
@@ -30,7 +33,7 @@
           </el-row>
         </el-card>
       </el-col>
-      <el-col :span="12" v-hasPermi="['inventory:inventoryReceiptQuery:salesAmountQuery']">
+      <el-col :span="12">
         <el-card>
           <template #header>
             <div class="card-header">
@@ -60,8 +63,11 @@
         </el-card>
       </el-col>
     </el-row>
-    <el-row :gutter="5">
-      <el-col :span="12">
+    <el-row
+      :gutter="5"
+      v-hasPermi="['index:salesNotTakeEffectQuery']"
+    >
+      <el-col :span="24">
         <el-card>
           <template #header>
             <div class="card-header">
@@ -69,159 +75,39 @@
             </div>
           </template>
           <el-row>
-            <el-col :span="4" v-hasPermi="['purchase:purchaseOrderQuery:headShow']">
+            <el-col :span="3">
+              <el-statistic title="采购入库单据" :value="purchaseInReceipt" />
+            </el-col>
+            <el-col :span="3">
+              <el-statistic title="采购退库单据" :value="purchaseOutReceipt" />
+            </el-col>
+            <el-col :span="3">
+              <el-statistic title="销售出库单据" :value="salesOutReceipt" />
+            </el-col>
+            <el-col :span="3">
+              <el-statistic title="销售退库单据" :value="salesRefundReceipt" />
+            </el-col>
+            <el-col :span="3">
+              <el-statistic title="其他入库单据" :value="otherInReceipt" />
+            </el-col>
+            <el-col :span="3">
+              <el-statistic title="其他出库单据" :value="otherOutReceipt" />
+            </el-col>
+            <el-col :span="3">
               <el-statistic
-                title="采购订单"
-                :value="purchaseOrderNotTakeEffect"
-              />
-              <div class="statistic-footer">
-                <div class="footer-item">
-                  <span>当天新增</span>
-                  <span class="green">
-                    {{ purchaseOrderTodaySource }}
-                    <el-icon>
-                      <CaretTop />
-                    </el-icon>
-                  </span>
-                </div>
-              </div>
-            </el-col>
-            <el-col :span="4" v-hasPermi="['inventory:inventoryReceiptQuery:headShow']">
-              <el-statistic
-                title="采购单据"
-                :value="purchaseReceiptNotTakeEffect"
-              />
-              <div class="statistic-footer">
-                <div class="footer-item">
-                  <span>当天新增</span>
-                  <span class="green">
-                    {{ purchaseReceiptTodaySource }}
-                    <el-icon>
-                      <CaretTop />
-                    </el-icon>
-                  </span>
-                </div>
-              </div>
-            </el-col>
-            <el-col :span="4" v-hasPermi="['purchase:purchaseOrderQuery:headShow']">
-              <el-statistic title="销售订单" :value="salesOrderNotTakeEffect" />
-              <div class="statistic-footer">
-                <div class="footer-item">
-                  <span>当天新增</span>
-                  <span class="green">
-                    {{ salesOrderTodaySource }}
-                    <el-icon>
-                      <CaretTop />
-                    </el-icon>
-                  </span>
-                </div>
-              </div>
-            </el-col>
-            <el-col :span="4" v-hasPermi="['inventory:inventoryReceiptQuery:headShow']">
-              <el-statistic
-                title="销售单据"
-                :value="salesReceiptNotTakeEffect"
-              />
-              <div class="statistic-footer">
-                <div class="footer-item">
-                  <span>当天新增</span>
-                  <span class="green">
-                    {{ salesReceiptTodaySource }}
-                    <el-icon>
-                      <CaretTop />
-                    </el-icon>
-                  </span>
-                </div>
-              </div>
-            </el-col>
-            <el-col :span="4" v-hasPermi="['inventory:inventoryReceiptQuery:headShow']">
-              <el-statistic
-                title="库存单据"
-                :value="inventoryReceiptNotTakeEffect"
-              />
-              <div class="statistic-footer">
-                <div class="footer-item">
-                  <span>当天新增</span>
-                  <span class="green">
-                    {{ inventoryReceiptTodaySource }}
-                    <el-icon>
-                      <CaretTop />
-                    </el-icon>
-                  </span>
-                </div>
-              </div>
-            </el-col>
-            <el-col :span="4" v-hasPermi="['inventory:inventoryReceiptQuery:headShow']">
-              <el-statistic
-                title="调拨单据"
-                :value="inventoryTransferNotTakeEffect"
-              />
-              <div class="statistic-footer">
-                <div class="footer-item">
-                  <span>当天新增</span>
-                  <span class="green">
-                    {{ inventoryTransferTodaySource }}
-                    <el-icon>
-                      <CaretTop />
-                    </el-icon>
-                  </span>
-                </div>
-              </div>
-            </el-col>
-          </el-row>
-        </el-card>
-      </el-col>
-      <el-col :span="12">
-        <el-card>
-          <template #header>
-            <div class="card-header">
-              <span>已审核</span>
-            </div>
-          </template>
-          <el-row>
-            <el-col :span="4" v-hasPermi="['purchase:purchaseOrderQuery:headShow']">
-              <el-statistic title="采购订单" :value="purchaseOrderTakeEffect" />
-              <div class="statistic-footer">
-                <div class="footer-item">
-                  <span class="green">
-                    实时统计
-                    <el-icon>
-                      <Histogram />
-                    </el-icon>
-                  </span>
-                </div>
-              </div>
-            </el-col>
-            <el-col :span="4" v-hasPermi="['inventory:inventoryReceiptQuery:headShow']">
-              <el-statistic
-                title="采购单据"
-                :value="purchaseReceiptTakeEffect"
+                title="库存调拨单据"
+                :value="otherTransferReceipt"
               />
             </el-col>
-            <el-col :span="4" v-hasPermi="['purchase:purchaseOrderQuery:headShow']">
-              <el-statistic title="销售订单" :value="salesOrderTakeEffect" />
-            </el-col>
-            <el-col :span="4" v-hasPermi="['inventory:inventoryReceiptQuery:headShow']">
-              <el-statistic title="销售单据" :value="salesReceiptTakeEffect" />
-            </el-col>
-            <el-col :span="4" v-hasPermi="['inventory:inventoryReceiptQuery:headShow']">
-              <el-statistic
-                title="库存单据"
-                :value="inventoryReceiptTakeEffect"
-              />
-            </el-col>
-            <el-col :span="4" v-hasPermi="['inventory:inventoryReceiptQuery:headShow']">
-              <el-statistic
-                title="调拨单据"
-                :value="inventoryTransferTakeEffect"
-              />
+            <el-col :span="3">
+              <el-statistic title="库存盘点单据" :value="stocktakingReceipt" />
             </el-col>
           </el-row>
         </el-card>
       </el-col>
     </el-row>
-    <el-row :gutter="5">
-      <el-col :span="12" v-hasPermi="['baseDate:product:show']">
+    <el-row :gutter="2">
+      <el-col :span="12" v-hasPermi="['index:overstockList']">
         <el-card>
           <template #header>
             <div class="card-header">
@@ -311,7 +197,7 @@
           </el-tabs>
         </el-card>
       </el-col>
-      <el-col :span="12" v-hasPermi="['baseDate:product:show']">
+      <el-col :span="12" v-hasPermi="['index:monthOverstockList']">
         <el-card>
           <template #header>
             <div class="card-header">
@@ -417,19 +303,15 @@
 </template>
 
 <script setup name="Index">
-import { useTransition } from "@vueuse/core";
-import { purchaseOrderHeadQuery } from "@/api/purchase/purchaseOrderQuery";
 import {
-  headQuery,
   salesAmountQuery,
-} from "@/api/inventory/inventoryDocumentQuery";
-import {
+  salesNotTakeEffectQuery,
   listOverstockProduct,
   listDangerProduct,
   listThreeOverstock,
   listSixOverstock,
   listTwelveOverstock,
-} from "@/api/basedate/product";
+} from "@/api/index";
 
 // 销售总金额与毛利润
 const dailySalesAmount = ref(0);
@@ -444,6 +326,15 @@ const lastSixMonthsGrossProfit = ref(0);
 const thisYearGrossProfit = ref(0);
 const lastYearGrossProfit = ref(0);
 const lastTwoYearsGrossProfit = ref(0);
+// 待审核单据
+const purchaseInReceipt = ref(0);
+const purchaseOutReceipt = ref(0);
+const salesOutReceipt = ref(0);
+const salesRefundReceipt = ref(0);
+const otherInReceipt = ref(0);
+const otherOutReceipt = ref(0);
+const otherTransferReceipt = ref(0);
+const stocktakingReceipt = ref(0);
 // 货品库存预警结果表
 const overstockProductList = ref([]);
 const dangerProductList = ref([]);
@@ -452,102 +343,6 @@ const sixOverstockList = ref([]);
 const twelveOverstockList = ref([]);
 const loading = ref(false);
 const total = ref(0);
-// 采购订单待审核
-const purchaseOrderNotTakeEffectSource = ref(0);
-const purchaseOrderNotTakeEffect = useTransition(
-  purchaseOrderNotTakeEffectSource,
-  {
-    duration: 500,
-  }
-);
-// 采购订单待审核当日新增
-const purchaseOrderTodaySource = ref(0);
-// 采购单据待审核当日新增
-const purchaseReceiptTodaySource = ref(0);
-// 销售订单待审核当日新增
-const salesOrderTodaySource = ref(0);
-// 销售单据待审核当日新增
-const salesReceiptTodaySource = ref(0);
-// 库存单据待审核当日新增
-const inventoryReceiptTodaySource = ref(0);
-// 调拨单据待审核当日新增
-const inventoryTransferTodaySource = ref(0);
-// 采购订单已审核
-const purchaseOrderTakeEffectSource = ref(0);
-const purchaseOrderTakeEffect = useTransition(purchaseOrderTakeEffectSource, {
-  duration: 500,
-});
-// 采购单据待审核
-const purchaseReceiptNotTakeEffectSource = ref(0);
-const purchaseReceiptNotTakeEffect = useTransition(
-  purchaseReceiptNotTakeEffectSource,
-  {
-    duration: 500,
-  }
-);
-// 采购单据已审核
-const purchaseReceiptTakeEffectSource = ref(0);
-const purchaseReceiptTakeEffect = useTransition(
-  purchaseReceiptTakeEffectSource,
-  {
-    duration: 500,
-  }
-);
-// 销售订单待审核
-const salesOrderNotTakeEffectSource = ref(0);
-const salesOrderNotTakeEffect = useTransition(salesOrderNotTakeEffectSource, {
-  duration: 500,
-});
-// 销售订单已审核
-const salesOrderTakeEffectSource = ref(0);
-const salesOrderTakeEffect = useTransition(salesOrderTakeEffectSource, {
-  duration: 500,
-});
-// 销售单据待审核
-const salesReceiptNotTakeEffectSource = ref(0);
-const salesReceiptNotTakeEffect = useTransition(
-  salesReceiptNotTakeEffectSource,
-  {
-    duration: 500,
-  }
-);
-// 销售单据已审核
-const salesReceiptTakeEffectSource = ref(0);
-const salesReceiptTakeEffect = useTransition(salesReceiptTakeEffectSource, {
-  duration: 500,
-});
-// 库存单据待审核
-const inventoryReceiptNotTakeEffectSource = ref(0);
-const inventoryReceiptNotTakeEffect = useTransition(
-  inventoryReceiptNotTakeEffectSource,
-  {
-    duration: 500,
-  }
-);
-// 库存单据已审核
-const inventoryReceiptTakeEffectSource = ref(0);
-const inventoryReceiptTakeEffect = useTransition(
-  inventoryReceiptTakeEffectSource,
-  {
-    duration: 500,
-  }
-);
-// 调拨单据待审核
-const inventoryTransferNotTakeEffectSource = ref(0);
-const inventoryTransferNotTakeEffect = useTransition(
-  inventoryTransferNotTakeEffectSource,
-  {
-    duration: 500,
-  }
-);
-// 调拨单据已审核
-const inventoryTransferTakeEffectSource = ref(0);
-const inventoryTransferTakeEffect = useTransition(
-  inventoryTransferTakeEffectSource,
-  {
-    duration: 500,
-  }
-);
 
 const data = reactive({
   queryParams: {
@@ -566,17 +361,6 @@ const data = reactive({
 
 const { queryParams, rules } = toRefs(data);
 
-function getNowTime() {
-  var now = new Date();
-  var year = now.getFullYear(); //得到年份
-  var month = now.getMonth(); //得到月份
-  var date = now.getDate(); //得到日期
-  month = month + 1;
-  month = month.toString().padStart(2, "0");
-  date = date.toString().padStart(2, "0");
-  var defaultDate = `${year}-${month}-${date}`;
-  return defaultDate;
-}
 /** 重置表单 */
 function Reset() {
   queryParams.value = {
@@ -589,15 +373,6 @@ function Reset() {
     deliveryDate: undefined,
     invoiceDate: undefined,
   };
-}
-// 采购订单待审核查询
-function purchaseOrderNotTakeEffectQuery() {
-  queryParams.value.orderFormType = 1;
-  queryParams.value.orderFormStatus = 1;
-  purchaseOrderHeadQuery(queryParams.value).then((response) => {
-    purchaseOrderNotTakeEffectSource.value = response.total;
-  });
-  Reset();
 }
 // 销售金额与毛利润查询
 function amountQuery() {
@@ -616,167 +391,18 @@ function amountQuery() {
     lastTwoYearsGrossProfit.value = response.lastTwoYearsGrossProfit;
   });
 }
-// 采购订单当天待审核查询
-function purchaseOrderTodayQuery() {
-  queryParams.value.orderFormType = 1;
-  queryParams.value.orderFormStatus = 1;
-  queryParams.value.deliveryDate = getNowTime();
-  purchaseOrderHeadQuery(queryParams.value).then((response) => {
-    purchaseOrderTodaySource.value = response.total;
+// 待审核单据查询
+function notTakeEffectQuery() {
+  salesNotTakeEffectQuery().then((response) => {
+    purchaseInReceipt.value = response.purchaseInReceipt;
+    purchaseOutReceipt.value = response.purchaseOutReceipt;
+    salesOutReceipt.value = response.salesOutReceipt;
+    salesRefundReceipt.value = response.salesRefundReceipt;
+    otherInReceipt.value = response.otherInReceipt;
+    otherOutReceipt.value = response.otherOutReceipt;
+    otherTransferReceipt.value = response.otherTransferReceipt;
+    stocktakingReceipt.value = response.stocktakingReceipt;
   });
-  Reset();
-}
-// 采购订单已审核查询
-function purchaseOrderTakeEffectQuery() {
-  queryParams.value.orderFormType = 1;
-  queryParams.value.orderFormStatus = 2;
-  purchaseOrderHeadQuery(queryParams.value).then((response) => {
-    purchaseOrderTakeEffectSource.value = response.total;
-  });
-  Reset();
-}
-// 采购单据待审核查询
-function purchaseReceiptNotTakeEffectQuery() {
-  queryParams.value.receiptCategory = 1;
-  queryParams.value.receiptStatus = 1;
-  headQuery(queryParams.value).then((response) => {
-    purchaseReceiptNotTakeEffectSource.value = response.total;
-  });
-  Reset();
-}
-// 采购单据当天待审核查询
-function purchaseReceiptTodayQuery() {
-  queryParams.value.receiptCategory = 1;
-  queryParams.value.receiptStatus = 1;
-  queryParams.value.invoiceDate = getNowTime();
-  headQuery(queryParams.value).then((response) => {
-    purchaseReceiptTodaySource.value = response.total;
-  });
-  Reset();
-}
-// 采购单据已审核查询
-function purchaseReceiptTakeEffectQuery() {
-  queryParams.value.receiptCategory = 1;
-  queryParams.value.receiptStatus = 2;
-  headQuery(queryParams.value).then((response) => {
-    purchaseReceiptTakeEffectSource.value = response.total;
-  });
-  Reset();
-}
-// 销售订单待审核查询
-function salesOrderNotTakeEffectQuery() {
-  queryParams.value.orderFormType = 2;
-  queryParams.value.orderFormStatus = 1;
-  purchaseOrderHeadQuery(queryParams.value).then((response) => {
-    salesOrderNotTakeEffectSource.value = response.total;
-  });
-  Reset();
-}
-// 销售订单当天待审核查询
-function salesOrderTodayQuery() {
-  queryParams.value.orderFormType = 2;
-  queryParams.value.orderFormStatus = 1;
-  queryParams.value.deliveryDate = getNowTime();
-  purchaseOrderHeadQuery(queryParams.value).then((response) => {
-    salesOrderTodaySource.value = response.total;
-  });
-  Reset();
-}
-// 销售订单已审核查询
-function salesOrderTakeEffectQuery() {
-  queryParams.value.orderFormType = 2;
-  queryParams.value.orderFormStatus = 2;
-  purchaseOrderHeadQuery(queryParams.value).then((response) => {
-    salesOrderTakeEffectSource.value = response.total;
-  });
-  Reset();
-}
-// 销售单据待审核查询
-function salesReceiptNotTakeEffectQuery() {
-  queryParams.value.receiptCategory = 2;
-  queryParams.value.receiptStatus = 1;
-  headQuery(queryParams.value).then((response) => {
-    salesReceiptNotTakeEffectSource.value = response.total;
-  });
-  Reset();
-}
-// 销售单据待审核查询
-function salesReceiptTodayQuery() {
-  queryParams.value.receiptCategory = 2;
-  queryParams.value.receiptStatus = 1;
-  queryParams.value.invoiceDate = getNowTime();
-  headQuery(queryParams.value).then((response) => {
-    salesReceiptTodaySource.value = response.total;
-  });
-  Reset();
-}
-// 销售单据已审核查询
-function salesReceiptTakeEffectQuery() {
-  queryParams.value.receiptCategory = 2;
-  queryParams.value.receiptStatus = 2;
-  headQuery(queryParams.value).then((response) => {
-    salesReceiptTakeEffectSource.value = response.total;
-  });
-  Reset();
-}
-// 库存单据待审核查询
-function inventoryReceiptNotTakeEffectQuery() {
-  queryParams.value.receiptCategory = 3;
-  queryParams.value.receiptStatus = 1;
-  headQuery(queryParams.value).then((response) => {
-    inventoryReceiptNotTakeEffectSource.value = response.total;
-  });
-  Reset();
-}
-// 库存单据当天待审核查询
-function inventoryReceiptTodayQuery() {
-  queryParams.value.receiptCategory = 3;
-  queryParams.value.receiptStatus = 1;
-  queryParams.value.invoiceDate = getNowTime();
-  headQuery(queryParams.value).then((response) => {
-    inventoryReceiptTodaySource.value = response.total;
-  });
-  Reset();
-}
-// 库存单据已审核查询
-function inventoryReceiptTakeEffectQuery() {
-  queryParams.value.receiptCategory = 3;
-  queryParams.value.receiptStatus = 2;
-  headQuery(queryParams.value).then((response) => {
-    inventoryReceiptTakeEffectSource.value = response.total;
-  });
-  Reset();
-}
-// 调拨单据待审核查询
-function inventoryTransferNotTakeEffectQuery() {
-  queryParams.value.receiptCategory = 3;
-  queryParams.value.receiptType = 7;
-  queryParams.value.receiptStatus = 1;
-  headQuery(queryParams.value).then((response) => {
-    inventoryTransferNotTakeEffectSource.value = response.total;
-  });
-  Reset();
-}
-// 调拨单据当日待审核查询
-function inventoryTransferTodayQuery() {
-  queryParams.value.receiptCategory = 3;
-  queryParams.value.receiptType = 7;
-  queryParams.value.receiptStatus = 1;
-  queryParams.value.invoiceDate = getNowTime();
-  headQuery(queryParams.value).then((response) => {
-    inventoryTransferTodaySource.value = response.total;
-  });
-  Reset();
-}
-// 调拨单据已审核查询
-function inventoryTransferTakeEffectQuery() {
-  queryParams.value.receiptCategory = 3;
-  queryParams.value.receiptType = 7;
-  queryParams.value.receiptStatus = 2;
-  headQuery(queryParams.value).then((response) => {
-    inventoryTransferTakeEffectSource.value = response.total;
-  });
-  Reset();
 }
 /** 查询货品库存积压预警列表 */
 function overstockProductQuery() {
@@ -831,24 +457,7 @@ function twelveOverstockQuery() {
 /** 查询数据总条数列表 */
 function getList() {
   amountQuery();
-  purchaseOrderNotTakeEffectQuery();
-  purchaseOrderTodayQuery();
-  purchaseOrderTakeEffectQuery();
-  purchaseReceiptNotTakeEffectQuery();
-  purchaseReceiptTodayQuery();
-  purchaseReceiptTakeEffectQuery();
-  salesOrderNotTakeEffectQuery();
-  salesOrderTodayQuery();
-  salesOrderTakeEffectQuery();
-  salesReceiptNotTakeEffectQuery();
-  salesReceiptTodayQuery();
-  salesReceiptTakeEffectQuery();
-  inventoryReceiptNotTakeEffectQuery();
-  inventoryReceiptTodayQuery();
-  inventoryReceiptTakeEffectQuery();
-  inventoryTransferNotTakeEffectQuery();
-  inventoryTransferTodayQuery();
-  inventoryTransferTakeEffectQuery();
+  notTakeEffectQuery();
   overstockProductQuery();
   dangerProductQuery();
   threeOverstockQuery();

@@ -1,13 +1,14 @@
 package com.ruoyi.common.utils.bean;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-import javax.validation.Validator;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validator;
+
 import java.util.Set;
 
 /**
  * bean对象属性验证
- * 
+ *
  * @author KrityCat
  */
 public class BeanValidators {

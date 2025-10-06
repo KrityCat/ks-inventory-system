@@ -19,15 +19,6 @@ export function detailQuery(query) {
   })
 }
 
-// 销售金额与毛利润查询
-export function salesAmountQuery(query) {
-  return request({
-    url: '/inventory/inventoryReceiptQuery/salesAmountQuery',
-    method: 'get',
-    params: query
-  })
-}
-
 // 查询库存单据详情
 export function getReceipt(SystematicReceipt) {
   return request({

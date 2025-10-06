@@ -193,7 +193,7 @@
   </div>
 </template>
 
-<script setup name="productType">
+<script setup name="ProductType">
 import {
   listProductType,
   getProductType,

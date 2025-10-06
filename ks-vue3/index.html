@@ -1,130 +1,85 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <meta name="renderer" content="webkit">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <link rel="icon" href="/favicon.ico">
+    <meta charset="utf-8"/>
+    <link href='/luckysheet_dist/plugins/css/pluginsCss.css' rel='stylesheet'/>
+    <link href='/luckysheet_dist/plugins/plugins.css' rel='stylesheet'/>
+    <link href='/luckysheet_dist/css/luckysheet.css' rel='stylesheet'/>
+    <link href='/luckysheet_dist/assets/iconfont/iconfont.css' rel='stylesheet'/>
+    <script src="/luckysheet_dist/plugins/js/plugin.js"></script>
+    <script src="/luckysheet_dist/luckysheet.umd.js"></script>
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible"/>
+    <meta content="webkit" name="renderer"/>
+    <meta
+            content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+            name="viewport"
+    />
+    <link href="/favicon.ico" rel="icon"/>
 </head>
 
 <body>
-  <div id="app">
-    <div id="loader-wrapper">
-      <div class='base'>
-        <div class='cube'></div>
-        <div class='cube'></div>
-        <div class='cube'></div>
-        <div class='cube'></div>
-        <div class='cube'></div>
-        <div class='cube'></div>
-        <div class='cube'></div>
-        <div class='cube'></div>
-        <div class='cube'></div>
-      </div>
-      <div class="loading-text">正在加载系统资源，请耐心等待!</div>
+<div id="app">
+    <div id="loading">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <p>系统加载中</p>
     </div>
-  </div>
-  <script type="module" src="/src/main.js"></script>
+</div>
+<script src="/src/main.js" type="module"></script>
 </body>
 
 <style lang="scss" scoped>
-  .loading-text {
-    height: 9em;
-    left: 41%;
-    color: #05afd1;
-    font-size: 25px;
-    position: absolute;
-    top: 60%;
-  }
-
-  .base {
-    height: 9em;
-    left: 50%;
-    margin: -7.5em;
-    padding: 3em;
-    position: absolute;
-    top: 50%;
-    width: 9em;
-    transform: rotateX(45deg) rotateZ(45deg);
-    transform-style: preserve-3d;
-  }
-
-  .cube,
-  .cube:after,
-  .cube:before {
-    content: '';
-    float: left;
-    height: 3em;
-    position: absolute;
-    width: 3em;
-  }
-
-  /* Top */
-  .cube {
-    background-color: #05afd1;
-    position: relative;
-    transform: translateZ(3em);
-    transform-style: preserve-3d;
-    transition: .25s;
-    box-shadow: 13em 13em 1.5em rgba(0, 0, 0, 0.1);
-    animation: anim 1s infinite;
-  }
-
-  .cube:after {
-    background-color: #049dbc;
-    transform: rotateX(-90deg) translateY(3em);
-    transform-origin: 100% 100%;
-  }
-
-  .cube:before {
-    background-color: #048ca7;
-    transform: rotateY(90deg) translateX(3em);
-    transform-origin: 100% 0;
-  }
-
-  .cube:nth-child(1) {
-    animation-delay: 0.05s;
-  }
-
-  .cube:nth-child(2) {
-    animation-delay: 0.1s;
-  }
-
-  .cube:nth-child(3) {
-    animation-delay: 0.15s;
-  }
-
-  .cube:nth-child(4) {
-    animation-delay: 0.2s;
-  }
-
-  .cube:nth-child(5) {
-    animation-delay: 0.25s;
-  }
-
-  .cube:nth-child(6) {
-    animation-delay: 0.3s;
-  }
-
-  .cube:nth-child(7) {
-    animation-delay: 0.35s;
-  }
-
-  .cube:nth-child(8) {
-    animation-delay: 0.4s;
-  }
-
-  .cube:nth-child(9) {
-    animation-delay: 0.45s;
-  }
-
-  @keyframes anim {
-    50% {
-      transform: translateZ(0.5em);
+    #loading {
+      text-align: center;
+      width: 200px;
+      height: 50%;
+      margin: 20% auto;
     }
-  }
+    #loading span {
+      height: 80px;
+      width: 15px;
+      background: #7e81ff;
+      display: inline-block;
+      animation: loader 1s infinite;
+    }
+    #loading p {
+      color: #7e81ff;
+      font-size: 20px;
+      font-family: Helvetica;
+      text-transform: uppercase;
+      margin-top: 5px;
+      font-weight: 300;
+      letter-spacing: 0.05em;
+      text-align: center;
+    }
+    @keyframes loader {
+      50% {
+        height: 30px;
+        margin-top: 50px;
+        opacity: 0.5;
+      }
+    }
+    #loading span:nth-child(1) {
+      animation-delay: 0.1s;
+    }
+    #loading span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+    #loading span:nth-child(3) {
+      animation-delay: 0.3s;
+    }
+    #loading span:nth-child(4) {
+      animation-delay: 0.4s;
+    }
+    #loading span:nth-child(5) {
+      animation-delay: 0.5s;
+    }
+    #loading span:nth-child(6) {
+      animation-delay: 0.6s;
+    }
 </style>
-
 </html>

@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ruoyi.inventory.mapper.InventoryMapper">
+
+    <resultMap type="InventoryProduct" id="InventoryProductResult">
+        <result property="productId" column="product_id"/>
+        <result property="warehouseId" column="warehouse_id"/>
+        <result property="supplierId" column="supplier_id"/>
+        <result property="planQuantity" column="plan_quantity"/>
+        <result property="lockInventoryQty" column="lock_inventory_qty"/>
+        <result property="univalence" column="univalence"/>
+        <result property="discount" column="discount"/>
+        <result property="money" column="money"/>
+        <result property="invoiceDate" column="invoice_date"/>
+        <association property="product" javaType="Product" resultMap="ProductResult"/>
+        <association property="warehouse" javaType="Warehouse" resultMap="WarehouseResult"/>
+        <association property="type" javaType="ProductType" resultMap="ProductTypeResult"/>
+        <!--        <association property="headReceipt"         javaType="HeadReceipt" resultMap="headReceiptResult"/>-->
+        <!--        <association property="detailReceipt"         javaType="DetailReceipt" resultMap="detailReceiptResult"/>-->
+    </resultMap>
+
+    <resultMap type="Product" id="ProductResult">
+        <result property="productId" column="product_id"/>
+        <result property="productCode" column="product_code"/>
+        <result property="productName" column="product_name"/>
+        <result property="productType" column="product_type"/>
+        <result property="productSpecifications" column="product_specifications"/>
+        <result property="measureUnit" column="measure_unit"/>
+        <result property="producer" column="producer"/>
+    </resultMap>
+
+    <resultMap type="ProductType" id="ProductTypeResult">
+        <id property="productTypeId" column="product_type_id"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="ancestors" column="ancestors"/>
+        <result property="productTypeName" column="product_type_name"/>
+    </resultMap>
+
+    <resultMap type="Warehouse" id="WarehouseResult">
+        <result property="warehouseId" column="warehouse_id"/>
+        <result property="warehouseName" column="warehouse_name"/>
+    </resultMap>
+
+    <resultMap type="DetailReceipt" id="detailReceiptResult">
+        <result property="systematicReceipt" column="systematic_receipt"/>
+        <result property="productId" column="product_id"/>
+        <result property="warehousingId" column="warehousing_id"/>
+        <result property="retrievalId" column="retrieval_id"/>
+        <result property="supplierId" column="supplier_id"/>
+        <result property="customerId" column="customer_id"/>
+        <result property="currentInventory" column="current_inventory"/>
+        <result property="actualInventory" column="actual_inventory"/>
+        <result property="planQuantity" column="plan_quantity"/>
+        <result property="univalence" column="univalence"/>
+        <result property="discount" column="discount"/>
+        <result property="money" column="money"/>
+        <result property="cost" column="cost"/>
+        <result property="remarks" column="remarks"/>
+    </resultMap>
+
+    <resultMap type="headReceipt" id="headReceiptResult">
+        <result property="systematicReceipt" column="systematic_receipt"/>
+        <result property="originalReceipt" column="original_receipt"/>
+        <result property="receiptCategory" column="receipt_category"/>
+        <result property="receiptType" column="receipt_type"/>
+        <result property="receiptStatus" column="receipt_status"/>
+        <result property="invoiceDate" column="invoice_date"/>
+        <result property="warehousingIds" column="warehousing_ids"/>
+        <result property="retrievalIds" column="retrieval_ids"/>
+        <result property="userIds" column="user_ids"/>
+        <result property="supplierIds" column="supplier_ids"/>
+        <result property="customerIds" column="customer_ids"/>
+        <result property="planReceipt" column="plan_receipt"/>
+        <result property="receiptNotes" column="receipt_notes"/>
+        <result property="deposit" column="deposit"/>
+        <result property="totalAmount" column="total_amount"/>
+        <result property="capitalizeTotalAmount" column="capitalize_total_amount"/>
+        <result property="afterSalesInstallation" column="after_sales_installation"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <!--    查询库存货品公用方法    -->
+    <sql id="selectInventoryProductVo">
+        SELECT
+        ip.product_id,
+        ip.warehouse_id,
+        ip.supplier_id,
+        ip.plan_quantity,
+        ip.univalence,
+        ip.discount,
+        ip.money,
+        ip.create_by,
+        ip.create_time,
+        ip.update_by,
+        ip.update_time
+        FROM inventory_product ip
+    </sql>
+
+    <sql id="selectInPlanQuantity">
+        SUM(CASE WHEN hr.receipt_status = 2 AND hr.warehousing_ids = #{item.warehousingId,jdbcType=VARCHAR} THEN
+        dr.plan_quantity ELSE 0 END) -
+        SUM(CASE WHEN hr.receipt_status = 2 AND hr.retrieval_ids = #{item.warehousingId,jdbcType=VARCHAR} THEN
+        dr.plan_quantity ELSE 0 END)
+    </sql>
+
+    <sql id="selectInMoney">
+        SUM(CASE WHEN hr.receipt_status = 2 AND hr.warehousing_ids = #{item.warehousingId,jdbcType=VARCHAR} THEN
+        dr.money ELSE 0 END) -
+        SUM(CASE WHEN hr.receipt_status = 2 AND hr.retrieval_ids = #{item.warehousingId,jdbcType=VARCHAR} THEN dr.money
+        ELSE 0 END)
+    </sql>
+
+    <sql id="selectOutPlanQuantity">
+        SUM(CASE WHEN hr.receipt_status = 2 AND hr.warehousing_ids = #{item.retrievalId,jdbcType=VARCHAR} THEN
+        dr.plan_quantity ELSE 0 END) -
+        SUM(CASE WHEN hr.receipt_status = 2 AND hr.retrieval_ids = #{item.retrievalId,jdbcType=VARCHAR} THEN
+        dr.plan_quantity ELSE 0 END)
+    </sql>
+
+    <sql id="selectOutMoney">
+        SUM(CASE WHEN hr.receipt_status = 2 AND hr.warehousing_ids = #{item.retrievalId,jdbcType=VARCHAR} THEN dr.money
+        ELSE 0 END) -
+        SUM(CASE WHEN hr.receipt_status = 2 AND hr.retrieval_ids = #{item.retrievalId,jdbcType=VARCHAR} THEN dr.money
+        ELSE 0 END)
+    </sql>
+
+    <sql id="updateFrom">
+        FROM detail_receipt dr
+        JOIN head_receipt hr ON dr.systematic_receipt = hr.systematic_receipt
+        WHERE dr.product_id = #{item.productId,jdbcType=VARCHAR}
+    </sql>
+
+    <!--    入库货品修改公用方法    -->
+    <sql id="updateInInventoryBeach">
+        UPDATE inventory_product
+        SET plan_quantity = (SELECT COALESCE(
+        <include refid="selectInPlanQuantity"/>
+        , 0)
+        <include refid="updateFrom"/>
+        ),
+        univalence = ( SELECT COALESCE( (<include refid="selectInMoney"/>) / NULLIF((
+        <include refid="selectInPlanQuantity"/>
+        ), 0) , 0)
+        <include refid="updateFrom"/>
+        ),
+        money = ( SELECT COALESCE(
+        <include refid="selectInMoney"/>
+        , 0)<include refid="updateFrom"/>)
+        WHERE product_id = #{item.productId,jdbcType=VARCHAR}
+    </sql>
+
+    <!--    出库货品修改公用方法    -->
+    <sql id="updateOutInventoryBeach">
+        UPDATE inventory_product
+        SET plan_quantity = (SELECT COALESCE(
+        <include refid="selectOutPlanQuantity"/>
+        , 0)
+        <include refid="updateFrom"/>
+        ),
+        univalence = ( SELECT COALESCE( (<include refid="selectOutMoney"/>) / NULLIF((
+        <include refid="selectOutPlanQuantity"/>
+        ), 0) , 0)
+        <include refid="updateFrom"/>
+        ),
+        money = ( SELECT COALESCE(
+        <include refid="selectOutMoney"/>
+        , 0)<include refid="updateFrom"/>)
+        WHERE product_id = #{item.productId,jdbcType=VARCHAR}
+    </sql>
+
+    <!--    货品编号查询      -->
+    <select id="selectInventoryProduct" parameterType="java.util.List" resultMap="InventoryProductResult">
+        SELECT DISTINCT
+        ip.product_id, ip.warehouse_id, ip.supplier_id, ip.plan_quantity,
+        ip.univalence, ip.discount, ip.money, ip.create_by, ip.create_time, ip.update_by, ip.update_time,
+        p.product_code, p.product_name, p.product_type, p.product_specifications, p.measure_unit, p.producer,
+        pt.product_type_id, pt.parent_id, pt.ancestors, pt.product_type_name, w.warehouse_name
+        FROM inventory_product ip
+        JOIN product p ON ip.product_id = p.product_id
+        JOIN warehouse w ON w.warehouse_id = ip.warehouse_id
+        JOIN product_type pt ON pt.product_type_id = p.product_type
+        where 1=1
+        <if test="productId != null and productId != ''">
+            AND p.product_id = #{productId}
+        </if>
+        <if test="productCode != null and productCode != ''">
+            AND p.product_code like concat('%', #{productCode}, '%')
+        </if>
+        <if test="productName != null and productName != ''">
+            AND p.product_name like concat('%', #{productName}, '%')
+        </if>
+        <if test="productType != null and productType != ''">
+            AND p.product_type = #{productType}
+        </if>
+        <if test="productSpecifications != null and productSpecifications != ''">
+            AND p.product_specifications = #{productSpecifications}
+        </if>
+        <if test="warehouseId != null and warehouseId != ''">
+            AND ip.warehouse_id = #{warehouseId}
+        </if>
+    </select>
+
+    <!--    积压未入库查询      -->
+    <select id="selectProductDangerQuery" parameterType="InventoryProduct" resultMap="InventoryProductResult">
+        SELECT DISTINCT
+        ip.product_id, ip.warehouse_id, ip.supplier_id, ip.plan_quantity,
+        ip.univalence, ip.discount, ip.money, ip.create_by, ip.create_time, ip.update_by, ip.update_time,
+        p.product_code, p.product_name, p.product_type, p.product_specifications, p.measure_unit, p.producer,
+        pt.product_type_id, pt.parent_id, pt.ancestors, pt.product_type_name, w.warehouse_name
+        FROM inventory_product ip
+        JOIN product p ON ip.product_id = p.product_id
+        JOIN warehouse w ON w.warehouse_id = ip.warehouse_id
+        JOIN product_type pt ON pt.product_type_id = p.product_type
+        join detail_receipt d ON p.product_id = d.product_id
+        join head_receipt h ON h.systematic_receipt = d.systematic_receipt
+        where 1=1
+        <if test="productCode != null and productCode != ''">
+            AND p.product_code like concat('%', #{productCode}, '%')
+        </if>
+        <if test="productName != null and productName != ''">
+            AND p.product_name like concat('%', #{productName}, '%')
+        </if>
+        <if test="productType != null and productType != ''">
+            AND p.product_type = #{productType}
+        </if>
+        <if test="productSpecifications != null and productSpecifications != ''">
+            AND p.product_specifications = #{productSpecifications}
+        </if>
+        <if test="warehouseId != null and warehouseId != ''">
+            AND ip.warehouse_id = #{warehouseId}
+        </if>
+        <if test="invoiceDate != null and invoiceDate != ''">
+            and not exists (select 1 from head_receipt h2 where h2.systematic_receipt = h.systematic_receipt
+            and h2.invoice_date &gt;= #{invoiceDate}
+            )
+        </if>
+        <if test="invoiceDate != null and invoiceDate != ''">
+            and exists (select 1 from head_receipt h2 where h2.systematic_receipt = h.systematic_receipt
+            and h2.invoice_date &lt; #{invoiceDate}
+            )
+        </if>
+    </select>
+
+    <!--    货品编号查询      -->
+    <select id="selectInventoryById" parameterType="DetailReceipt" resultMap="detailReceiptResult">
+        <include refid="selectInventoryProductVo"/>
+        where ip.product_id = #{productId}
+        and ip.warehouse_id in (#{warehousingId}, #{retrievalId})
+        limit 1
+    </select>
+
+    <!--    入库货品新增      -->
+    <insert id="addInInventory" parameterType="java.util.List">
+        insert into inventory_product(
+        product_id,
+        warehouse_id,
+        supplier_id,
+        plan_quantity,
+        univalence,
+        discount,
+        money
+        )
+        <foreach collection="list" index="index" item="item" separator="union all">
+            select
+            #{item.productId,jdbcType=VARCHAR},
+            #{item.warehousingId,jdbcType=VARCHAR},
+            #{item.supplierId,jdbcType=VARCHAR},
+            #{item.planQuantity,jdbcType=VARCHAR},
+            #{item.univalence,jdbcType=VARCHAR},
+            #{item.discount,jdbcType=VARCHAR},
+            #{item.money,jdbcType=VARCHAR}
+            from dual
+        </foreach>
+    </insert>
+
+    <!--    出库货品新增      -->
+    <insert id="addOutInventory" parameterType="java.util.List">
+        insert into inventory_product(
+        product_id,
+        warehouse_id,
+        supplier_id,
+        plan_quantity,
+        univalence,
+        discount,
+        money
+        )
+        <foreach collection="list" index="index" item="item" separator="union all">
+            select
+            #{item.productId,jdbcType=VARCHAR},
+            #{item.retrievalId,jdbcType=VARCHAR},
+            #{item.supplierId,jdbcType=VARCHAR},
+            -#{item.planQuantity,jdbcType=VARCHAR},
+            -#{item.univalence,jdbcType=VARCHAR},
+            #{item.discount,jdbcType=VARCHAR},
+            -#{item.money,jdbcType=VARCHAR}
+            from dual
+        </foreach>
+    </insert>
+
+    <!--    入库货品修改      -->
+    <update id="updateInInventory" parameterType="java.util.List">
+        <foreach collection="list" index="index" item="item" separator=";">
+            <include refid="updateInInventoryBeach"/>
+            AND warehouse_id = #{item.warehousingId,jdbcType=VARCHAR}
+        </foreach>
+    </update>
+
+    <!--    出库货品修改      -->
+    <update id="updateOutInventory" parameterType="java.util.List">
+        <foreach collection="list" index="index" item="item" separator=";">
+            <include refid="updateOutInventoryBeach"/>
+            AND warehouse_id = #{item.retrievalId,jdbcType=VARCHAR}
+        </foreach>
+    </update>
+</mapper>

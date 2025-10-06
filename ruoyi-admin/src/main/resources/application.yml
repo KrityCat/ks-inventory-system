@@ -1,22 +1,22 @@
 # 项目相关配置
 ruoyi:
   # 名称
-  name: 铠思进销存
+  name: 铠思
   # 版本
-  version: 1.1.0
+  version: 1.0.0
   # 版权年份
   copyrightYear: 2024
   # 实例演示开关
   demoEnabled: false
-  # 文件路径 示例（ Windows配置D:/ruoyi/uploadPath，Linux配置 /home/ruoyi/uploadPath）
-  profile: /home/ruoyi/uploadPath
+  # 文件路径 示例（ Windows配置D:/ks/uploadPath，Linux配置 /home/ks/uploadPath）
+  profile: /home/ks/uploadPath
   # 获取ip地址开关
   addressEnabled: true
   # 验证码类型 math 数字计算 char 字符验证
   captchaType: math
   # 积木报表访问地址
-  reportUrl: http://%s:${server.port}
-#  reportUrl: http://localhost:8035
+  #  reportUrl: http://%s:${server.port}
+  reportUrl: http://localhost:8035
 
 # 开发环境配置
 server:
@@ -70,28 +70,31 @@ spring:
     restart:
       # 热部署开关
       enabled: true
-  # redis 配置
-  redis:
-    # 地址
-    host: 
-    # 端口，默认为6379
-    port: 6379
-    # 数据库索引
-    database: 0
-    # 密码
-    password: 
-    # 连接超时时间
-    timeout: 10s
-    lettuce:
-      pool:
-        # 连接池中的最小空闲连接
-        min-idle: 0
-        # 连接池中的最大空闲连接
-        max-idle: 8
-        # 连接池的最大数据库连接数
-        max-active: 8
-        # #连接池最大阻塞等待时间（使用负值表示没有限制）
-        max-wait: -1ms
+  data:
+    # redis 配置
+    redis:
+      # 地址
+      host: 192.168.1.130
+      # 端口，默认为6379
+      port: 6379
+      # 数据库索引
+      database: 0
+      # 密码
+      password: ksdis741953
+      # 连接超时时间
+      timeout: 10s
+      lettuce:
+        pool:
+          # 连接池中的最小空闲连接
+          min-idle: 0
+          # 连接池中的最大空闲连接
+          max-idle: 8
+          # 连接池的最大数据库连接数
+          max-active: 8
+          # #连接池最大阻塞等待时间（使用负值表示没有限制）
+          max-wait: -1ms
+  freemarker:
+    check-template-location: false
 
 # token配置
 token:
@@ -114,16 +117,22 @@ mybatis:
 # PageHelper分页插件
 pagehelper:
   helperDialect: mysql
-  reasonable: true
   supportMethodsArguments: true
   params: count=countSql
 
-# Swagger配置
-swagger:
-  # 是否开启swagger
-  enabled: false
-  # 请求前缀
-  pathMapping: /dev-api
+# Springdoc配置
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    tags-sorter: alpha
+  group-configs:
+    - group: 'default'
+      display-name: '测试模块'
+      paths-to-match: '/**'
+      packages-to-scan: com.ruoyi.web.controller.tool
 
 # 防止XSS攻击
 xss:

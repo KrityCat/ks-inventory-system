@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ruoyi.inventory.mapper.DetailReceiptMapper">
+
+    <resultMap type="DetailReceipt" id="detailReceiptResult">
+        <result property="systematicReceipt" column="systematic_receipt"/>
+        <result property="productId" column="product_id"/>
+        <result property="warehousingId" column="warehousing_id"/>
+        <result property="warehousingName" column="warehousing_name"/>
+        <result property="retrievalId" column="retrieval_id"/>
+        <result property="retrievalName" column="retrieval_name"/>
+        <result property="supplierId" column="supplier_id"/>
+        <result property="customerId" column="customer_id"/>
+        <result property="productSpecifications" column="product_specifications"/>
+        <result property="measureUnit" column="measure_unit"/>
+        <result property="lockedGoods" column="locked_goods"/>
+        <result property="lockInventoryQty" column="lock_inventory_qty"/>
+        <result property="currentInventory" column="current_inventory"/>
+        <result property="actualInventory" column="actual_inventory"/>
+        <result property="planQuantity" column="plan_quantity"/>
+        <result property="univalence" column="univalence"/>
+        <result property="discount" column="discount"/>
+        <result property="money" column="money"/>
+        <result property="cost" column="cost"/>
+        <result property="remarks" column="remarks"/>
+        <result property="receiptType" column="receipt_type"/>
+        <association property="product" javaType="Product" resultMap="ProductResult"/>
+        <association property="type" javaType="ProductType" resultMap="ProductTypeResult"/>
+        <association property="headReceipt" javaType="HeadReceipt" resultMap="headReceiptResult"/>
+        <association property="supplier" javaType="Supplier" resultMap="SupplierResult"/>
+        <association property="customer" javaType="Customer" resultMap="CustomerResult"/>
+        <association property="sysUser" javaType="SysUser" resultMap="SysUserResult"/>
+        <collection property="warehousing" ofType="Warehouse">
+            <result property="warehousingId" column="warehousing_id"/>
+            <result property="warehousingName" column="warehousing_name"/>
+        </collection>
+        <collection property="retrieval" ofType="Warehouse">
+            <result property="retrievalId" column="retrieval_id"/>
+            <result property="retrievalName" column="retrieval_name"/>
+        </collection>
+    </resultMap>
+
+    <resultMap type="Product" id="ProductResult">
+        <result property="productId" column="product_id"/>
+        <result property="productCode" column="product_code"/>
+        <result property="productName" column="product_name"/>
+        <result property="productType" column="product_type"/>
+        <result property="productSpecifications" column="product_specifications"/>
+        <result property="measureUnit" column="measure_unit"/>
+        <result property="producer" column="producer"/>
+        <result property="costPrice" column="cost_price"/>
+        <result property="univalence" column="univalence"/>
+        <result property="discount" column="discount"/>
+        <result property="productBarcode" column="product_barcode"/>
+        <result property="inventoryQty" column="inventory_qty"/>
+        <result property="lockInventoryQty" column="lock_inventory_qty"/>
+    </resultMap>
+
+    <resultMap type="ProductType" id="ProductTypeResult">
+        <id property="productTypeId" column="product_type_id"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="ancestors" column="ancestors"/>
+        <result property="productTypeName" column="product_type_name"/>
+    </resultMap>
+
+    <resultMap type="headReceipt" id="headReceiptResult">
+        <result property="systematicReceipt" column="systematic_receipt"/>
+        <result property="originalReceipt" column="original_receipt"/>
+        <result property="receiptCategory" column="receipt_category"/>
+        <result property="receiptType" column="receipt_type"/>
+        <result property="receiptStatus" column="receipt_status"/>
+        <result property="invoiceDate" column="invoice_date"/>
+        <result property="warehousingIds" column="warehousing_ids"/>
+        <result property="retrievalIds" column="retrieval_ids"/>
+        <result property="userIds" column="user_ids"/>
+        <result property="supplierIds" column="supplier_ids"/>
+        <result property="customerIds" column="customer_ids"/>
+        <result property="planReceipt" column="plan_receipt"/>
+        <result property="receiptNotes" column="receipt_notes"/>
+        <result property="deposit" column="deposit"/>
+        <result property="totalAmount" column="total_amount"/>
+        <result property="capitalizeTotalAmount" column="capitalize_total_amount"/>
+        <result property="afterSalesInstallation" column="after_sales_installation"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <resultMap type="Supplier" id="SupplierResult">
+        <result property="supplierId" column="supplier_id"/>
+        <result property="supplierCode" column="supplier_code"/>
+        <result property="supplierName" column="supplier_name"/>
+    </resultMap>
+
+    <resultMap type="Customer" id="CustomerResult">
+        <result property="customerId" column="customer_id"/>
+        <result property="customerCode" column="customer_code"/>
+        <result property="customerName" column="customer_name"/>
+    </resultMap>
+
+    <resultMap type="SysUser" id="SysUserResult">
+        <id property="userId" column="user_id"/>
+        <result property="userName" column="user_name"/>
+    </resultMap>
+
+    <!--    单据明细单查询      -->
+    <select id="SelectDetailReceiptQuery" parameterType="DetailReceipt" resultMap="detailReceiptResult">
+        SELECT
+        dr.systematic_receipt, dr.product_id, dr.warehousing_id, dr.retrieval_id, dr.supplier_id, dr.customer_id,
+        dr.current_inventory, dr.actual_inventory, dr.plan_quantity, dr.univalence, dr.discount, dr.money, dr.cost,
+        dr.remarks, dr.product_specifications, dr.measure_unit, dr.locked_goods, dr.lock_inventory_qty,
+        (SELECT w1.warehouse_id FROM warehouse w1 WHERE w1.warehouse_id = dr.warehousing_id) AS warehousing_id,
+        (SELECT w1.warehouse_name FROM warehouse w1 WHERE w1.warehouse_id = dr.warehousing_id) AS warehousing_name,
+        (SELECT w2.warehouse_id FROM warehouse w2 WHERE w2.warehouse_id = dr.retrieval_id) AS retrieval_id,
+        (SELECT w2.warehouse_name FROM warehouse w2 WHERE w2.warehouse_id = dr.retrieval_id) AS retrieval_name,
+        p.product_id, p.product_code, p.product_name, p.product_type, p.producer,
+        pt.product_type_id, pt.parent_id, pt.ancestors, pt.product_type_name
+        FROM head_receipt hr
+        JOIN detail_receipt dr ON hr.systematic_receipt = dr.systematic_receipt
+        JOIN product p ON dr.product_id = p.product_id
+        JOIN product_type pt ON pt.product_type_id = p.product_type
+        WHERE 1=1
+        <if test="systematicReceipt != null and systematicReceipt != ''">
+            AND hr.systematic_receipt like concat('%', #{systematicReceipt}, '%')
+        </if>
+        <if test="originalReceipt != null and originalReceipt != ''">
+            AND hr.original_receipt like concat('%', #{originalReceipt}, '%')
+        </if>
+        <if test="receiptCategory != null and receiptCategory != ''">
+            AND hr.receipt_category = #{receiptCategory}
+        </if>
+        <if test="receiptType != null and receiptType != ''">
+            AND hr.receipt_type = #{receiptType}
+        </if>
+        <if test="receiptStatus != null and receiptStatus != ''">
+            AND hr.receipt_status = #{receiptStatus}
+        </if>
+        <if test="warehousingIds != null and warehousingIds != ''">
+            AND hr.warehousing_ids = #{warehousingIds}
+        </if>
+        <if test="retrievalIds != null and retrievalIds != ''">
+            AND hr.retrieval_ids = #{retrievalIds}
+        </if>
+        <if test="userIds != null and userIds != ''">
+            AND hr.user_ids = #{userIds}
+        </if>
+        <if test="supplierIds != null and supplierIds != ''">
+            AND hr.supplier_ids = #{supplierIds}
+        </if>
+        <if test="customerIds != null and customerIds != ''">
+            AND hr.customer_ids = #{customerIds}
+        </if>
+        <if test="productCode != null and productCode != ''">
+            AND p.product_code like concat('%', #{productCode}, '%')
+        </if>
+        <if test="productName != null and productName != ''">
+            AND p.product_name like concat('%', #{productName}, '%')
+        </if>
+        <if test="lockedGoods != null and lockedGoods != ''">
+            AND dr.locked_goods = #{lockedGoods}
+        </if>
+        <if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+            AND date_format(hr.create_time,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')
+        </if>
+        <if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+            AND date_format(hr.create_time,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')
+        </if>
+    </select>
+
+    <!--    入库锁单数量查询      -->
+    <select id="selectLockInventoryQtyByReceipt" parameterType="DetailReceipt" resultMap="detailReceiptResult">
+        SELECT
+        hr.systematic_receipt, hr.invoice_date, dr.plan_quantity, dr.lock_inventory_qty, p.product_code, p.product_name,
+        pt.product_type_name, su.user_name
+        FROM head_receipt hr
+        JOIN detail_receipt dr ON dr.systematic_receipt = hr.systematic_receipt
+        JOIN product p ON p.product_id = dr.product_id
+        JOIN sys_user su ON su.user_id = hr.user_ids
+        JOIN product_type pt ON pt.product_type_id = p.product_type
+        WHERE hr.receipt_type IN (1, 5)
+        AND hr.receipt_status = 2
+        AND dr.lock_inventory_qty > 0
+        AND dr.product_id = #{productId}
+        AND dr.warehousing_id IN (#{warehousingId}, #{retrievalId})
+        ORDER BY hr.invoice_date DESC
+    </select>
+
+    <!--    单据锁单数量查询      -->
+    <select id="selectLockQtyByReceipt" parameterType="DetailReceipt" resultMap="detailReceiptResult">
+        SELECT
+        hr.systematic_receipt, hr.invoice_date, dr.plan_quantity, p.product_code, p.product_name, pt.product_type_name,
+        su.user_name
+        FROM head_receipt hr
+        JOIN detail_receipt dr ON dr.systematic_receipt = hr.systematic_receipt
+        JOIN product p ON p.product_id = dr.product_id
+        JOIN sys_user su ON su.user_id = hr.user_ids
+        JOIN product_type pt ON pt.product_type_id = p.product_type
+        WHERE hr.receipt_type IN (3, 6)
+        AND hr.receipt_status = 1
+        AND dr.locked_goods = 1
+        AND dr.product_id = #{productId}
+        AND dr.retrieval_id IN (#{warehousingId}, #{retrievalId})
+    </select>
+
+    <!--    货品发生明细      -->
+    <select id="inventoryDetailsQuery" parameterType="DetailReceipt" resultMap="detailReceiptResult">
+        SELECT
+        dr.product_id, dr.plan_quantity, dr.univalence, dr.money, hr.receipt_type,
+        p.product_code, p.product_name, p.product_type, p.product_specifications, p.measure_unit,
+        pt.product_type_name, hr.systematic_receipt, hr.original_receipt, hr.invoice_date, hr.create_time,
+        (SELECT su.user_name FROM sys_user su WHERE hr.user_ids = su.user_id) AS user_name,
+        (SELECT s.supplier_name FROM supplier s WHERE hr.supplier_ids = s.supplier_id) AS supplier_name,
+        (SELECT c.customer_name FROM customer c WHERE hr.customer_ids = c.customer_id) AS customer_name
+        from detail_receipt dr
+        JOIN head_receipt hr ON hr.systematic_receipt = dr.systematic_receipt
+        JOIN product p ON dr.product_id = p.product_id
+        JOIN product_type pt ON pt.product_type_id = p.product_type
+        WHERE hr.receipt_status = 2
+        <if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+            AND date_format(hr.invoice_date,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')
+        </if>
+        <if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+            AND date_format(hr.invoice_date,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')
+        </if>
+        <if test="systematicReceipt != null and systematicReceipt != ''">
+            AND hr.systematic_receipt like concat('%', #{systematicReceipt}, '%')
+        </if>
+        <if test="warehousingId != null and warehousingId != ''">
+            AND dr.warehousing_id = #{warehousingId}
+        </if>
+        <if test="retrievalId != null and retrievalId != ''">
+            AND dr.retrieval_id = #{retrievalId}
+        </if>
+        <if test="productCode != null and productCode != ''">
+            AND p.product_code like concat('%', #{productCode}, '%')
+        </if>
+        <if test="productName != null and productName != ''">
+            AND p.product_name like concat('%', #{productName}, '%')
+        </if>
+        <if test="userIds != null and userIds != ''">
+            AND hr.user_ids = #{userIds}
+        </if>
+        <if test="supplierIds != null and supplierIds != ''">
+            AND hr.supplier_ids = #{supplierIds}
+        </if>
+        <if test="customerIds != null and customerIds != ''">
+            AND hr.customer_ids = #{customerIds}
+        </if>
+    </select>
+
+    <!--    单据明细表新增   -->
+    <insert id="addDetailReceipt" parameterType="java.util.List">
+        insert into detail_receipt(
+        systematic_receipt,
+        product_id,
+        warehousing_id,
+        retrieval_id,
+        supplier_id,
+        customer_id,
+        product_specifications,
+        measure_unit,
+        current_inventory,
+        actual_inventory,
+        locked_goods,
+        lock_inventory_qty,
+        plan_quantity,
+        univalence,
+        discount,
+        money,
+        cost,
+        remarks,
+        create_by,
+        create_time
+        )
+        <foreach collection="list" index="index" item="item" separator="union all">
+            select
+            #{item.systematicReceipt,jdbcType=VARCHAR},
+            #{item.productId,jdbcType=VARCHAR},
+            #{item.warehousingId,jdbcType=VARCHAR},
+            #{item.retrievalId,jdbcType=VARCHAR},
+            #{item.supplierId,jdbcType=VARCHAR},
+            #{item.customerId,jdbcType=VARCHAR},
+            #{item.productSpecifications,jdbcType=VARCHAR},
+            #{item.measureUnit,jdbcType=VARCHAR},
+            #{item.currentInventory,jdbcType=VARCHAR},
+            #{item.actualInventory,jdbcType=VARCHAR},
+            #{item.lockedGoods,jdbcType=VARCHAR},
+            #{item.lockInventoryQty,jdbcType=VARCHAR},
+            #{item.planQuantity,jdbcType=VARCHAR},
+            #{item.univalence,jdbcType=VARCHAR},
+            #{item.discount,jdbcType=VARCHAR},
+            #{item.money,jdbcType=VARCHAR},
+            #{item.cost,jdbcType=VARCHAR},
+            #{item.remarks,jdbcType=VARCHAR},
+            #{item.createBy,jdbcType=VARCHAR},
+            sysdate()
+            from dual
+        </foreach>
+    </insert>
+
+    <!--    单据明细表修改   -->
+    <update id="updateDetailReceipt" parameterType="DetailReceipt">
+        update detail_receipt
+        <set>
+            <if test="productId != null and productId != ''">product_id = #{productId},</if>
+            <if test="warehousingId != null and warehousingId != ''">warehousing_id = #{warehousingId},</if>
+            <if test="retrievalId != null and retrievalId != ''">retrieval_id = #{retrievalId},</if>
+            <if test="supplierId != null and supplierId != ''">supplier_id = #{supplierId},</if>
+            <if test="customerId != null and customerId != ''">customer_id = #{customerId},</if>
+            <if test="productSpecifications != null and productSpecifications != ''">product_specifications =
+                #{productSpecifications},
+            </if>
+            <if test="measureUnit != null and measureUnit != ''">measure_unit = #{measureUnit},</if>
+            <if test="currentInventory != null and currentInventory != ''">current_inventory = #{currentInventory},</if>
+            <if test="actualInventory != null and actualInventory != ''">actual_inventory = #{actualInventory},</if>
+            <if test="lockedGoods != null and lockedGoods != ''">locked_goods = #{lockedGoods},</if>
+            <if test="lockInventoryQty != null and lockInventoryQty != ''">lock_inventory_qty = #{lockInventoryQty},
+            </if>
+            <if test="planQuantity != null and planQuantity != ''">plan_quantity = #{planQuantity},</if>
+            <if test="univalence != null and univalence != ''">univalence = #{univalence},</if>
+            <if test="discount != null and discount != ''">discount = #{discount},</if>
+            <if test="money != null and money != ''">money = #{money},</if>
+            <if test="cost != null and cost != ''">cost = #{cost},</if>
+            <if test="remarks != null and remarks != ''">remarks = #{remarks},</if>
+            update_by = #{updateBy},
+            update_time = sysdate()
+        </set>
+        where systematic_receipt = #{systematicReceipt}
+    </update>
+
+    <!--    单据明细表删除      -->
+    <delete id="delDetailReceipt" parameterType="java.util.List">
+        delete from detail_receipt where systematic_receipt in
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item.systematicReceipt}
+        </foreach>
+    </delete>
+
+</mapper>

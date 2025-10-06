@@ -76,7 +76,7 @@
     </el-form>
     <!--  底部  -->
     <div class="el-login-footer">
-      <span>Copyright © 2024 KS-inventory-system.top All Rights Reserved.</span>
+      <span>Copyright © 2025 铠思 All Rights Reserved.</span>
     </div>
   </div>
 </template>

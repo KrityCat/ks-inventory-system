@@ -91,6 +91,17 @@ public class Product extends BaseEntity {
     private String inventoryQty;
 
     /**
+     * 库存数量
+     */
+    @Excel(name = "库存锁单数量")
+    private String lockInventoryQty;
+
+    /**
+     * 单据锁单数量
+     */
+    private String lockQty;
+
+    /**
      * 库存上限
      */
     @Excel(name = "库存上限")
@@ -117,7 +128,7 @@ public class Product extends BaseEntity {
     /**
      * 状态（0正常 1停用）
      */
-    @Excel(name = "帐号状态", readConverterExp = "0=正常,1=停用")
+    @Excel(name = "状态", readConverterExp = "0=正常,1=停用")
     private String status;
 
     /**
@@ -132,6 +143,12 @@ public class Product extends BaseEntity {
      * 货品类型名称
      */
     private String productTypeName;
+
+    private String assembleLockQty;
+
+    private String warehousingId;
+
+    private String retrievalId;
 
     public String getProductId() {
         return productId;
@@ -229,6 +246,22 @@ public class Product extends BaseEntity {
         this.inventoryQty = inventoryQty;
     }
 
+    public String getLockInventoryQty() {
+        return lockInventoryQty;
+    }
+
+    public void setLockInventoryQty(String lockInventoryQty) {
+        this.lockInventoryQty = lockInventoryQty;
+    }
+
+    public String getLockQty() {
+        return lockQty;
+    }
+
+    public void setLockQty(String lockQty) {
+        this.lockQty = lockQty;
+    }
+
     public String getUpperLimit() {
         return upperLimit;
     }
@@ -285,6 +318,30 @@ public class Product extends BaseEntity {
         this.productTypeName = productTypeName;
     }
 
+    public String getAssembleLockQty() {
+        return assembleLockQty;
+    }
+
+    public void setAssembleLockQty(String assembleLockQty) {
+        this.assembleLockQty = assembleLockQty;
+    }
+
+    public String getWarehousingId() {
+        return warehousingId;
+    }
+
+    public void setWarehousingId(String warehousingId) {
+        this.warehousingId = warehousingId;
+    }
+
+    public String getRetrievalId() {
+        return retrievalId;
+    }
+
+    public void setRetrievalId(String retrievalId) {
+        this.retrievalId = retrievalId;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
@@ -300,6 +357,9 @@ public class Product extends BaseEntity {
                 .append("discount", getDiscount())
                 .append("productBarcode", getProductBarcode())
                 .append("inventoryQty", getInventoryQty())
+                .append("lockInventoryQty", getLockInventoryQty())
+                .append("lockQty", getLockInventoryQty())
+                .append("assembleLockQty", getAssembleLockQty())
                 .append("upperLimit", getUpperLimit())
                 .append("lowerLimit", getLowerLimit())
                 .append("defaultWarehouse", getDefaultWarehouse())
@@ -307,6 +367,8 @@ public class Product extends BaseEntity {
                 .append("status", getStatus())
                 .append("type", getType())
                 .append("productTypeName", getProductTypeName())
+                .append("warehousingId", getWarehousingId())
+                .append("retrievalId", getRetrievalId())
                 .append("createBy", getCreateBy())
                 .append("createTime", getCreateTime())
                 .append("updateBy", getUpdateBy())

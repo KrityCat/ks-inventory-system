@@ -39,7 +39,7 @@ export function saveInventoryCounting(data) {
 /**   删除库存单据    */
 export function delReceipt(data) {
   return request({
-    url: '/inventory/inventoryReceiptQuery/delete',
+    url: '/inventory/inventoryReceiptProcessing/delete',
     method: 'post',
     data: data
   })

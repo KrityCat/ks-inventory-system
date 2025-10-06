@@ -5,16 +5,17 @@ import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.entity.DetailReceipt;
 import com.ruoyi.common.core.domain.entity.HeadReceipt;
+import com.ruoyi.common.core.domain.entity.ReceiptFrom;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.poi.ExcelUtil;
-import com.ruoyi.system.service.SalesReceiptQueryService;
+import com.ruoyi.inventory.service.SalesReceiptQueryService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -74,7 +75,7 @@ public class SalesReceiptQueryController extends BaseController {
     @PreAuthorize("@ss.hasPermi('sales:salesReceiptQuery:delete')")
     @Log(title = "删除销售单据", businessType = BusinessType.DELETE)
     @PostMapping("/delete")
-    public AjaxResult remove(@RequestBody List<DetailReceipt> bo) {
+    public AjaxResult remove(@RequestBody ReceiptFrom bo) {
         return toAjax(salesReceiptQueryService.delSalesReceipt(bo));
     }
 

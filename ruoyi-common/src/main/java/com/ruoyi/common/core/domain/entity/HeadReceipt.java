@@ -41,6 +41,12 @@ public class HeadReceipt extends BaseEntity {
     private Long receiptType;
 
     /**
+     * 出货方式
+     */
+    @Excel(name = "财务审核", readConverterExp = "1=待审核,2=已审核")
+    private Long financialReview;
+
+    /**
      * 单据状态
      */
     @Excel(name = "单据状态", readConverterExp = "1=待审核,2=已审核")
@@ -138,7 +144,7 @@ public class HeadReceipt extends BaseEntity {
     private String capitalizeTotalAmount;
 
     @Excel(name = "售后安装", readConverterExp = "0=是,1=否")
-    private Long afterSalesInstallation;
+    private String afterSalesInstallation;
 
     /**
      * 审核结果
@@ -151,31 +157,6 @@ public class HeadReceipt extends BaseEntity {
      */
     @Excel(name = "审核意见")
     private String reviewComments;
-
-    private Long dailySalesAmount;
-
-    private Long lastMonthSalesAmount;
-
-    private Long lastSixMonthsSalesAmount;
-
-    private Long thisYearSalesAmount;
-
-    private Long lastYearSalesAmount;
-
-    private Long lastTwoYearsSalesAmount;
-
-    private Long dailyGrossProfit;
-
-    private Long lastMonthGrossProfit;
-
-    private Long lastSixMonthsGrossProfit;
-
-    private Long thisYearGrossProfit;
-
-    private Long lastYearGrossProfit;
-
-    private Long lastTwoYearsGrossProfit;
-
 
     private List<Product> product;
 
@@ -211,6 +192,14 @@ public class HeadReceipt extends BaseEntity {
 
     public void setReceiptType(Long receiptType) {
         this.receiptType = receiptType;
+    }
+
+    public Long getfinancialReview() {
+        return financialReview;
+    }
+
+    public void setfinancialReview(Long financialReview) {
+        this.financialReview = financialReview;
     }
 
     public Long getReceiptStatus() {
@@ -325,11 +314,11 @@ public class HeadReceipt extends BaseEntity {
         this.capitalizeTotalAmount = capitalizeTotalAmount;
     }
 
-    public Long getAfterSalesInstallation() {
+    public String getAfterSalesInstallation() {
         return afterSalesInstallation;
     }
 
-    public void setAfterSalesInstallation(Long afterSalesInstallation) {
+    public void setAfterSalesInstallation(String afterSalesInstallation) {
         this.afterSalesInstallation = afterSalesInstallation;
     }
 
@@ -405,102 +394,6 @@ public class HeadReceipt extends BaseEntity {
         this.details = details;
     }
 
-    public Long getDailySalesAmount() {
-        return dailySalesAmount;
-    }
-
-    public void setDailySalesAmount(Long dailySalesAmount) {
-        this.dailySalesAmount = dailySalesAmount;
-    }
-
-    public Long getLastMonthSalesAmount() {
-        return lastMonthSalesAmount;
-    }
-
-    public void setLastMonthSalesAmount(Long lastMonthSalesAmount) {
-        this.lastMonthSalesAmount = lastMonthSalesAmount;
-    }
-
-    public Long getLastSixMonthsSalesAmount() {
-        return lastSixMonthsSalesAmount;
-    }
-
-    public void setLastSixMonthsSalesAmount(Long lastSixMonthsSalesAmount) {
-        this.lastSixMonthsSalesAmount = lastSixMonthsSalesAmount;
-    }
-
-    public Long getThisYearSalesAmount() {
-        return thisYearSalesAmount;
-    }
-
-    public void setThisYearSalesAmount(Long thisYearSalesAmount) {
-        this.thisYearSalesAmount = thisYearSalesAmount;
-    }
-
-    public Long getLastYearSalesAmount() {
-        return lastYearSalesAmount;
-    }
-
-    public void setLastYearSalesAmount(Long lastYearSalesAmount) {
-        this.lastYearSalesAmount = lastYearSalesAmount;
-    }
-
-    public Long getLastTwoYearsSalesAmount() {
-        return lastTwoYearsSalesAmount;
-    }
-
-    public void setLastTwoYearsSalesAmount(Long lastTwoYearsSalesAmount) {
-        this.lastTwoYearsSalesAmount = lastTwoYearsSalesAmount;
-    }
-
-    public Long getDailyGrossProfit() {
-        return dailyGrossProfit;
-    }
-
-    public void setDailyGrossProfit(Long dailyGrossProfit) {
-        this.dailyGrossProfit = dailyGrossProfit;
-    }
-
-    public Long getLastMonthGrossProfit() {
-        return lastMonthGrossProfit;
-    }
-
-    public void setLastMonthGrossProfit(Long lastMonthGrossProfit) {
-        this.lastMonthGrossProfit = lastMonthGrossProfit;
-    }
-
-    public Long getLastSixMonthsGrossProfit() {
-        return lastSixMonthsGrossProfit;
-    }
-
-    public void setLastSixMonthsGrossProfit(Long lastSixMonthsGrossProfit) {
-        this.lastSixMonthsGrossProfit = lastSixMonthsGrossProfit;
-    }
-
-    public Long getThisYearGrossProfit() {
-        return thisYearGrossProfit;
-    }
-
-    public void setThisYearGrossProfit(Long thisYearGrossProfit) {
-        this.thisYearGrossProfit = thisYearGrossProfit;
-    }
-
-    public Long getLastYearGrossProfit() {
-        return lastYearGrossProfit;
-    }
-
-    public void setLastYearGrossProfit(Long lastYearGrossProfit) {
-        this.lastYearGrossProfit = lastYearGrossProfit;
-    }
-
-    public Long getLastTwoYearsGrossProfit() {
-        return lastTwoYearsGrossProfit;
-    }
-
-    public void setLastTwoYearsGrossProfit(Long lastTwoYearsGrossProfit) {
-        this.lastTwoYearsGrossProfit = lastTwoYearsGrossProfit;
-    }
-
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
@@ -508,6 +401,7 @@ public class HeadReceipt extends BaseEntity {
                 .append("originalReceipt", getOriginalReceipt())
                 .append("receiptCategory", getReceiptCategory())
                 .append("receiptType", getReceiptType())
+                .append("financialReview", getfinancialReview())
                 .append("receiptStatus", getReceiptStatus())
                 .append("invoiceDate", getInvoiceDate())
                 .append("warehousingIds", getWarehousingIds())

@@ -249,12 +249,6 @@
             </template>
           </el-table-column>
           <el-table-column
-            label="原始单号"
-            align="center"
-            prop="originalReceipt"
-            width="180"
-          />
-          <el-table-column
             label="单据类型"
             align="center"
             prop="serviceType"
@@ -304,6 +298,12 @@
             align="center"
             prop="customer.customerName"
             width="100"
+          />
+          <el-table-column
+            label="原始单号"
+            align="center"
+            prop="originalReceipt"
+            width="180"
           />
           <el-table-column
             label="备注"
@@ -391,7 +391,7 @@
                   link
                   type="primary"
                   icon="Printer"
-                  @click="printOut(scope.row)"
+                  @click="printCommon(scope.row)"
                   v-hasPermi="['afterSales:afterSalesOrderQuery:printOut']"
                 ></el-button>
               </el-tooltip>
@@ -489,27 +489,33 @@
       </el-col>
     </el-row>
   </div>
+
+  <!-- 查看打印模板对话框 -->
+  <print-template-dialog
+      v-model:visible="openPrintTemplate"
+      :systematic-receipt="systematicReceipt"
+  />
 </template>
 
-<script setup name="afterSalesOrderQuery">
-import { getToken } from "@/utils/auth";
+<script setup name="AfterSalesOrderQuery">
 import { useRouter } from "vue-router";
-import { listWarehouse } from "@/api/basedate/warehouse";
-import { listUser, getUserProfile } from "@/api/system/user";
-import { listCustomer } from "@/api/basedate/customer";
+import { getUserProfile } from "@/api/system/user";
 import {
   headQuery,
   detailQuery,
   getAfterSales,
   delAfterSales,
 } from "@/api/aftersales/afterSalesOrderQuery";
-import { viewUrl } from "@/api/jimu/jiMuReport";
+import {
+  userList,
+  warehouseList,
+  customerList,
+} from "@/api/common/CommonReceipt";
+import printTemplateDialog from '@/components/CommonDialog/printTemplateDialog.vue';
 
 const { proxy } = getCurrentInstance();
 const { service_type } = proxy.useDict("service_type");
 const { receipt_status } = proxy.useDict("receipt_status");
-const { print_selected_files } = proxy.useDict("print_selected_files");
-const { print_selected_sizes } = proxy.useDict("print_selected_sizes");
 
 // 查询结果表
 const salesOrderList = ref([]);
@@ -517,8 +523,6 @@ const salesDetailOrderList = ref([]);
 const userOptions = ref(undefined);
 const customerOptions = ref(undefined);
 const warehouseOptions = ref(undefined);
-const printOptions = ref(undefined);
-const openUrl = ref("");
 // 查询表展示
 const salesHead = ref(true);
 // 查询明细表展示
@@ -535,6 +539,8 @@ const open = ref(false);
 // 数据范围
 const dateRange = ref([]);
 const router = useRouter();
+const openPrintTemplate = ref(false);
+const systematicReceipt = ref(null);
 
 const data = reactive({
   option: {
@@ -572,13 +578,13 @@ const { queryParams, form, option, rules } = toRefs(data);
 
 async function Options() {
   loading.value = true;
-  listWarehouse(option.value).then((response) => {
+  warehouseList(option.value).then((response) => {
     warehouseOptions.value = response.rows;
   });
-  listCustomer(option.value).then((response) => {
+  customerList(option.value).then((response) => {
     customerOptions.value = response.rows;
   });
-  await listUser(option.value).then((response) => {
+  await userList(option.value).then((response) => {
     userOptions.value = response.rows;
   });
   await getUserProfile().then((response) => {
@@ -642,24 +648,10 @@ function reset() {
   };
   proxy.resetForm("printRef");
 }
-/** 打印按钮 */
-async function printOut(row) {
-  form.value.printId = print_selected_files.value[8].label;
-  form.value.printSize = print_selected_sizes.value[8].label;
-  await viewUrl().then((res) => {
-    openUrl.value = res;
-  });
-  const printUrl =
-    openUrl.value +
-    "/" +
-    form.value.printId +
-    "?token=Bearer " +
-    getToken() +
-    "&systematicReceipt=" +
-    row.systematicReceipt +
-    "&pageSize=" +
-    form.value.printSize;
-  window.open(printUrl, "_blank");
+// 打印按钮
+function printCommon(row) {
+  systematicReceipt.value = row.systematicReceipt;
+  openPrintTemplate.value = true;
 }
 /** 修改按钮操作 */
 function handleUpdate(row) {
@@ -728,7 +720,7 @@ function remoteCustomer(query) {
   if (query) {
     setTimeout(() => {
       option.value.customerName = query;
-      listCustomer(option.value).then((response) => {
+      customerList(option.value).then((response) => {
         customerOptions.value = response.rows;
       });
       customerOptions.value = list.value.filter((item) => {
@@ -736,7 +728,7 @@ function remoteCustomer(query) {
       });
     }, 200);
   } else {
-    listCustomer(option.value).then((response) => {
+    customerList(option.value).then((response) => {
       customerOptions.value = response.rows;
     });
   }

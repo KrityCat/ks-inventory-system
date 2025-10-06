@@ -7,6 +7,8 @@ import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.file.FileUploadUtils;
 import com.ruoyi.common.utils.file.FileUtils;
 import com.ruoyi.framework.config.ServerConfig;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,31 +19,27 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * 通用请求处理
- * 
+ *
  * @author KrityCat
  */
 @RestController
 @RequestMapping("/common")
 public class CommonController {
     private static final Logger log = LoggerFactory.getLogger(CommonController.class);
-
+    private static final String FILE_DELIMETER = ",";
     @Autowired
     private ServerConfig serverConfig;
 
-    private static final String FILE_DELIMETER = ",";
-
     /**
      * 通用下载请求
-     * 
+     *
      * @param fileName 文件名称
-     * @param delete 是否删除
+     * @param delete   是否删除
      */
     @GetMapping("/download")
     public void fileDownload(String fileName, Boolean delete, HttpServletResponse response, HttpServletRequest request) {

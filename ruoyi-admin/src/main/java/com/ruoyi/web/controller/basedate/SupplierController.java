@@ -8,14 +8,14 @@ import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.poi.ExcelUtil;
-import com.ruoyi.system.service.SupplierService;
+import com.ruoyi.inventory.service.SupplierService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -28,7 +28,7 @@ import java.util.List;
 public class SupplierController extends BaseController {
 
     @Autowired
-    private SupplierService SlService;
+    private SupplierService supplierService;
 
     /**
      * 查询供应商接口
@@ -37,7 +37,7 @@ public class SupplierController extends BaseController {
     @GetMapping("/list")
     public TableDataInfo list(Supplier bo) {
         startPage();
-        List<Supplier> list = SlService.SupplierQuery(bo);
+        List<Supplier> list = supplierService.SupplierQuery(bo);
         return getDataTable(list);
     }
 
@@ -49,46 +49,46 @@ public class SupplierController extends BaseController {
     public AjaxResult getInfo(@PathVariable(value = "supplierId", required = false) Long supplierId) {
         AjaxResult ajax = AjaxResult.success();
         if (StringUtils.isNotNull(supplierId)) {
-            Supplier supplier = SlService.selectSupplierById(supplierId);
+            Supplier supplier = supplierService.selectSupplierById(supplierId);
             ajax.put(AjaxResult.DATA_TAG, supplier);
         }
         return ajax;
     }
 
     /**
-     * 新增接口
+     * 供应商新增接口
      */
     @PreAuthorize("@ss.hasPermi('baseDate:supplier:add')")
     @Log(title = "新增供应商资料", businessType = BusinessType.INSERT)
     @PostMapping("/add")
     public AjaxResult add(@Validated @RequestBody Supplier bo) {
         bo.setCreateBy(getUsername());
-        return toAjax(SlService.insertSupplier(bo));
+        return toAjax(supplierService.insertSupplier(bo));
     }
 
     /**
-     * 修改接口
+     * 供应商修改接口
      */
     @PreAuthorize("@ss.hasPermi('baseDate:supplier:update')")
     @Log(title = "修改供应商资料", businessType = BusinessType.INSERT)
     @PutMapping("/update")
     public AjaxResult edit(@Validated @RequestBody Supplier bo) {
         bo.setUpdateBy(getUsername());
-        return toAjax(SlService.updateSupplier(bo));
+        return toAjax(supplierService.updateSupplier(bo));
     }
 
     /**
-     * 删除接口
+     * 供应商删除接口
      */
     @PreAuthorize("@ss.hasPermi('baseDate:supplier:remove')")
     @Log(title = "删除供应商资料", businessType = BusinessType.INSERT)
     @DeleteMapping("/{supplierIds}")
     public AjaxResult remove(@PathVariable Long[] supplierIds) {
-        return toAjax(SlService.deleteSupplierByIds(supplierIds));
+        return toAjax(supplierService.deleteSupplierByIds(supplierIds));
     }
 
     /**
-     * 模板接口
+     * 供应商模板接口
      */
     @PostMapping("/importTemplate")
     public void importTemplate(HttpServletResponse response) {
@@ -97,7 +97,7 @@ public class SupplierController extends BaseController {
     }
 
     /**
-     * 导入接口
+     * 供应商导入接口
      */
     @PreAuthorize("@ss.hasPermi('baseDate:supplier:import')")
     @Log(title = "导入供应商资料", businessType = BusinessType.IMPORT)
@@ -106,18 +106,18 @@ public class SupplierController extends BaseController {
         ExcelUtil<Supplier> util = new ExcelUtil<Supplier>(Supplier.class);
         List<Supplier> SupplierList = util.importExcel(file.getInputStream());
         String operName = getUsername();
-        String message = SlService.importSupplier(SupplierList, updateSupport, operName);
+        String message = supplierService.importSupplier(SupplierList, updateSupport, operName);
         return success(message);
     }
 
     /**
-     * 供应商接口
+     * 供应商导出接口
      */
     @PreAuthorize("@ss.hasPermi('baseDate:supplier:export')")
     @Log(title = "导出供应商资料", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, Supplier bo) {
-        List<Supplier> list = SlService.SupplierQuery(bo);
+        List<Supplier> list = supplierService.SupplierQuery(bo);
         ExcelUtil<Supplier> util = new ExcelUtil<Supplier>(Supplier.class);
         util.exportExcel(response, list, "供应商数据");
     }

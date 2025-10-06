@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ruoyi.inventory.mapper.IndexMapper">
+
+    <resultMap type="index" id="indexResult">
+        <result property="dailySalesAmount" column="dailySalesAmount"/>
+        <result property="lastMonthSalesAmount" column="lastMonthSalesAmount"/>
+        <result property="lastSixMonthsSalesAmount" column="lastSixMonthsSalesAmount"/>
+        <result property="thisYearSalesAmount" column="thisYearSalesAmount"/>
+        <result property="lastYearSalesAmount" column="lastYearSalesAmount"/>
+        <result property="lastTwoYearsSalesAmount" column="lastTwoYearsSalesAmount"/>
+        <result property="dailyGrossProfit" column="dailyGrossProfit"/>
+        <result property="lastMonthGrossProfit" column="lastMonthGrossProfit"/>
+        <result property="lastSixMonthsGrossProfit" column="lastSixMonthsGrossProfit"/>
+        <result property="thisYearGrossProfit" column="thisYearGrossProfit"/>
+        <result property="lastYearGrossProfit" column="lastYearGrossProfit"/>
+        <result property="lastTwoYearsGrossProfit" column="lastTwoYearsGrossProfit"/>
+        <result property="purchaseInReceipt" column="purchaseInReceipt"/>
+        <result property="purchaseOutReceipt" column="purchaseOutReceipt"/>
+        <result property="salesOutReceipt" column="salesOutReceipt"/>
+        <result property="salesRefundReceipt" column="salesRefundReceipt"/>
+        <result property="otherInReceipt" column="otherInReceipt"/>
+        <result property="otherOutReceipt" column="otherOutReceipt"/>
+        <result property="otherTransferReceipt" column="otherTransferReceipt"/>
+        <result property="stocktakingReceipt" column="stocktakingReceipt"/>
+        <result property="productId" column="product_id"/>
+        <result property="productCode" column="product_code"/>
+        <result property="productName" column="product_name"/>
+        <result property="productType" column="product_type"/>
+        <result property="productSpecifications" column="product_specifications"/>
+        <result property="measureUnit" column="measure_unit"/>
+        <result property="producer" column="producer"/>
+        <result property="costPrice" column="cost_price"/>
+        <result property="univalence" column="univalence"/>
+        <result property="discount" column="discount"/>
+        <result property="productBarcode" column="product_barcode"/>
+        <result property="inventoryQty" column="inventory_qty"/>
+        <result property="lockInventoryQty" column="lock_inventory_qty"/>
+        <result property="upperLimit" column="upper_limit"/>
+        <result property="lowerLimit" column="lower_limit"/>
+        <result property="defaultWarehouse" column="default_warehouse"/>
+        <result property="notes" column="notes"/>
+        <result property="status" column="status"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="productTypeName" column="product_type_name"/>
+        <association property="type" javaType="ProductType" resultMap="ProductTypeResult"/>
+    </resultMap>
+
+    <resultMap type="ProductType" id="ProductTypeResult">
+        <id property="productTypeId" column="product_type_id"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="ancestors" column="ancestors"/>
+        <result property="productTypeName" column="product_type_name"/>
+        <result property="orderNum" column="order_num"/>
+        <result property="status" column="status"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="parentName" column="parent_name"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+
+    <!--    销售金额与毛利润查询      -->
+    <select id="salesAmountQuery" parameterType="index" resultMap="indexResult">
+        select
+        SUM(case when receipt_type = 3 and receipt_status = 2 and create_time = STR_TO_DATE(NOW(), '%Y-%m-%d') then
+        total_amount when receipt_type = 4 and receipt_status = 2 and create_time = STR_TO_DATE(NOW(), '%Y-%m-%d') then
+        -total_amount else 0 end) as dailySalesAmount,
+        SUM(case when receipt_type = 3 and receipt_status = 2 and create_time >= DATE_SUB(CURDATE(), interval 1 month)
+        then total_amount when receipt_type = 4 and receipt_status = 2 and create_time >= DATE_SUB(CURDATE(), interval 1
+        month) then -total_amount else 0 end) as lastMonthSalesAmount,
+        SUM(case when receipt_type = 3 and receipt_status = 2 and create_time >= DATE_SUB(CURDATE(), interval 6 month)
+        then total_amount when receipt_type = 4 and receipt_status = 2 and create_time >= DATE_SUB(CURDATE(), interval 6
+        month) then -total_amount else 0 end) as lastSixMonthsSalesAmount,
+        SUM(case when receipt_type = 3 and receipt_status = 2 and year(create_time) = year(now()) then total_amount when
+        receipt_type = 4 and receipt_status = 2 and year(create_time) = year(now()) then -total_amount else 0 end) as
+        thisYearSalesAmount,
+        SUM(case when receipt_type = 3 and receipt_status = 2 and year(create_time) = year(date_sub(now(), interval 1
+        year)) then total_amount when receipt_type = 4 and receipt_status = 2 and year(create_time) =
+        year(date_sub(now(), interval 1 year)) then -total_amount else 0 end) as lastYearSalesAmount,
+        SUM(case when receipt_type = 3 and receipt_status = 2 and year(create_time) = year(date_sub(now(), interval 2
+        year)) then total_amount when receipt_type = 4 and receipt_status = 2 and year(create_time) =
+        year(date_sub(now(), interval 2 year)) then -total_amount else 0 end) as lastTwoYearsSalesAmount,
+        SUM(case when receipt_type in (2, 3, 6, 9) and receipt_status = 2 and create_time = STR_TO_DATE(NOW(),
+        '%Y-%m-%d') then total_amount when receipt_type in (1, 4, 5, 10) and receipt_status = 2 and create_time =
+        STR_TO_DATE(NOW(), '%Y-%m-%d') then -total_amount else 0 end) as dailyGrossProfit,
+        SUM(case when receipt_type in (2, 3, 6, 9) and receipt_status = 2 and create_time >= DATE_SUB(CURDATE(),
+        interval 1 month) then total_amount when receipt_type in (1, 4, 5, 10) and receipt_status = 2 and create_time >=
+        DATE_SUB(CURDATE(), interval 1 month) then -total_amount else 0 end) as lastMonthGrossProfit,
+        SUM(case when receipt_type in (2, 3, 6, 9) and receipt_status = 2 and create_time >= DATE_SUB(CURDATE(),
+        interval 6 month) then total_amount when receipt_type in (1, 4, 5, 10) and receipt_status = 2 and create_time >=
+        DATE_SUB(CURDATE(), interval 6 month) then -total_amount else 0 end) as lastSixMonthsGrossProfit,
+        SUM(case when receipt_type in (2, 3, 6, 9) and receipt_status = 2 and year(create_time) = year(now()) then
+        total_amount when receipt_type in (1, 4, 5, 10) and receipt_status = 2 and year(create_time) = year(now()) then
+        -total_amount else 0 end) as thisYearGrossProfit,
+        SUM(case when receipt_type in (2, 3, 6, 9) and receipt_status = 2 and year(create_time) = year(date_sub(now(),
+        interval 1 year)) then total_amount when receipt_type in (1, 4, 5, 10) and receipt_status = 2 and
+        year(create_time) = year(date_sub(now(), interval 1 year)) then -total_amount else 0 end) as
+        lastYearGrossProfit,
+        SUM(case when receipt_type in (2, 3, 6, 9) and receipt_status = 2 and year(create_time) = year(date_sub(now(),
+        interval 2 year)) then total_amount when receipt_type in (1, 4, 5, 10) and receipt_status = 2 and
+        year(create_time) = year(date_sub(now(), interval 2 year)) then -total_amount else 0 end) as
+        lastTwoYearsGrossProfit
+        from
+        head_receipt
+    </select>
+
+    <!--    待审核单据     -->
+    <select id="salesNotTakeEffectQuery" parameterType="index" resultMap="indexResult">
+        select
+        -- 采购入库单据待审核
+        (select count(*) from head_receipt where receipt_type = 1 and receipt_status = 1) AS purchaseInReceipt,
+        -- 采购退库单据待审核
+        (select count(*) from head_receipt where receipt_type = 2 and receipt_status = 1) AS purchaseOutReceipt,
+        -- 销售出库单据待审核
+        (select count(*) from head_receipt where receipt_type = 3 and receipt_status = 1) AS salesOutReceipt,
+        -- 销售退库单据待审核
+        (select count(*) from head_receipt where receipt_type = 4 and receipt_status = 1) AS salesRefundReceipt,
+        -- 其他入库单据待审核
+        (select count(*) from head_receipt where receipt_type = 5 and receipt_status = 1) AS otherInReceipt,
+        -- 其他出库单据待审核
+        (select count(*) from head_receipt where receipt_type = 6 and receipt_status = 1) AS otherOutReceipt,
+        -- 库存调拨单据待审核
+        (select count(*) from head_receipt where receipt_type = 7 and receipt_status = 1) AS otherTransferReceipt,
+        -- 库存盘点单据待审核
+        (select count(*) from head_receipt where receipt_type = 8 and receipt_status = 1) AS stocktakingReceipt
+    </select>
+
+
+    <!--    查询货品公用方法    -->
+    <sql id="selectProductVo">
+        SELECT
+        p.product_id, p.product_code, p.product_name, p.product_type, p.product_specifications, p.measure_unit,
+        p.producer, ip.plan_quantity as inventory_qty,
+        p.upper_limit, p.lower_limit, pt.product_type_name
+        FROM product p
+        JOIN product_type pt ON pt.product_type_id = p.product_type
+        left JOIN inventory_product ip ON ip.product_id = p.product_id
+    </sql>
+
+    <!--    货品库存积压预警查询      -->
+    <select id="productOverstockQuery" parameterType="index" resultMap="indexResult">
+        <include refid="selectProductVo"/>
+        WHERE ip.plan_quantity &gt; p.upper_limit
+    </select>
+
+    <!--    货品库存不足预警查询      -->
+    <select id="productDangerQuery" parameterType="index" resultMap="indexResult">
+        <include refid="selectProductVo"/>
+        WHERE ip.plan_quantity &lt; p.lower_limit
+    </select>
+
+    <!-- 通用积压预警查询 -->
+    <sql id="backlogWarningBase">
+        <include refid="selectProductVo"/>
+        JOIN detail_receipt d ON p.product_id = d.product_id
+        JOIN head_receipt h ON h.systematic_receipt = d.systematic_receipt
+        WHERE ip.plan_quantity > 0
+    </sql>
+
+    <!--    积压3个月未出预警查询      -->
+    <select id="productThreeDangerQuery" parameterType="index" resultMap="indexResult">
+        <include refid="backlogWarningBase"/>
+        and not exists (select 1 from head_receipt h2 where h2.systematic_receipt = h.systematic_receipt and
+        h.receipt_type = 3 and h2.invoice_date &gt;= DATE_SUB(CURDATE(), interval 3 month))
+        and exists (select 1 from head_receipt h2 where h2.systematic_receipt = h.systematic_receipt and h2.invoice_date
+        &lt; DATE_SUB(CURDATE(), interval 3 month))
+    </select>
+
+    <!--    积压6个月未出预警查询      -->
+    <select id="productSixDangerQuery" parameterType="index" resultMap="indexResult">
+        <include refid="backlogWarningBase"/>
+        and not exists (select 1 from head_receipt h2 where h2.systematic_receipt = h.systematic_receipt and
+        h.receipt_type = 3 and h2.invoice_date &gt;= DATE_SUB(CURDATE(), interval 6 month))
+        and exists (select 1 from head_receipt h2 where h2.systematic_receipt = h.systematic_receipt and h2.invoice_date
+        &lt; DATE_SUB(CURDATE(), interval 6 month))
+    </select>
+
+    <!--    积压12个月未出预警查询      -->
+    <select id="productTwelveDangerQuery" parameterType="index" resultMap="indexResult">
+        <include refid="backlogWarningBase"/>
+        and not exists (select 1 from head_receipt h2 where h2.systematic_receipt = h.systematic_receipt and
+        h.receipt_type = 3 and h2.invoice_date &gt;= DATE_SUB(CURDATE(), interval 12 month))
+        and exists (select 1 from head_receipt h2 where h2.systematic_receipt = h.systematic_receipt and h2.invoice_date
+        &lt; DATE_SUB(CURDATE(), interval 12 month))
+    </select>
+
+
+</mapper>

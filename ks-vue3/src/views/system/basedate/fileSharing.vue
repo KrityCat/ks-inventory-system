@@ -172,7 +172,7 @@
   </div>
 </template>
 
-<script setup name="fileSharing">
+<script setup name="FileSharing">
 import {
   listFile,
   getFile,

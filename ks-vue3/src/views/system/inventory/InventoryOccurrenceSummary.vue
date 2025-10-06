@@ -4,196 +4,202 @@
     <el-row :gutter="20">
       <el-col :span="24" :xs="24">
         <el-form
-          :inline="true"
-          v-show="showSearch"
-          ref="queryRef"
-          :model="queryParams"
-          label-width="100px"
+            v-show="showSearch"
+            ref="queryRef"
+            :inline="true"
+            :model="queryParams"
+            label-width="100px"
         >
           <el-form-item label="发生时间" style="width: 388px">
             <el-date-picker
-              v-model="dateRange"
-              value-format="YYYY-MM-DD"
-              type="daterange"
-              range-separator="-"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
+                v-model="dateRange"
+                end-placeholder="结束日期"
+                range-separator="-"
+                start-placeholder="开始日期"
+                type="daterange"
+                value-format="YYYY-MM-DD"
             ></el-date-picker>
           </el-form-item>
           <el-form-item label="货品编号" prop="productCode">
             <el-input
-              v-model="queryParams.productCode"
-              placeholder="请输入货品编号"
-              clearable
-              class="form-item"
-              @keyup.enter="handleQuery"
+                v-model="queryParams.productCode"
+                class="form-item"
+                clearable
+                placeholder="请输入货品编号"
+                @keyup.enter="handleQuery"
             />
           </el-form-item>
           <el-form-item label="货品名称" prop="productName">
             <el-input
-              v-model="queryParams.productName"
-              placeholder="请输入货品名称"
-              clearable
-              class="form-item"
-              @keyup.enter="handleQuery"
+                v-model="queryParams.productName"
+                class="form-item"
+                clearable
+                placeholder="请输入货品名称"
+                @keyup.enter="handleQuery"
             />
           </el-form-item>
           <el-form-item label="货品类型" prop="productType">
             <el-tree-select
-              class="form-item"
-              v-model="form.productType"
-              :data="typeOptions"
-              :props="{ value: 'id', label: 'label', children: 'children' }"
-              value-key="id"
-              placeholder="请选择货品类型"
-              clearable
-              check-strictly
+                v-model="form.productType"
+                :data="typeOptions"
+                :props="{ value: 'id', label: 'label', children: 'children' }"
+                check-strictly
+                class="form-item"
+                clearable
+                placeholder="请选择货品类型"
+                value-key="id"
             />
           </el-form-item>
           <el-form-item label="商品规格" prop="productSpecifications">
             <el-input
-              v-model="queryParams.productSpecifications"
-              placeholder="请输入商品规格"
-              clearable
-              class="form-item"
-              @keyup.enter="handleQuery"
+                v-model="queryParams.productSpecifications"
+                class="form-item"
+                clearable
+                placeholder="请输入商品规格"
+                @keyup.enter="handleQuery"
             />
           </el-form-item>
           <el-form-item label="仓库" prop="warehousingId">
             <el-select
-              class="form-item"
-              v-model="queryParams.warehousingId"
-              placeholder="请选择"
-              filterable
-              clearable
+                v-model="queryParams.warehousingId"
+                class="form-item"
+                clearable
+                filterable
+                placeholder="请选择"
             >
               <el-option
-                v-for="item in warehouseOptions"
-                :key="item.warehouseId"
-                :label="item.warehouseName"
-                :value="item.warehouseId"
+                  v-for="item in warehouseOptions"
+                  :key="item.warehouseId"
+                  :label="item.warehouseName"
+                  :value="item.warehouseId"
               ></el-option>
             </el-select>
           </el-form-item>
           <el-form-item>
             <el-button
-              type="primary"
-              icon="Search"
-              @click="handleQuery"
-              v-hasPermi="['inventory:inventoryOccurrenceSummary:list']"
-              >查询</el-button
+                v-hasPermi="['inventory:inventoryOccurrenceSummary:list']"
+                icon="Search"
+                type="primary"
+                @click="handleQuery"
+            >查询
+            </el-button
             >
             <el-button icon="Refresh" @click="resetQuery">重置</el-button>
           </el-form-item>
         </el-form>
         <el-row :gutter="10" class="mb8">
-          <!-- <el-col :span="1.5">
+          <el-col :span="1.5">
             <el-button
-              type="danger"
-              plain
-              icon="Download"
-              @click="handleDetailExport"
-              disable="disable"
-              v-hasPermi="['system:inventoryOccurrenceSummary:export']"
-              >导出</el-button
+                v-hasPermi="['inventory:inventoryOccurrenceSummary:export']"
+                disable="disable"
+                icon="Download"
+                plain
+                type="danger"
+                @click="handleDetailExport"
+            >导出
+            </el-button
             >
-          </el-col> -->
+          </el-col>
           <right-toolbar
-            v-model:showSearch="showSearch"
-            @queryTable="getList"
+              v-model:showSearch="showSearch"
+              @queryTable="getList"
           ></right-toolbar>
         </el-row>
 
         <el-table
-          border
-          show-summary
-          v-loading="loading"
-          :data="occurrenceSummaryList"
+            v-loading="loading"
+            :data="occurrenceSummaryList"
+            border
+            show-summary
         >
           <el-table-column
-            label="序号"
-            align="center"
-            type="index"
-            width="60"
-          />
-          <el-table-column label="仓库" align="center" prop="warehousingName" />
-          <el-table-column
-            label="货品编号"
-            align="center"
-            prop="product.productCode"
-          />
-          <el-table-column
-            label="货品名称"
-            align="center"
-            prop="product.productName"
-          />
-          <el-table-column
-            label="货品类型"
-            align="center"
-            prop="type.productTypeName"
-          />
-          <el-table-column
-            label="规格"
-            align="center"
-            prop="product.productSpecifications"
-          />
-          <el-table-column
-            label="单位"
-            align="center"
-            prop="product.measureUnit"
-          />
-          <el-table-column label="期初结存" align="center">
-            <el-table-column
-              label="数量"
               align="center"
-              prop="obplanQuantity"
-            />
-            <el-table-column label="金额" align="center" prop="obmoney" />
+              label="序号"
+              type="index"
+              width="60"
+          />
+          <el-table-column align="center" label="仓库">
+            <template #default="scope">
+              <span>{{ scope.row.retrievalName || scope.row.warehousingName }}</span>
+            </template>
           </el-table-column>
-          <el-table-column label="本期入库" align="center">
-            <el-table-column
-              label="数量"
+          <el-table-column
               align="center"
-              prop="eiplanQuantity"
+              label="货品编号"
+              prop="productCode"
+          />
+          <el-table-column
+              align="center"
+              label="货品名称"
+              prop="productName"
+          />
+          <el-table-column
+              align="center"
+              label="货品类型"
+              prop="productTypeName"
+          />
+          <el-table-column
+              align="center"
+              label="规格"
+              prop="productSpecifications"
+          />
+          <el-table-column
+              align="center"
+              label="单位"
+              prop="measureUnit"
+          />
+          <el-table-column align="center" label="期初结存">
+            <el-table-column
+                align="center"
+                label="数量"
+                prop="obplanQuantity"
             />
-            <el-table-column label="金额" align="center" prop="eimoney" />
+            <el-table-column align="center" label="金额" prop="obmoney"/>
           </el-table-column>
-          <el-table-column label="本期出库" align="center">
+          <el-table-column align="center" label="本期入库">
             <el-table-column
-              label="数量"
-              align="center"
-              prop="erplanQuantity"
+                align="center"
+                label="数量"
+                prop="eiplanQuantity"
             />
-            <el-table-column label="金额" align="center" prop="ermoney" />
+            <el-table-column align="center" label="金额" prop="eimoney"/>
           </el-table-column>
-          <el-table-column label="期末结存" align="center">
+          <el-table-column align="center" label="本期出库">
             <el-table-column
-              label="数量"
-              align="center"
-              prop="cbplanQuantity"
+                align="center"
+                label="数量"
+                prop="erplanQuantity"
             />
-            <el-table-column label="金额" align="center" prop="cbmoney" />
+            <el-table-column align="center" label="金额" prop="ermoney"/>
+          </el-table-column>
+          <el-table-column align="center" label="期末结存">
+            <el-table-column
+                align="center"
+                label="数量"
+                prop="cbplanQuantity"
+            />
+            <el-table-column align="center" label="金额" prop="cbmoney"/>
           </el-table-column>
         </el-table>
         <!-- 分页组件 -->
         <pagination
-          v-show="total > 0"
-          :total="total"
-          v-model:page="queryParams.pageNum"
-          v-model:limit="queryParams.pageSize"
-          @pagination="getList"
+            v-show="total > 0"
+            v-model:limit="queryParams.pageSize"
+            v-model:page="queryParams.pageNum"
+            :total="total"
+            @pagination="getList"
         />
       </el-col>
     </el-row>
   </div>
 </template>
 
-<script setup name="InventoryOccurrenceSummary">
-import { listWarehouse } from "@/api/basedate/warehouse";
-import { inventorySummaryQuery } from "@/api/inventory/inventoryOccurrenceSummary";
-import { productTypeTreeSelect } from "@/api/basedate/product";
+<script name="InventoryOccurrenceSummary" setup>
+import {listWarehouse} from "@/api/basedate/warehouse";
+import {inventorySummaryQuery} from "@/api/inventory/inventoryOccurrenceSummary";
+import {productTypeTreeSelect} from "@/api/basedate/product";
 
-const { proxy } = getCurrentInstance();
+const {proxy} = getCurrentInstance();
 
 // 查询结果表
 const occurrenceSummaryList = ref([]);
@@ -222,7 +228,7 @@ const data = reactive({
   rules: {},
 });
 
-const { queryParams, form, rules } = toRefs(data);
+const {queryParams, form, rules} = toRefs(data);
 
 function Options() {
   listWarehouse().then((response) => {
@@ -232,22 +238,25 @@ function Options() {
     typeOptions.value = response.data;
   });
 }
+
 /** 查询货品发生汇总 */
 function getList() {
   loading.value = true;
   inventorySummaryQuery(
-    proxy.addDateRange(queryParams.value, dateRange.value)
+      proxy.addDateRange(queryParams.value, dateRange.value)
   ).then((response) => {
     occurrenceSummaryList.value = response.rows;
     total.value = response.total;
     loading.value = false;
   });
 }
+
 /** 查询按钮操作 */
 function handleQuery() {
   queryParams.value.pageNum = 1;
   getList();
 }
+
 /** 重置按钮操作 */
 function resetQuery() {
   typeOptions.value = undefined;
@@ -256,6 +265,7 @@ function resetQuery() {
   handleQuery();
   reset();
 }
+
 /** 重置操作表单 */
 function reset() {
   form.value = {
@@ -267,16 +277,20 @@ function reset() {
   };
   proxy.resetForm("queryRef");
 }
+
 /** 导出按钮操作 */
 function handleDetailExport() {
   proxy.download(
-    "inventory/inventoryOccurrenceSummary/export",
-    {
-      ...queryParams.value,
-    },
-    `库存发生汇总表_${new Date().getTime()}.xlsx`
+      "inventory/inventoryOccurrenceSummary/export",
+      {
+        ...queryParams.value,
+      },
+      `货品发生汇总_${new Date().getTime()}.xlsx`
   );
+  proxy.$modal.msgSuccess("浏览器正在下载，请稍等！");
 }
+
+
 getList();
 Options();
 </script>

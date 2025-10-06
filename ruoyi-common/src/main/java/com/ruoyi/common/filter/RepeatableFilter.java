@@ -1,15 +1,15 @@
 package com.ruoyi.common.filter;
 
 import com.ruoyi.common.utils.StringUtils;
+import jakarta.servlet.*;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.MediaType;
 
-import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
 /**
  * Repeatable 过滤器
- * 
+ *
  * @author KrityCat
  */
 public class RepeatableFilter implements Filter {

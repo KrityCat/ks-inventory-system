@@ -4,72 +4,83 @@
     <el-row :gutter="20">
       <el-col :span="24" :xs="24">
         <el-form
-          :inline="true"
-          v-show="showSearch"
-          ref="queryRef"
-          :model="queryParams"
-          label-width="100px"
+            v-show="showSearch"
+            ref="queryRef"
+            :inline="true"
+            :model="queryParams"
+            label-width="100px"
         >
+          <el-form-item label="发生时间" style="width: 388px">
+            <el-date-picker
+                v-model="dateRange"
+                end-placeholder="结束日期"
+                range-separator="-"
+                start-placeholder="开始日期"
+                type="daterange"
+                value-format="YYYY-MM-DD"
+            ></el-date-picker>
+          </el-form-item>
           <el-form-item label="货品编号" prop="productCode">
             <el-input
-              v-model="queryParams.productCode"
-              placeholder="请输入货品编号"
-              clearable
-              style="width: 180px"
-              @keyup.enter="handleQuery"
+                v-model="queryParams.productCode"
+                clearable
+                placeholder="请输入货品编号"
+                style="width: 180px"
+                @keyup.enter="handleQuery"
             />
           </el-form-item>
           <el-form-item label="货品名称" prop="productName">
             <el-input
-              v-model="queryParams.productName"
-              placeholder="请输入货品名称"
-              clearable
-              style="width: 180px"
-              @keyup.enter="handleQuery"
+                v-model="queryParams.productName"
+                clearable
+                placeholder="请输入货品名称"
+                style="width: 180px"
+                @keyup.enter="handleQuery"
             />
           </el-form-item>
           <el-form-item label="货品类型" prop="productType">
             <el-tree-select
-              style="width: 180px"
-              v-model="form.productType"
-              :data="typeOptions"
-              :props="{ value: 'id', label: 'label', children: 'children' }"
-              value-key="id"
-              placeholder="请选择货品类型"
-              clearable
-              check-strictly
+                v-model="form.productType"
+                :data="typeOptions"
+                :props="{ value: 'id', label: 'label', children: 'children' }"
+                check-strictly
+                clearable
+                placeholder="请选择货品类型"
+                style="width: 180px"
+                value-key="id"
             />
           </el-form-item>
           <el-form-item label="商品规格" prop="productSpecifications">
             <el-input
-              v-model="queryParams.productSpecifications"
-              placeholder="请输入商品规格"
-              clearable
-              style="width: 180px"
-              @keyup.enter="handleQuery"
+                v-model="queryParams.productSpecifications"
+                clearable
+                placeholder="请输入商品规格"
+                style="width: 180px"
+                @keyup.enter="handleQuery"
             />
           </el-form-item>
           <el-form-item label="仓库" prop="warehousingId">
             <el-select
-              style="width: 180px"
-              v-model="queryParams.warehousingId"
-              placeholder="请选择"
+                v-model="queryParams.warehousingId"
+                placeholder="请选择"
+                style="width: 180px"
             >
               <el-option
-                v-for="item in warehouseOptions"
-                :key="item.warehouseId"
-                :label="item.warehouseName"
-                :value="item.warehouseId"
+                  v-for="item in warehouseOptions"
+                  :key="item.warehouseId"
+                  :label="item.warehouseName"
+                  :value="item.warehouseId"
               ></el-option>
             </el-select>
           </el-form-item>
           <el-form-item>
             <el-button
-              type="primary"
-              icon="Search"
-              @click="handleQuery"
-              v-hasPermi="['inventory:inventoryOccurrenceDetails:list']"
-              >查询</el-button
+                v-hasPermi="['inventory:inventoryOccurrenceDetails:list']"
+                icon="Search"
+                type="primary"
+                @click="handleQuery"
+            >查询
+            </el-button
             >
             <el-button icon="Refresh" @click="resetQuery">重置</el-button>
           </el-form-item>
@@ -87,139 +98,129 @@
             >
           </el-col> -->
           <right-toolbar
-            v-model:showSearch="showSearch"
-            @queryTable="getList"
+              v-model:showSearch="showSearch"
+              @queryTable="getList"
           ></right-toolbar>
         </el-row>
 
         <el-table
-          border
-          show-summary
-          v-loading="loading"
-          :data="occurrenceDetailList"
+            v-loading="loading"
+            :data="occurrenceDetailList"
+            border
+            show-summary
         >
           <el-table-column
-            label="序号"
-            align="center"
-            type="index"
-            width="60"
-          />
-          <el-table-column
-            label="货品编号"
-            align="center"
-            prop="product.productCode"
-          />
-          <el-table-column
-            label="货品名称"
-            align="center"
-            prop="product.productName"
-          />
-          <el-table-column
-            label="货品类型"
-            align="center"
-            prop="type.productTypeName"
-          />
-          <el-table-column
-            label="规格"
-            align="center"
-            prop="product.productSpecifications"
-          />
-          <el-table-column
-            label="单位"
-            align="center"
-            prop="product.measureUnit"
-          />
-          <el-table-column label="期初结存" align="center">
-            <el-table-column
-              label="数量"
               align="center"
-              prop="obplanQuantity"
-            />
-            <el-table-column label="单价" align="center" prop="obunivalence" />
-            <el-table-column label="金额" align="center" prop="obmoney" />
-          </el-table-column>
+              label="序号"
+              type="index"
+              width="60"
+          />
           <el-table-column
-            label="业务类型"
-            align="center"
-            prop="receiptType"
-            width="100"
+              align="center"
+              label="货品编号"
+              prop="product.productCode"
+          />
+          <el-table-column
+              align="center"
+              label="货品名称"
+              prop="product.productName"
+          />
+          <el-table-column
+              align="center"
+              label="货品类型"
+              prop="type.productTypeName"
+          />
+          <el-table-column
+              align="center"
+              label="规格"
+              prop="product.productSpecifications"
+          />
+          <el-table-column
+              align="center"
+              label="单位"
+              prop="product.measureUnit"
+          />
+          <el-table-column
+              align="center"
+              label="业务类型"
+              prop="receiptType"
+              width="100"
           >
             <template #default="scope">
               <dict-tag
-                :options="receipt_type"
-                :value="scope.row.receiptType"
+                  :options="receipt_type"
+                  :value="scope.row.receiptType"
               />
             </template>
           </el-table-column>
           <el-table-column
-            label="开单日期"
-            align="center"
-            prop="headReceipt.invoiceDate"
-            width="100"
-          />
-          <el-table-column
-            label="系统单号"
-            align="center"
-            prop="headReceipt.systematicReceipt"
-            width="180"
-          />
-          <el-table-column
-            label="原始单号"
-            align="center"
-            prop="headReceipt.originalReceipt"
-            width="180"
-          />
-          <el-table-column
-            label="供应商"
-            align="center"
-            prop="supplier.supplierName"
-            idth="100"
-          />
-          <el-table-column
-            label="客户"
-            align="center"
-            prop="customer.customerName"
-            idth="100"
-          />
-          <el-table-column label="数量" align="center" prop="planQuantity" />
-          <el-table-column label="单价" align="center" prop="univalence" />
-          <el-table-column label="金额" align="center" prop="money" />
-          <el-table-column
-            label="创建日期"
-            align="center"
-            prop="headReceipt.createTime"
-            width="180"
-          />
-          <el-table-column label="期末结存" align="center">
-            <el-table-column
-              label="数量"
               align="center"
-              prop="cbplanQuantity"
-            />
-            <el-table-column label="单价" align="center" prop="cbunivalence" />
-            <el-table-column label="金额" align="center" prop="cbmoney" />
+              label="开单日期"
+              prop="headReceipt.invoiceDate"
+              width="100"
+          />
+          <el-table-column
+              align="center"
+              label="系统单号"
+              prop="systematicReceipt"
+              width="180"
+          >
+            <template #default="scope">
+              <el-link type="primary">
+                <a target="_blank" @click="handleUpdate(scope.row)">{{
+                    scope.row.systematicReceipt
+                  }}</a>
+              </el-link>
+            </template>
           </el-table-column>
+          <el-table-column
+              align="center"
+              label="原始单号"
+              prop="headReceipt.originalReceipt"
+          />
+          <el-table-column
+              align="center"
+              idth="100"
+              label="供应商"
+              prop="supplier.supplierName"
+          />
+          <el-table-column
+              align="center"
+              idth="100"
+              label="客户"
+              prop="customer.customerName"
+          />
+          <el-table-column align="center" label="数量" prop="planQuantity"/>
+          <el-table-column align="center" label="单价" prop="univalence"/>
+          <el-table-column align="center" label="金额" prop="money"/>
+          <el-table-column
+              align="center"
+              label="创建日期"
+              prop="headReceipt.createTime"
+              width="180"
+          />
         </el-table>
         <!-- 分页组件 -->
         <pagination
-          v-show="total > 0"
-          :total="total"
-          v-model:page="queryParams.pageNum"
-          v-model:limit="queryParams.pageSize"
-          @pagination="getList"
+            v-show="total > 0"
+            v-model:limit="queryParams.pageSize"
+            v-model:page="queryParams.pageNum"
+            :total="total"
+            @pagination="getList"
         />
       </el-col>
     </el-row>
   </div>
 </template>
 
-<script setup name="InventoryOccurrenceDetails">
-import { listWarehouse } from "@/api/basedate/warehouse";
-import { occurrenceDetailsQuery } from "@/api/inventory/inventoryOccurrenceDetails";
-import { productTypeTreeSelect } from "@/api/basedate/product";
+<script name="InventoryOccurrenceDetails" setup>
+import {listWarehouse} from "@/api/basedate/warehouse";
+import {occurrenceDetailsQuery} from "@/api/inventory/inventoryOccurrenceDetails";
+import {productTypeTreeSelect} from "@/api/basedate/product";
+import {useRouter} from "vue-router";
 
-const { proxy } = getCurrentInstance();
-const { receipt_type } = proxy.useDict("receipt_type");
+const {proxy} = getCurrentInstance();
+const {receipt_type} = proxy.useDict("receipt_type");
 
 // 查询结果表
 const occurrenceDetailList = ref([]);
@@ -233,6 +234,7 @@ const total = ref(0);
 // 数据范围
 const dateRange = ref([]);
 const typeOptions = ref(undefined);
+const router = useRouter();
 
 const data = reactive({
   form: {},
@@ -248,7 +250,7 @@ const data = reactive({
   rules: {},
 });
 
-const { queryParams, form, rules } = toRefs(data);
+const {queryParams, form, rules} = toRefs(data);
 
 function Options() {
   listWarehouse().then((response) => {
@@ -258,22 +260,25 @@ function Options() {
     typeOptions.value = response.data;
   });
 }
+
 /** 库存发生明细列表 */
 function getList() {
   loading.value = true;
   occurrenceDetailsQuery(
-    proxy.addDateRange(queryParams.value, dateRange.value)
+      proxy.addDateRange(queryParams.value, dateRange.value)
   ).then((response) => {
     occurrenceDetailList.value = response.rows;
     total.value = response.total;
     loading.value = false;
   });
 }
+
 /** 查询按钮操作 */
 function handleQuery() {
   queryParams.value.pageNum = 1;
   getList();
 }
+
 /** 重置按钮操作 */
 function resetQuery() {
   typeOptions.value = undefined;
@@ -282,6 +287,7 @@ function resetQuery() {
   handleQuery();
   reset();
 }
+
 /** 重置操作表单 */
 function reset() {
   form.value = {
@@ -293,16 +299,51 @@ function reset() {
   };
   proxy.resetForm("queryRef");
 }
+
 /** 导出按钮操作 */
 function handleDetailExport() {
   proxy.download(
-    "inventory/inventoryOccurrenceDetails/export",
-    {
-      ...queryParams.value,
-    },
-    `库存发生明细表_${new Date().getTime()}.xlsx`
+      "inventory/inventoryOccurrenceDetails/export",
+      {
+        ...queryParams.value,
+      },
+      `库存发生明细表_${new Date().getTime()}.xlsx`
   );
 }
+
+function handleUpdate(row) {
+  const systematicReceipt = row.systematicReceipt;
+  const receiptType = row.receiptType;
+
+  // 路由配置对象
+  const routeMap = {
+    1: "/purchase/purchaseDocumentProcessing",
+    2: "/purchase/purchaseDocumentProcessing",
+    3: "/sales/salesDocumentProcessing",
+    4: "/sales/salesDocumentProcessing",
+    5: "/inventory/inventoryDocumentProcessing",
+    6: "/inventory/inventoryDocumentProcessing",
+    7: "/inventory/inventoryTransfer",
+    8: "/inventory/inventoryCounting",
+    9: "/inventory/reportingLossesProcessing",
+    10: "/inventory/reportOverflowProcessing",
+    11: "/inventory/assemblyAndDisassemblyProcessing",
+  };
+
+  // 获取对应的路径
+  const path = routeMap[receiptType];
+
+  // 如果路径存在，则进行导航
+  if (path) {
+    router.push({
+      path: path,
+      query: {systematicReceipt},
+    });
+  } else {
+    return proxy.$modal.msgError("该单据类型不存在制作页面");
+  }
+}
+
 getList();
 Options();
 </script>

@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ruoyi.inventory.mapper.AccessoryMapper">
+
+    <resultMap type="Accessory" id="AccessoryResult">
+        <result property="accessoryId" column="accessory_id"/>
+        <result property="accessoryCode" column="accessory_code"/>
+        <result property="accessoryName" column="accessory_name"/>
+        <result property="accessoryType" column="accessory_type"/>
+        <result property="accessorySpecifications" column="accessory_specifications"/>
+        <result property="measureUnit" column="measure_unit"/>
+        <result property="producer" column="producer"/>
+        <result property="inventoryQty" column="inventory_qty"/>
+        <result property="status" column="status"/>
+        <result property="notes" column="notes"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <!--    查询配件公用方法    -->
+    <sql id="selectAccessoryVo">
+        SELECT
+        a.accessory_id, a.accessory_code, a.accessory_name, a.accessory_type, a.accessory_specifications,
+        a.measure_unit,
+        a.producer, a.status, a.notes, a.inventory_qty, a.create_by, a.create_time, a.update_by, a.update_time
+        FROM accessory a
+    </sql>
+
+    <!--    查询配件公用方法    -->
+    <sql id="selectAccessoryOperationRecordVo">
+        SELECT
+        aor.log_id, aor.accessory_id, aor.accessory_code, aor.accessory_name, aor.accessory_type,
+        aor.accessory_specifications,
+        aor.measure_unit, aor.producer, aor.status, aor.notes, aor.inventory_qty, aor.update_by, aor.update_time
+        FROM accessory_operation_record aor
+    </sql>
+
+    <!--    配件资料查询      -->
+    <select id="accessoryQuery" parameterType="Accessory" resultMap="AccessoryResult">
+        <include refid="selectAccessoryVo"/>
+        WHERE 1=1
+        <!-- 配件编号 -->
+        <if test="accessoryCode != null and accessoryCode != ''">
+            AND a.accessory_code like concat('%', #{accessoryCode}, '%')
+        </if>
+        <!-- 配件名称 -->
+        <if test="accessoryName != null and accessoryName != ''">
+            AND a.accessory_name like concat('%', #{accessoryName}, '%')
+        </if>
+        <!-- 配件类型 -->
+        <if test="accessoryType != null and accessoryType != ''">
+            AND a.accessory_type = #{accessoryType}
+        </if>
+        <!-- 商品规格 -->
+        <if test="accessorySpecifications != null and accessorySpecifications != ''">
+            AND a.accessory_specifications like concat('%', #{accessorySpecifications}, '%')
+        </if>
+        <!-- 计量单位 -->
+        <if test="measureUnit != null and measureUnit != ''">
+            AND a.measure_unit like concat('%', #{measureUnit}, '%')
+        </if>
+        <!-- 开始时间检索 -->
+        <if test="params.beginTime != null and params.beginTime != ''">
+            AND date_format(u.create_time,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')
+        </if>
+        <!-- 结束时间检索 -->
+        <if test="params.endTime != null and params.endTime != ''">
+            AND date_format(u.create_time,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')
+        </if>
+    </select>
+
+    <!--    配件操作记录查询      -->
+    <select id="accessoryOperationRecordQuery" parameterType="Accessory" resultMap="AccessoryResult">
+        <include refid="selectAccessoryOperationRecordVo"/>
+        WHERE 1=1
+        <!-- 配件ID -->
+        <if test="accessoryCode != null and accessoryCode != ''">
+            AND aor.accessory_code = #{accessoryCode}
+        </if>
+    </select>
+
+    <!--    配件编号查询      -->
+    <select id="selectAccessoryById" parameterType="Long" resultMap="AccessoryResult">
+        <include refid="selectAccessoryVo"/>
+        where a.accessory_id = #{accessoryId}
+    </select>
+
+
+    <!--    配件资料新增      -->
+    <insert id="insertAccessory" parameterType="Accessory">
+        insert into accessory(
+        <if test="accessoryCode != null and accessoryCode != ''">accessory_code,</if>
+        <if test="accessoryName != null and accessoryName != ''">accessory_name,</if>
+        <if test="accessoryType != null and accessoryType != ''">accessory_type,</if>
+        <if test="accessorySpecifications != null and accessorySpecifications != ''">accessory_specifications,</if>
+        <if test="measureUnit != null and measureUnit != ''">measure_unit,</if>
+        <if test="producer != null and producer != ''">producer,</if>
+        <if test="inventoryQty != null and inventoryQty != ''">inventory_qty,</if>
+        <if test="notes != null and notes != ''">notes,</if>
+        <if test="status != null and status != ''">status,</if>
+        <if test="createBy != null and createBy != ''">create_by,</if>
+        create_time
+        )values(
+        <if test="accessoryCode != null and accessoryCode != ''">#{accessoryCode},</if>
+        <if test="accessoryName != null and accessoryName != ''">#{accessoryName},</if>
+        <if test="accessoryType != null and accessoryType != ''">#{accessoryType},</if>
+        <if test="accessorySpecifications != null and accessorySpecifications != ''">#{accessorySpecifications},</if>
+        <if test="measureUnit != null and measureUnit != ''">#{measureUnit},</if>
+        <if test="producer != null and producer != ''">#{producer},</if>
+        <if test="inventoryQty != null and inventoryQty != ''">#{inventoryQty},</if>
+        <if test="notes != null and notes != ''">#{notes},</if>
+        <if test="status != null and status != ''">#{status},</if>
+        <if test="createBy != null and createBy != ''">#{createBy},</if>
+        sysdate()
+        )
+    </insert>
+
+    <!--    配件操作新增      -->
+    <insert id="insertAccessoryRecord" parameterType="Accessory">
+        insert into accessory_operation_record(
+        <if test="accessoryId != null and accessoryId != ''">accessory_id,</if>
+        <if test="accessoryCode != null and accessoryCode != ''">accessory_code,</if>
+        <if test="accessoryName != null and accessoryName != ''">accessory_name,</if>
+        <if test="accessoryType != null and accessoryType != ''">accessory_type,</if>
+        <if test="accessorySpecifications != null and accessorySpecifications != ''">accessory_specifications,</if>
+        <if test="measureUnit != null and measureUnit != ''">measure_unit,</if>
+        <if test="producer != null and producer != ''">producer,</if>
+        <if test="inventoryQty != null and inventoryQty != ''">inventory_qty,</if>
+        <if test="notes != null and notes != ''">notes,</if>
+        <if test="status != null and status != ''">status,</if>
+        <if test="updateBy != null and updateBy != ''">update_by,</if>
+        update_time
+        )values(
+        <if test="accessoryId != null and accessoryId != ''">#{accessoryId},</if>
+        <if test="accessoryCode != null and accessoryCode != ''">#{accessoryCode},</if>
+        <if test="accessoryName != null and accessoryName != ''">#{accessoryName},</if>
+        <if test="accessoryType != null and accessoryType != ''">#{accessoryType},</if>
+        <if test="accessorySpecifications != null and accessorySpecifications != ''">#{accessorySpecifications},</if>
+        <if test="measureUnit != null and measureUnit != ''">#{measureUnit},</if>
+        <if test="producer != null and producer != ''">#{producer},</if>
+        <if test="inventoryQty != null and inventoryQty != ''">#{inventoryQty},</if>
+        <if test="notes != null and notes != ''">#{notes},</if>
+        <if test="status != null and status != ''">#{status},</if>
+        <if test="updateBy != null and updateBy != ''">#{updateBy},</if>
+        sysdate()
+        )
+    </insert>
+
+    <!--    配件资料修改      -->
+    <update id="updateAccessory" parameterType="Accessory">
+        update accessory
+        <set>
+            <if test="accessoryCode != null and accessoryCode != ''">accessory_code = #{accessoryCode},</if>
+            <if test="accessoryName != null and accessoryName != ''">accessory_name = #{accessoryName},</if>
+            <if test="accessoryType != null and accessoryType != ''">accessory_type = #{accessoryType},</if>
+            <if test="accessorySpecifications != null and accessorySpecifications != ''">accessory_specifications =
+                #{accessorySpecifications},
+            </if>
+            <if test="measureUnit != null and measureUnit != ''">measure_unit = #{measureUnit},</if>
+            <if test="producer != null and producer != ''">producer = #{producer},</if>
+            <if test="inventoryQty != null and inventoryQty != ''">inventory_qty = #{inventoryQty},</if>
+            <if test="notes != null and notes != ''">notes = #{notes},</if>
+            <if test="status != null and status != ''">status = #{status},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            update_time = sysdate()
+        </set>
+        where accessory_id = #{accessoryId}
+    </update>
+
+    <!--    配件资料删除      -->
+    <delete id="deleteAccessoryByIds" parameterType="Long">
+        delete from accessory where accessory_id in
+        <foreach collection="array" item="accessoryId" open="(" separator="," close=")">
+            #{accessoryId}
+        </foreach>
+    </delete>
+
+</mapper>

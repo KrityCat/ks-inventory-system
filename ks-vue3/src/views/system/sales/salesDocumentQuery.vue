@@ -403,7 +403,7 @@
             fixed="right"
             label="操作"
             align="center"
-            width="120"
+            width="100"
             class-name="small-padding fixed-width"
           >
             <template #default="scope">
@@ -439,7 +439,7 @@
                   link
                   type="primary"
                   icon="Printer"
-                  @click="printOut(scope.row)"
+                  @click="printCommon(scope.row)"
                   v-hasPermi="['sales:salesReceiptQuery:printOut']"
                 ></el-button>
               </el-tooltip>
@@ -476,6 +476,12 @@
             align="center"
             type="index"
             width="60"
+          />
+          <el-table-column
+              label="锁单货品"
+              align="center"
+              prop="lockGoods"
+              width="100"
           />
           <el-table-column
             label="系统单号"
@@ -533,31 +539,37 @@
       </el-col>
     </el-row>
   </div>
+
+  <!-- 查看打印模板对话框 -->
+  <print-template-dialog
+      v-model:visible="openPrintTemplate"
+      :systematic-receipt="systematicReceipt"
+  />
 </template>
 
-<script setup name="salesDocumentQuery">
-import { getToken } from "@/utils/auth";
+<script setup name="SalesDocumentQuery">
 import { useRouter } from "vue-router";
-import { listWarehouse } from "@/api/basedate/warehouse";
-import { listUser, getUserProfile } from "@/api/system/user";
-import { listCustomer } from "@/api/basedate/customer";
+import { getUserProfile } from "@/api/system/user";
 import {
   headQuery,
   detailQuery,
   getSalesReceipt,
   delSalesReceipt,
 } from "@/api/sales/SalesDocumentQuery";
+import {
+  userList,
+  warehouseList,
+  customerList,
+} from "@/api/common/CommonReceipt";
 import { getSalesOrder } from "@/api/sales/salesOrderProcessing";
 import { getAfterSales } from "@/api/aftersales/afterSalesOrderProcessing";
-import { viewUrl } from "@/api/jimu/jiMuReport";
+import printTemplateDialog from '@/components/CommonDialog/printTemplateDialog.vue';
 
 const { proxy } = getCurrentInstance();
 const { receipt_type } = proxy.useDict("receipt_type");
 const { receipt_status } = proxy.useDict("receipt_status");
 const { after_sales_installation } = proxy.useDict("after_sales_installation");
-const { print_selected_files } = proxy.useDict("print_selected_files");
 const { finding_of_audit } = proxy.useDict("finding_of_audit");
-const { print_selected_sizes } = proxy.useDict("print_selected_sizes");
 
 // 查询结果表
 const salesOrderList = ref([]);
@@ -565,8 +577,6 @@ const salesDetailOrderList = ref([]);
 const userOptions = ref(undefined);
 const customerOptions = ref(undefined);
 const warehouseOptions = ref(undefined);
-const printOptions = ref(undefined);
-const openUrl = ref("");
 // 查询表展示
 const salesHead = ref(true);
 // 查询明细表展示
@@ -577,12 +587,11 @@ const showSearch = ref(true);
 const loading = ref(false);
 // 总条数
 const total = ref(0);
-// 窗口标题
-const title = ref("");
-const open = ref(false);
 // 数据范围
 const dateRange = ref([]);
 const router = useRouter();
+const openPrintTemplate = ref(false);
+const systematicReceipt = ref(null);
 
 const data = reactive({
   option: {
@@ -623,21 +632,32 @@ const data = reactive({
 const { queryParams, form, option, rules } = toRefs(data);
 
 async function Options() {
-  loading.value = true;
-  listWarehouse(option.value).then((response) => {
-    warehouseOptions.value = response.rows;
-  });
-  listCustomer(option.value).then((response) => {
-    customerOptions.value = response.rows;
-  });
-  await listUser(option.value).then((response) => {
-    userOptions.value = response.rows;
-  });
-  await getUserProfile().then((response) => {
-    queryParams.value.userIds = response.data.userId;
-  });
-  getList();
-  loading.value = false;
+  loading.value = true; // 开始加载
+
+  try {
+    // 使用 Promise.all 并行执行无依赖关系的异步请求
+    const [warehouseResp, customerResp, userResp] = await Promise.all([
+      warehouseList(option.value),
+      customerList(option.value),
+      userList(option.value),
+    ]);
+
+    // 同步更新响应式数据
+    warehouseOptions.value = warehouseResp.rows;
+    customerOptions.value = customerResp.rows;
+    userOptions.value = userResp.rows;
+
+    // 顺序执行有依赖关系的请求
+    const profileResp = await getUserProfile();
+    queryParams.value.userIds = profileResp.data.userId;
+
+    // 确保所有数据就绪后再获取列表
+    getList();
+  } catch (error) {
+    console.error("数据加载失败:", error);
+  } finally {
+    loading.value = false; // 无论成功失败都关闭加载状态
+  }
 }
 /** 查询销售头单列表 */
 function getList() {
@@ -694,41 +714,24 @@ function reset() {
   };
   proxy.resetForm("printRef");
 }
-/** 打印按钮 */
-async function printOut(row) {
-  form.value.printId = print_selected_files.value[3].label;
-  form.value.printSize = print_selected_sizes.value[3].label;
-  await viewUrl().then((res) => {
-    openUrl.value = res;
-  });
-  const printUrl =
-    openUrl.value +
-    "/" +
-    form.value.printId +
-    "?token=Bearer " +
-    getToken() +
-    "&systematicReceipt=" +
-    row.systematicReceipt +
-    "&pageSize=" +
-    form.value.printSize;
-  window.open(printUrl, "_blank");
-}
 /** 查看订单按钮操作 */
 function handleOrder(row) {
+  const systematicReceipt = row.systematicReceipt;
   if (row.receiptType === 4) {
     proxy.$modal.msgError("单据为销售退货单，无销售订单");
-  }
-  const systematicReceipt = row.systematicReceipt;
-  getSalesOrder(systematicReceipt).then((response) => {
-    if (response.data == null) {
-      proxy.$modal.msgError("无销售订单，请确认！");
-    }
-    const systematicOrderForm = response.data.systematicOrderForm;
-    router.push({
-      path: "/sales/salesOrderProcessing",
-      query: { systematicOrderForm },
+  } else {
+    getSalesOrder(systematicReceipt).then((response) => {
+      const systematicOrderForm = response.data.systematicOrderForm;
+      if (response.data == null) {
+        proxy.$modal.msgError("无销售订单，请确认！");
+      } else {
+        router.push({
+          path: "/sales/salesOrderProcessing",
+          query: { systematicOrderForm },
+        });
+      }
     });
-  });
+  }
 }
 /** 修改按钮操作 */
 function handleUpdate(row) {
@@ -740,31 +743,32 @@ function handleUpdate(row) {
 }
 /** 查看售后按钮操作 */
 function handleAfterSales(row) {
+  const systematicReceipt = row.systematicReceipt;
   if (row.receiptStatus === 1) {
     proxy.$modal.msgError("单据未审核，无售后安装单");
   } else if (row.receiptType === 4) {
     proxy.$modal.msgError("单据为销售退货单，无售后安装单");
-  }
-  const systematicReceipt = row.systematicReceipt;
-  getAfterSales(systematicReceipt).then((response) => {
-    if (response.data == null) {
-      proxy.$modal.msgError("无售后安装单，请确认！");
-    }
-    router.push({
-      path: "/afterSales/afterSalesOrderProcessing",
-      query: { systematicReceipt },
+  } else {
+    getAfterSales(systematicReceipt).then((response) => {
+      if (response.data == null) {
+        proxy.$modal.msgError("无售后安装单，请确认！");
+      } else {
+        router.push({
+          path: "/afterSales/afterSalesOrderProcessing",
+          query: { systematicReceipt },
+        });
+      }
     });
-  });
+  }
 }
 /** 删除按钮操作 */
 function handleDelete(row) {
   const systematicReceipt = row.systematicReceipt;
   getSalesReceipt(systematicReceipt).then((response) => {
-    const details = response.data.details;
     proxy.$modal
       .confirm("确认要删除系统编号为" + systematicReceipt + "的销售单据?")
       .then(function () {
-        return delSalesReceipt(details);
+        return delSalesReceipt(response.data);
       })
       .then(() => {
         getList();
@@ -817,7 +821,7 @@ function remoteCustomer(query) {
   if (query) {
     setTimeout(() => {
       option.value.customerName = query;
-      listCustomer(option.value).then((response) => {
+      customerList(option.value).then((response) => {
         customerOptions.value = response.rows;
       });
       customerOptions.value = list.value.filter((item) => {
@@ -825,10 +829,16 @@ function remoteCustomer(query) {
       });
     }, 200);
   } else {
-    listCustomer(option.value).then((response) => {
+    customerList(option.value).then((response) => {
       customerOptions.value = response.rows;
     });
   }
+}
+
+// 打印按钮
+function printCommon(row) {
+  systematicReceipt.value = row.systematicReceipt;
+  openPrintTemplate.value = true;
 }
 
 Options();

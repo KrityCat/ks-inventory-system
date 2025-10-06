@@ -3,17 +3,14 @@ package com.ruoyi.web.controller.inventory;
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
-import com.ruoyi.common.core.domain.entity.DetailReceipt;
 import com.ruoyi.common.core.domain.entity.HeadReceipt;
 import com.ruoyi.common.core.domain.entity.ReceiptFrom;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.StringUtils;
-import com.ruoyi.system.service.InventoryReceiptProcessingService;
+import com.ruoyi.inventory.service.InventoryReceiptProcessingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * 库存单据制作模块
@@ -81,9 +78,9 @@ public class InventoryReceiptProcessingController extends BaseController {
      * 删除库存单据
      */
     @PreAuthorize("@ss.hasPermi('inventory:inventoryReceiptProcessing:delete')")
-    @Log(title = "删除库存单据", businessType = BusinessType.INSERT)
+    @Log(title = "删除库存单据", businessType = BusinessType.DELETE)
     @PostMapping("/delete")
-    public AjaxResult remove(@RequestBody List<DetailReceipt> bo) {
+    public AjaxResult remove(@RequestBody ReceiptFrom bo) {
         return toAjax(inventoryReceiptProcessingService.delInventoryReceipt(bo));
     }
 

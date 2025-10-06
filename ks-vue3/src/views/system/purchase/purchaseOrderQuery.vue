@@ -236,12 +236,6 @@
             </template>
           </el-table-column>
           <el-table-column
-            label="原始单号"
-            align="center"
-            prop="originalOrderForm"
-            width="180"
-          />
-          <el-table-column
             label="订单类型"
             align="center"
             prop="orderFormType"
@@ -295,6 +289,11 @@
             align="center"
             prop="supplier.supplierName"
             width="100"
+          />
+          <el-table-column
+            label="原始单号"
+            align="center"
+            prop="originalOrderForm"
           />
           <el-table-column
             label="备注"
@@ -487,29 +486,35 @@
       </el-col>
     </el-row>
   </div>
+
+  <!-- 查看打印模板对话框 -->
+  <print-template-dialog
+      v-model:visible="openPrintTemplate"
+      :systematic-receipt="systematicReceipt"
+  />
 </template>
 
 <script setup name="PurchaseOrderQuery">
-import { getToken } from "@/utils/auth";
 import { useRouter } from "vue-router";
-import { listWarehouse } from "@/api/basedate/warehouse";
-import { listUser, getUserProfile } from "@/api/system/user";
-import { listSupplier } from "@/api/basedate/supplier";
+import { getUserProfile } from "@/api/system/user";
 import {
   purchaseOrderHeadQuery,
   detailQuery,
   getPurchaseOrder,
   delPurchaseOrder,
 } from "@/api/purchase/purchaseOrderQuery";
-import { viewUrl } from "@/api/jimu/jiMuReport";
+import {
+  userList,
+  warehouseList,
+  supplierList,
+} from "@/api/common/CommonReceipt";
 import { ref } from "vue";
+import printTemplateDialog from '@/components/CommonDialog/printTemplateDialog.vue';
 
 const { proxy } = getCurrentInstance();
 const { order_form_type } = proxy.useDict("order_form_type");
 const { order_form_status } = proxy.useDict("order_form_status");
 const { finding_of_audit } = proxy.useDict("finding_of_audit");
-const { print_selected_files } = proxy.useDict("print_selected_files");
-const { print_selected_sizes } = proxy.useDict("print_selected_sizes");
 
 // 查询结果表
 const purchaseOrderList = ref([]);
@@ -525,12 +530,11 @@ const showSearch = ref(true);
 const loading = ref(false);
 // 总条数
 const total = ref(0);
-// 窗口标题
-const title = ref("");
-const open = ref(false);
 // 数据范围
 const dateRange = ref([]);
 const router = useRouter();
+const openPrintTemplate = ref(false);
+const systematicReceipt = ref(null);
 
 const data = reactive({
   userOptions: undefined,
@@ -581,13 +585,13 @@ const {
 
 async function Options() {
   loading.value = true;
-  listWarehouse(option.value).then((response) => {
+  warehouseList(option.value).then((response) => {
     warehouseOptions.value = response.rows;
   });
-  listSupplier(option.value).then((response) => {
+  supplierList(option.value).then((response) => {
     supplierOptions.value = response.rows;
   });
-  await listUser(option.value).then((response) => {
+  await userList(option.value).then((response) => {
     userOptions.value = response.rows;
   });
   await getUserProfile().then((response) => {
@@ -652,24 +656,11 @@ function reset() {
   proxy.resetForm("printRef");
 }
 /** 打印按钮 */
-async function printOut(row) {
-  form.value.printId = print_selected_files.value[0].label;
-  form.value.printSize = print_selected_sizes.value[0].label;
-  await viewUrl().then((res) => {
-    openUrl.value = res;
-  });
-  const printUrl =
-    openUrl.value +
-    "/" +
-    form.value.printId +
-    "?token=Bearer " +
-    getToken() +
-    "&systematicOrderForm=" +
-    row.systematicOrderForm +
-    "&pageSize=" +
-    form.value.printSize;
-  window.open(printUrl, "_blank");
+function printCommon(row) {
+  systematicReceipt.value = row.systematicReceipt;
+  openPrintTemplate.value = true;
 }
+
 /** 修改按钮操作 */
 function handleUpdate(row) {
   const systematicOrderForm = row.systematicOrderForm;
@@ -736,7 +727,7 @@ function remoteSupplier(query) {
   if (query) {
     setTimeout(() => {
       option.value.supplierName = query;
-      listSupplier(option.value).then((response) => {
+      supplierList(option.value).then((response) => {
         supplierOptions.value = response.rows;
       });
       supplierOptions.value = list.value.filter((item) => {
@@ -744,7 +735,7 @@ function remoteSupplier(query) {
       });
     }, 200);
   } else {
-    listSupplier(option.value).then((response) => {
+    supplierList(option.value).then((response) => {
       supplierOptions.value = response.rows;
     });
   }

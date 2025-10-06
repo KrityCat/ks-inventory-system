@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ruoyi.inventory.mapper.DetailReceiptLogMapper">
+
+    <resultMap type="DetailReceipt" id="detailReceiptLogResult">
+        <result property="systematicReceipt" column="systematic_receipt"/>
+        <result property="productId" column="product_id"/>
+        <result property="warehousingId" column="warehousing_id"/>
+        <result property="warehousingName" column="warehousing_name"/>
+        <result property="retrievalId" column="retrieval_id"/>
+        <result property="retrievalName" column="retrieval_name"/>
+        <result property="supplierId" column="supplier_id"/>
+        <result property="customerId" column="customer_id"/>
+        <result property="productSpecifications" column="product_specifications"/>
+        <result property="measureUnit" column="measure_unit"/>
+        <result property="lockedGoods" column="locked_goods"/>
+        <result property="lockInventoryQty" column="lock_inventory_qty"/>
+        <result property="currentInventory" column="current_inventory"/>
+        <result property="actualInventory" column="actual_inventory"/>
+        <result property="planQuantity" column="plan_quantity"/>
+        <result property="univalence" column="univalence"/>
+        <result property="discount" column="discount"/>
+        <result property="money" column="money"/>
+        <result property="cost" column="cost"/>
+        <result property="remarks" column="remarks"/>
+        <result property="receiptType" column="receipt_type"/>
+        <association property="product" javaType="Product" resultMap="ProductResult"/>
+        <association property="type" javaType="ProductType" resultMap="ProductTypeResult"/>
+        <association property="supplier" javaType="Supplier" resultMap="SupplierResult"/>
+        <association property="customer" javaType="Customer" resultMap="CustomerResult"/>
+        <association property="sysUser" javaType="SysUser" resultMap="SysUserResult"/>
+        <collection property="warehousing" ofType="Warehouse">
+            <result property="warehousingId" column="warehousing_id"/>
+            <result property="warehousingName" column="warehousing_name"/>
+        </collection>
+        <collection property="retrieval" ofType="Warehouse">
+            <result property="retrievalId" column="retrieval_id"/>
+            <result property="retrievalName" column="retrieval_name"/>
+        </collection>
+    </resultMap>
+
+    <resultMap type="Product" id="ProductResult">
+        <result property="productId" column="product_id"/>
+        <result property="productCode" column="product_code"/>
+        <result property="productName" column="product_name"/>
+        <result property="productType" column="product_type"/>
+        <result property="productSpecifications" column="product_specifications"/>
+        <result property="measureUnit" column="measure_unit"/>
+        <result property="producer" column="producer"/>
+        <result property="costPrice" column="cost_price"/>
+        <result property="univalence" column="univalence"/>
+        <result property="discount" column="discount"/>
+        <result property="productBarcode" column="product_barcode"/>
+        <result property="inventoryQty" column="inventory_qty"/>
+        <result property="lockInventoryQty" column="lock_inventory_qty"/>
+    </resultMap>
+
+    <resultMap type="ProductType" id="ProductTypeResult">
+        <id property="productTypeId" column="product_type_id"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="ancestors" column="ancestors"/>
+        <result property="productTypeName" column="product_type_name"/>
+    </resultMap>
+
+    <resultMap type="Supplier" id="SupplierResult">
+        <result property="supplierId" column="supplier_id"/>
+        <result property="supplierCode" column="supplier_code"/>
+        <result property="supplierName" column="supplier_name"/>
+    </resultMap>
+
+    <resultMap type="Customer" id="CustomerResult">
+        <result property="customerId" column="customer_id"/>
+        <result property="customerCode" column="customer_code"/>
+        <result property="customerName" column="customer_name"/>
+    </resultMap>
+
+    <resultMap type="SysUser" id="SysUserResult">
+        <id property="userId" column="user_id"/>
+        <result property="userName" column="user_name"/>
+    </resultMap>
+
+    <!--    单据明细操作记录表查询      -->
+    <select id="selectDetailReceiptLogQuery" parameterType="DetailReceipt" resultMap="detailReceiptLogResult">
+        SELECT
+        drl.systematic_receipt, drl.product_id, drl.warehousing_id, drl.retrieval_id, drl.supplier_id, drl.customer_id,
+        drl.current_inventory, drl.actual_inventory, drl.plan_quantity, drl.univalence, drl.discount, drl.money,
+        drl.cost,
+        drl.remarks, drl.product_specifications, drl.measure_unit, drl.locked_goods, drl.lock_inventory_qty,
+        (SELECT w1.warehouse_id FROM warehouse w1 WHERE w1.warehouse_id = drl.warehousing_id) AS warehousing_id,
+        (SELECT w1.warehouse_name FROM warehouse w1 WHERE w1.warehouse_id = drl.warehousing_id) AS warehousing_name,
+        (SELECT w2.warehouse_id FROM warehouse w2 WHERE w2.warehouse_id = drl.retrieval_id) AS retrieval_id,
+        (SELECT w2.warehouse_name FROM warehouse w2 WHERE w2.warehouse_id = drl.retrieval_id) AS retrieval_name,
+        p.product_id, p.product_code, p.product_name, p.product_type, p.producer,
+        pt.product_type_id, pt.parent_id, pt.ancestors, pt.product_type_name
+        FROM detail_receipt_log drl
+        JOIN product p ON drl.product_id = p.product_id
+        JOIN product_type pt ON pt.product_type_id = p.product_type
+        WHERE 1=1
+        <if test="systematicReceipt != null and systematicReceipt != ''">
+            AND drl.systematic_receipt like = #{systematicReceipt}
+        </if>
+    </select>
+
+    <!--    单据明细操作记录表新增   -->
+    <insert id="addDetailReceiptLog" parameterType="java.util.List">
+        insert into detail_receipt_log(
+        systematic_receipt,
+        product_id,
+        warehousing_id,
+        retrieval_id,
+        supplier_id,
+        customer_id,
+        product_specifications,
+        measure_unit,
+        current_inventory,
+        actual_inventory,
+        locked_goods,
+        lock_inventory_qty,
+        plan_quantity,
+        univalence,
+        discount,
+        money,
+        cost,
+        remarks,
+        update_by,
+        create_time
+        )
+        <foreach collection="list" index="index" item="item" separator="union all">
+            select
+            #{item.systematicReceipt,jdbcType=VARCHAR},
+            #{item.productId,jdbcType=VARCHAR},
+            #{item.warehousingId,jdbcType=VARCHAR},
+            #{item.retrievalId,jdbcType=VARCHAR},
+            #{item.supplierId,jdbcType=VARCHAR},
+            #{item.customerId,jdbcType=VARCHAR},
+            #{item.productSpecifications,jdbcType=VARCHAR},
+            #{item.measureUnit,jdbcType=VARCHAR},
+            #{item.currentInventory,jdbcType=VARCHAR},
+            #{item.actualInventory,jdbcType=VARCHAR},
+            #{item.lockedGoods,jdbcType=VARCHAR},
+            #{item.lockInventoryQty,jdbcType=VARCHAR},
+            #{item.planQuantity,jdbcType=VARCHAR},
+            #{item.univalence,jdbcType=VARCHAR},
+            #{item.discount,jdbcType=VARCHAR},
+            #{item.money,jdbcType=VARCHAR},
+            #{item.cost,jdbcType=VARCHAR},
+            #{item.remarks,jdbcType=VARCHAR},
+            #{item.updateBy,jdbcType=VARCHAR},
+            sysdate()
+            from dual
+        </foreach>
+    </insert>
+
+    <!--    单据明细操作记录表删除      -->
+    <delete id="delDetailReceiptLog" parameterType="java.util.List">
+        delete from detail_receipt_log where systematic_receipt in
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item.systematicReceipt}
+        </foreach>
+    </delete>
+
+</mapper>

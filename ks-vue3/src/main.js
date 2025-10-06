@@ -46,6 +46,16 @@ import TreeSelect from '@/components/TreeSelect'
 // 字典标签组件
 import DictTag from '@/components/DictTag'
 
+import VxeUIAll from 'vxe-pc-ui'
+import 'vxe-pc-ui/es/style.css'
+
+import VxeUITable from 'vxe-table'
+import 'vxe-table/es/style.css'
+
+import VxeUIDesign from 'vxe-design'
+import 'vxe-design/lib/style.css'
+
+
 const app = createApp(App)
 
 // 全局方法挂载
@@ -72,6 +82,9 @@ app.use(router)
 app.use(store)
 app.use(plugins)
 app.use(elementIcons)
+app.use(VxeUIAll)
+app.use(VxeUITable)
+app.use(VxeUIDesign)
 app.component('svg-icon', SvgIcon)
 
 directive(app)

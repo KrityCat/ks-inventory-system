@@ -8,7 +8,7 @@ import com.ruoyi.common.core.domain.entity.HeadOrderForm;
 import com.ruoyi.common.core.domain.entity.OrderFrom;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.StringUtils;
-import com.ruoyi.system.service.SalesOrderProcessingService;
+import com.ruoyi.inventory.service.SalesOrderProcessingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;

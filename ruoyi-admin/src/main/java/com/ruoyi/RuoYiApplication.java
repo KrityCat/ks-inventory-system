@@ -14,6 +14,6 @@ import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 public class RuoYiApplication {
     public static void main(String[] args) {
         SpringApplication.run(RuoYiApplication.class, args);
-        System.out.println("w(ﾟДﾟ)w  铠思进销存系统启动成功  ヾ(≧▽≦*)o");
+        System.out.println("w(ﾟДﾟ)w  铠思运营系统启动成功  ヾ(≧▽≦*)o");
     }
 }

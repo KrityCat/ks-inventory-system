@@ -11,15 +11,15 @@ import com.ruoyi.common.core.redis.RedisCache;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.poi.ExcelUtil;
-import com.ruoyi.system.service.ProductService;
-import com.ruoyi.system.service.ProductTypeService;
+import com.ruoyi.inventory.service.ProductService;
+import com.ruoyi.inventory.service.ProductTypeService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -58,61 +58,6 @@ public class ProductController extends BaseController {
     public TableDataInfo list(Product bo) {
         startPage();
         List<Product> list = productService.productQuery(bo);
-        return getDataTable(list);
-    }
-
-    /**
-     * 货品库存预警查询接口
-     */
-    @PreAuthorize("@ss.hasPermi('baseDate:product:list')")
-    @GetMapping("/overstockList")
-    public TableDataInfo productOverstockQuery(Product bo) {
-        startPage();
-        List<Product> list = productService.productOverstockQuery(bo);
-        return getDataTable(list);
-    }
-
-    /**
-     * 货品库存预警查询接口
-     */
-    @PreAuthorize("@ss.hasPermi('baseDate:product:list')")
-    @GetMapping("/dangerList")
-    public TableDataInfo productDangerQuery(Product bo) {
-        startPage();
-        List<Product> list = productService.productDangerQuery(bo);
-        return getDataTable(list);
-    }
-
-    /**
-     * 积压3个月未出预警查询接口
-     */
-    @PreAuthorize("@ss.hasPermi('baseDate:product:list')")
-    @GetMapping("/threeOverstockList")
-    public TableDataInfo productThreeDangerQuery(Product bo) {
-        startPage();
-        List<Product> list = productService.productThreeDangerQuery(bo);
-        return getDataTable(list);
-    }
-
-    /**
-     * 积压6个月未出预警查询接口
-     */
-    @PreAuthorize("@ss.hasPermi('baseDate:product:list')")
-    @GetMapping("/sixOverstockList")
-    public TableDataInfo productSixDangerQuery(Product bo) {
-        startPage();
-        List<Product> list = productService.productSixDangerQuery(bo);
-        return getDataTable(list);
-    }
-
-    /**
-     * 积压12个月未出预警查询接口
-     */
-    @PreAuthorize("@ss.hasPermi('baseDate:product:list')")
-    @GetMapping("/twelveOverstockList")
-    public TableDataInfo productTwelveDangerQuery(Product bo) {
-        startPage();
-        List<Product> list = productService.productTwelveDangerQuery(bo);
         return getDataTable(list);
     }
 
@@ -161,7 +106,7 @@ public class ProductController extends BaseController {
      * 删除接口
      */
     @PreAuthorize("@ss.hasPermi('baseDate:product:remove')")
-    @Log(title = "删除货品资料", businessType = BusinessType.INSERT)
+    @Log(title = "删除货品资料", businessType = BusinessType.DELETE)
     @DeleteMapping("/{productIds}")
     public AjaxResult remove(@PathVariable Long[] productIds) {
         return toAjax(productService.deleteProductByIds(productIds));

@@ -17,18 +17,15 @@ import java.util.regex.Pattern;
 
 /**
  * 设置Anonymous注解允许匿名访问的url
- * 
- * @author KrityCat
+ *
+ * @author ruoyi
  */
 @Configuration
 public class PermitAllUrlProperties implements InitializingBean, ApplicationContextAware {
     private static final Pattern PATTERN = Pattern.compile("\\{(.*?)\\}");
-
-    private ApplicationContext applicationContext;
-
-    private List<String> urls = new ArrayList<>();
-
     public String ASTERISK = "*";
+    private ApplicationContext applicationContext;
+    private List<String> urls = new ArrayList<>();
 
     @Override
     public void afterPropertiesSet() {
@@ -40,12 +37,12 @@ public class PermitAllUrlProperties implements InitializingBean, ApplicationCont
 
             // 获取方法上边的注解 替代path variable 为 *
             Anonymous method = AnnotationUtils.findAnnotation(handlerMethod.getMethod(), Anonymous.class);
-            Optional.ofNullable(method).ifPresent(anonymous -> Objects.requireNonNull(info.getPatternsCondition().getPatterns())
+            Optional.ofNullable(method).ifPresent(anonymous -> Objects.requireNonNull(info.getPathPatternsCondition().getPatternValues()) //
                     .forEach(url -> urls.add(RegExUtils.replaceAll(url, PATTERN, ASTERISK))));
 
             // 获取类上边的注解, 替代path variable 为 *
             Anonymous controller = AnnotationUtils.findAnnotation(handlerMethod.getBeanType(), Anonymous.class);
-            Optional.ofNullable(controller).ifPresent(anonymous -> Objects.requireNonNull(info.getPatternsCondition().getPatterns())
+            Optional.ofNullable(controller).ifPresent(anonymous -> Objects.requireNonNull(info.getPathPatternsCondition().getPatternValues())
                     .forEach(url -> urls.add(RegExUtils.replaceAll(url, PATTERN, ASTERISK))));
         });
     }

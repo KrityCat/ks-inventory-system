@@ -6,9 +6,9 @@ spring:
     druid:
       # 主库数据源
       master:
-        url: jdbc:mysql://192.168.0.12:3306/KsDataBase?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&allowMultiQueries=true
-        username: 
-        password: 
+        url: jdbc:mysql://192.168.1.130:3306/KsDataBase?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&allowMultiQueries=true
+        username: root
+        password: kssql741953
       # 从库数据源
       slave:
         # 从数据源开关/默认关闭

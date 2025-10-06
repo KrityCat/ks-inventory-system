@@ -1,5 +1,5 @@
-# FROM java:8 最小化
-FROM anapsix/alpine-java:8_server-jre_unlimited
+# FROM java:17 最小化
+FROM eclipse-temurin:17-jdk-alpine
 #FROM java:8
 # 设置语言包为中文
 ENV LANG C.UTF-8

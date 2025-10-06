@@ -2,17 +2,18 @@ package com.ruoyi.common.filter;
 
 import com.ruoyi.common.enums.HttpMethod;
 import com.ruoyi.common.utils.StringUtils;
+import jakarta.servlet.*;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
-import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
  * 防止XSS攻击的过滤器
- * 
+ *
  * @author KrityCat
  */
 public class XssFilter implements Filter {
@@ -26,9 +27,7 @@ public class XssFilter implements Filter {
         String tempExcludes = filterConfig.getInitParameter("excludes");
         if (StringUtils.isNotEmpty(tempExcludes)) {
             String[] urls = tempExcludes.split(",");
-            for (String url : urls) {
-                excludes.add(url);
-            }
+            Collections.addAll(excludes, urls);
         }
     }
 

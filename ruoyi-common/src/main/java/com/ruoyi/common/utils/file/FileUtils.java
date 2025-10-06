@@ -4,19 +4,19 @@ import com.ruoyi.common.config.RuoYiConfig;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.uuid.IdUtils;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 /**
  * 文件处理工具类
- * 
+ *
  * @author KrityCat
  */
 public class FileUtils {
@@ -24,9 +24,9 @@ public class FileUtils {
 
     /**
      * 输出指定文件的byte数组
-     * 
+     *
      * @param filePath 文件路径
-     * @param os 输出流
+     * @param os       输出流
      * @return
      */
     public static void writeBytes(String filePath, OutputStream os) throws IOException {
@@ -64,7 +64,7 @@ public class FileUtils {
     /**
      * 写数据到文件中
      *
-     * @param data 数据
+     * @param data      数据
      * @param uploadDir 目标文件
      * @return 目标文件
      * @throws IOException IO异常
@@ -86,7 +86,7 @@ public class FileUtils {
 
     /**
      * 删除文件
-     * 
+     *
      * @param filePath 文件
      * @return
      */
@@ -102,7 +102,7 @@ public class FileUtils {
 
     /**
      * 文件名称验证
-     * 
+     *
      * @param filename 文件名称
      * @return true 正常 false 非法
      */
@@ -112,7 +112,7 @@ public class FileUtils {
 
     /**
      * 检查文件是否可下载
-     * 
+     *
      * @param resource 需要下载的文件
      * @return true 正常 false 非法
      */
@@ -123,18 +123,15 @@ public class FileUtils {
         }
 
         // 检查允许下载的文件规则
-        if (ArrayUtils.contains(MimeTypeUtils.DEFAULT_ALLOWED_EXTENSION, FileTypeUtils.getFileType(resource))) {
-            return true;
-        }
+        return ArrayUtils.contains(MimeTypeUtils.DEFAULT_ALLOWED_EXTENSION, FileTypeUtils.getFileType(resource));
 
         // 不在允许下载的文件规则
-        return false;
     }
 
     /**
      * 下载文件名重新编码
      *
-     * @param request 请求对象
+     * @param request  请求对象
      * @param fileName 文件名
      * @return 编码后的文件名
      */
@@ -143,17 +140,17 @@ public class FileUtils {
         String filename = fileName;
         if (agent.contains("MSIE")) {
             // IE浏览器
-            filename = URLEncoder.encode(filename, "utf-8");
+            filename = URLEncoder.encode(filename, StandardCharsets.UTF_8);
             filename = filename.replace("+", " ");
         } else if (agent.contains("Firefox")) {
             // 火狐浏览器
             filename = new String(fileName.getBytes(), "ISO8859-1");
         } else if (agent.contains("Chrome")) {
             // google浏览器
-            filename = URLEncoder.encode(filename, "utf-8");
+            filename = URLEncoder.encode(filename, StandardCharsets.UTF_8);
         } else {
             // 其它浏览器
-            filename = URLEncoder.encode(filename, "utf-8");
+            filename = URLEncoder.encode(filename, StandardCharsets.UTF_8);
         }
         return filename;
     }
@@ -161,22 +158,21 @@ public class FileUtils {
     /**
      * 下载文件名重新编码
      *
-     * @param response 响应对象
+     * @param response     响应对象
      * @param realFileName 真实文件名
      */
     public static void setAttachmentResponseHeader(HttpServletResponse response, String realFileName) throws UnsupportedEncodingException {
         String percentEncodedFileName = percentEncode(realFileName);
 
-        StringBuilder contentDispositionValue = new StringBuilder();
-        contentDispositionValue.append("attachment; filename=")
-                .append(percentEncodedFileName)
-                .append(";")
-                .append("filename*=")
-                .append("utf-8''")
-                .append(percentEncodedFileName);
+        String contentDispositionValue = "attachment; filename=" +
+                percentEncodedFileName +
+                ";" +
+                "filename*=" +
+                "utf-8''" +
+                percentEncodedFileName;
 
         response.addHeader("Access-Control-Expose-Headers", "Content-Disposition,download-filename");
-        response.setHeader("Content-disposition", contentDispositionValue.toString());
+        response.setHeader("Content-disposition", contentDispositionValue);
         response.setHeader("download-filename", percentEncodedFileName);
     }
 
@@ -187,13 +183,13 @@ public class FileUtils {
      * @return 百分号编码后的字符串
      */
     public static String percentEncode(String s) throws UnsupportedEncodingException {
-        String encode = URLEncoder.encode(s, StandardCharsets.UTF_8.toString());
+        String encode = URLEncoder.encode(s, StandardCharsets.UTF_8);
         return encode.replaceAll("\\+", "%20");
     }
 
     /**
      * 获取图像后缀
-     * 
+     *
      * @param photoByte 图像数据
      * @return 后缀名
      */
@@ -214,7 +210,7 @@ public class FileUtils {
 
     /**
      * 获取文件名称 /profile/upload/2022/04/16/ruoyi.png -- ruoyi.png
-     * 
+     *
      * @param fileName 路径名称
      * @return 没有文件路径的名称
      */
@@ -230,7 +226,7 @@ public class FileUtils {
 
     /**
      * 获取不带后缀文件名称 /profile/upload/2022/04/16/ruoyi.png -- ruoyi
-     * 
+     *
      * @param fileName 路径名称
      * @return 没有文件路径和后缀的名称
      */

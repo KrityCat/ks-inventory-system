@@ -8,7 +8,7 @@ import com.ruoyi.common.core.domain.entity.HeadOrderForm;
 import com.ruoyi.common.core.domain.entity.OrderFrom;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.StringUtils;
-import com.ruoyi.system.service.PurchaseOrderProcessingService;
+import com.ruoyi.inventory.service.PurchaseOrderProcessingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -49,7 +49,7 @@ public class PurchaseOrderProcessingController extends BaseController {
     @PreAuthorize("@ss.hasPermi('purchase:purchaseOrderProcessing:save')")
     @Log(title = "保存销售订单", businessType = BusinessType.INSERT)
     @PostMapping("/save")
-    public AjaxResult save(@RequestBody OrderFrom bo) throws Exception {
+    public AjaxResult save(@RequestBody OrderFrom bo) {
         bo.setCreateBy(getUsername());
         bo.setUpdateBy(getUsername());
         return toAjax(purchaseOrderProcessingService.savePurchaseOrderForm(bo));

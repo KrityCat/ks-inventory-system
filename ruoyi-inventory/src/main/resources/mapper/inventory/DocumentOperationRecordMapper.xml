@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.inventory.mapper.DocumentOperationRecordMapper">
+
+    <resultMap type="DocumentOperationRecord" id="DocumentOperationRecordResult">
+        <result property="logId" column="log_id"/>
+        <result property="systematicId" column="systematic_id"/>
+        <result property="systematicReceipt" column="systematic_receipt"/>
+        <result property="operate" column="operate"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="selectDocumentOperationRecordVo">
+        select log_id, systematic_id, systematic_receipt, operate, update_by, update_time from document_operation_record
+    </sql>
+
+    <select id="selectDocumentOperationRecordList" parameterType="DocumentOperationRecord"
+            resultMap="DocumentOperationRecordResult">
+        <include refid="selectDocumentOperationRecordVo"/>
+        <where>
+            <if test="systematicId != null ">and systematic_id = #{systematicId}</if>
+            <if test="systematicReceipt != null  and systematicReceipt != ''">and systematic_receipt =
+                #{systematicReceipt}
+            </if>
+            <if test="operate != null  and operate != ''">and operate = #{operate}</if>
+            <if test="updateBy != null  and updateBy != ''">and update_by = #{updateBy}</if>
+            <if test="updateTime != null ">and update_time = #{updateTime}</if>
+        </where>
+    </select>
+
+    <select id="selectDocumentOperationRecordByLogId" parameterType="Long" resultMap="DocumentOperationRecordResult">
+        <include refid="selectDocumentOperationRecordVo"/>
+        where log_id = #{logId}
+    </select>
+
+    <insert id="insertDocumentOperationRecord" parameterType="DocumentOperationRecord" useGeneratedKeys="true"
+            keyProperty="logId">
+        insert into document_operation_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="systematicId != null">systematic_id,</if>
+            <if test="systematicReceipt != null">systematic_receipt,</if>
+            <if test="operate != null">operate,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="systematicId != null">#{systematicId},</if>
+            <if test="systematicReceipt != null">#{systematicReceipt},</if>
+            <if test="operate != null">#{operate},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateDocumentOperationRecord" parameterType="DocumentOperationRecord">
+        update document_operation_record
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="systematicId != null">systematic_id = #{systematicId},</if>
+            <if test="systematicReceipt != null">systematic_receipt = #{systematicReceipt},</if>
+            <if test="operate != null">operate = #{operate},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where log_id = #{logId}
+    </update>
+
+    <delete id="deleteDocumentOperationRecordByLogId" parameterType="Long">
+        delete from document_operation_record where log_id = #{logId}
+    </delete>
+
+    <delete id="deleteDocumentOperationRecordByLogIds" parameterType="String">
+        delete from document_operation_record where log_id in 
+        <foreach item="logId" collection="array" open="(" separator="," close=")">
+            #{logId}
+        </foreach>
+    </delete>
+</mapper>

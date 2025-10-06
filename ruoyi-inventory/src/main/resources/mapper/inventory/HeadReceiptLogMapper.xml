@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ruoyi.inventory.mapper.HeadReceiptLogMapper">
+
+    <resultMap type="headReceipt" id="headReceiptLogResult">
+        <result property="systematicReceipt" column="systematic_receipt"/>
+        <result property="originalReceipt" column="original_receipt"/>
+        <result property="receiptCategory" column="receipt_category"/>
+        <result property="receiptType" column="receipt_type"/>
+        <result property="financialReview" column="financial_review"/>
+        <result property="receiptStatus" column="receipt_status"/>
+        <result property="invoiceDate" column="invoice_date"/>
+        <result property="warehousingIds" column="warehousing_ids"/>
+        <result property="retrievalIds" column="retrieval_ids"/>
+        <result property="userIds" column="user_ids"/>
+        <result property="supplierIds" column="supplier_ids"/>
+        <result property="customerIds" column="customer_ids"/>
+        <result property="planReceipt" column="plan_receipt"/>
+        <result property="receiptNotes" column="receipt_notes"/>
+        <result property="deposit" column="deposit"/>
+        <result property="totalAmount" column="total_amount"/>
+        <result property="capitalizeTotalAmount" column="capitalize_total_amount"/>
+        <result property="afterSalesInstallation" column="after_sales_installation"/>
+        <result property="findingOfAudit" column="finding_of_audit"/>
+        <result property="reviewComments" column="review_comments"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <association property="sysUser" javaType="SysUser" resultMap="SysUserResult"/>
+        <association property="supplier" javaType="Supplier" resultMap="SupplierResult"/>
+        <association property="customer" javaType="Customer" resultMap="CustomerResult"/>
+        <collection property="warehousing" ofType="Warehouse">
+            <result property="warehousingId" column="warehousing_id"/>
+            <result property="warehousingName" column="warehousing_name"/>
+        </collection>
+        <collection property="retrieval" ofType="Warehouse">
+            <result property="retrievalId" column="retrieval_id"/>
+            <result property="retrievalName" column="retrieval_name"/>
+        </collection>
+    </resultMap>
+
+    <resultMap type="SysUser" id="SysUserResult">
+        <id property="userId" column="user_id"/>
+        <result property="userName" column="user_name"/>
+    </resultMap>
+
+    <resultMap type="Supplier" id="SupplierResult">
+        <result property="supplierId" column="supplier_id"/>
+        <result property="supplierCode" column="supplier_code"/>
+        <result property="supplierName" column="supplier_name"/>
+    </resultMap>
+
+    <resultMap type="Customer" id="CustomerResult">
+        <result property="customerId" column="customer_id"/>
+        <result property="customerCode" column="customer_code"/>
+        <result property="customerName" column="customer_name"/>
+    </resultMap>
+
+    <!--    单据头操作记录表查询      -->
+    <select id="headReceiptLogQuery" parameterType="headReceipt" resultMap="headReceiptLogResult">
+        SELECT DISTINCT
+        hrl.systematic_receipt, hrl.original_receipt, hrl.receipt_category, hrl.receipt_type, hrl.financial_review,
+        hrl.receipt_status,
+        hrl.invoice_date, hrl.warehousing_ids, hrl.retrieval_ids, hrl.user_ids, hrl.supplier_ids, hrl.customer_ids,
+        hrl.plan_receipt, hrl.receipt_notes, hrl.deposit, hrl.total_amount, hrl.capitalize_total_amount,
+        hrl.after_sales_installation, hrl.finding_of_audit, hrl.review_comments, hrl.create_by, hrl.create_time,
+        hrl.update_by, hrl.update_time,
+        (SELECT w1.warehouse_id FROM warehouse w1 WHERE w1.warehouse_id = hrl.warehousing_ids) AS warehousing_id,
+        (SELECT w1.warehouse_name FROM warehouse w1 WHERE w1.warehouse_id = hrl.warehousing_ids) AS warehousing_name,
+        (SELECT w2.warehouse_id FROM warehouse w2 WHERE w2.warehouse_id = hrl.retrieval_ids) AS retrieval_id,
+        (SELECT w2.warehouse_name FROM warehouse w2 WHERE w2.warehouse_id = hrl.retrieval_ids) AS retrieval_name,
+        su.user_id, su.user_name,
+        (SELECT s.supplier_id FROM supplier s WHERE hrl.supplier_ids = s.supplier_id) AS supplier_id,
+        (SELECT s.supplier_name FROM supplier s WHERE hrl.supplier_ids = s.supplier_id) AS supplier_name,
+        (SELECT c.customer_id FROM customer c WHERE hrl.customer_ids = c.customer_id) AS customer_id,
+        (SELECT c.customer_name FROM customer c WHERE hrl.customer_ids = c.customer_id) AS customer_name
+        FROM head_receipt_log hrl
+        JOIN sys_user su ON hrl.user_ids = su.user_id
+        WHERE 1=1
+        <if test="systematicReceipt != null and systematicReceipt != ''">
+            AND hrl.systematic_receipt = #{systematicReceipt}
+        </if>
+        order by create_time DESC
+    </select>
+
+    <!--    单据头操作记录表新增      -->
+    <insert id="addHeadReceiptLog" parameterType="headReceipt">
+        insert into head_receipt_log(
+        <if test="systematicReceipt != null and systematicReceipt != ''">systematic_receipt,</if>
+        <if test="originalReceipt != null and originalReceipt != ''">original_receipt,</if>
+        <if test="receiptCategory != null and receiptCategory != ''">receipt_category,</if>
+        <if test="receiptType != null and receiptType != ''">receipt_type,</if>
+        <if test="financialReview != null and financialReview != ''">financial_review,</if>
+        <if test="receiptStatus != null and receiptStatus != ''">receipt_status,</if>
+        <if test="invoiceDate != null and invoiceDate != ''">invoice_date,</if>
+        <if test="warehousingIds != null and warehousingIds != ''">warehousing_ids,</if>
+        <if test="retrievalIds != null and retrievalIds != ''">retrieval_ids,</if>
+        <if test="userIds != null and userIds != ''">user_ids,</if>
+        <if test="supplierIds != null and supplierIds != ''">supplier_ids,</if>
+        <if test="customerIds != null and customerIds != ''">customer_ids,</if>
+        <if test="planReceipt != null and planReceipt != ''">plan_receipt,</if>
+        <if test="receiptNotes != null and receiptNotes != ''">receipt_notes,</if>
+        <if test="deposit != null and deposit != ''">deposit,</if>
+        <if test="totalAmount != null and totalAmount != ''">total_amount,</if>
+        <if test="capitalizeTotalAmount != null and capitalizeTotalAmount != ''">capitalize_total_amount,</if>
+        <if test="afterSalesInstallation != null and afterSalesInstallation != ''">after_sales_installation,</if>
+        <if test="findingOfAudit != null and findingOfAudit != ''">finding_of_audit,</if>
+        <if test="reviewComments != null and reviewComments != ''">review_comments,</if>
+        <if test="updateBy != null and updateBy != ''">update_by,</if>
+        update_time
+        )values(
+        <if test="systematicReceipt != null and systematicReceipt != ''">#{systematicReceipt},</if>
+        <if test="originalReceipt != null and originalReceipt != ''">#{originalReceipt},</if>
+        <if test="receiptCategory != null and receiptCategory != ''">#{receiptCategory},</if>
+        <if test="receiptType != null and receiptType != ''">#{receiptType},</if>
+        <if test="financialReview != null and financialReview != ''">#{financialReview},</if>
+        <if test="receiptStatus != null and receiptStatus != ''">#{receiptStatus},</if>
+        <if test="invoiceDate != null and invoiceDate != ''">#{invoiceDate},</if>
+        <if test="warehousingIds != null and warehousingIds != ''">#{warehousingIds},</if>
+        <if test="retrievalIds != null and retrievalIds != ''">#{retrievalIds},</if>
+        <if test="userIds != null and userIds != ''">#{userIds},</if>
+        <if test="supplierIds != null and supplierIds != ''">#{supplierIds},</if>
+        <if test="customerIds != null and customerIds != ''">#{customerIds},</if>
+        <if test="planReceipt != null and planReceipt != ''">#{planReceipt},</if>
+        <if test="receiptNotes != null and receiptNotes != ''">#{receiptNotes},</if>
+        <if test="deposit != null and deposit != ''">#{deposit},</if>
+        <if test="totalAmount != null and totalAmount != ''">#{totalAmount},</if>
+        <if test="capitalizeTotalAmount != null and capitalizeTotalAmount != ''">#{capitalizeTotalAmount},</if>
+        <if test="afterSalesInstallation != null and afterSalesInstallation != ''">#{afterSalesInstallation},</if>
+        <if test="findingOfAudit != null and findingOfAudit != ''">#{findingOfAudit},</if>
+        <if test="reviewComments != null and reviewComments != ''">#{reviewComments},</if>
+        <if test="updateBy != null and updateBy != ''">#{updateBy},</if>
+        sysdate()
+        )
+    </insert>
+
+    <!--    单据头操作记录表删除      -->
+    <delete id="delHeadReceiptLog" parameterType="java.util.List">
+        delete from head_receipt_log where systematic_receipt in
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item.systematicReceipt}
+        </foreach>
+    </delete>
+
+</mapper>

@@ -6,7 +6,8 @@ import com.ruoyi.common.core.domain.entity.InventoryProduct;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.poi.ExcelUtil;
-import com.ruoyi.system.service.InventoryService;
+import com.ruoyi.inventory.service.InventoryService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -27,7 +27,7 @@ import java.util.List;
 public class InventoryItemInquiryController extends BaseController {
 
     @Autowired
-    private InventoryService InventoryService;
+    private InventoryService inventoryService;
 
     /**
      * 库存货品查询
@@ -36,7 +36,7 @@ public class InventoryItemInquiryController extends BaseController {
     @GetMapping("/list")
     public TableDataInfo list(InventoryProduct bo) {
         startPage();
-        List<InventoryProduct> list = InventoryService.selectInventoryProduct(bo);
+        List<InventoryProduct> list = inventoryService.selectInventoryProduct(bo);
         return getDataTable(list);
     }
 
@@ -47,8 +47,8 @@ public class InventoryItemInquiryController extends BaseController {
     @Log(title = "库存货品导出", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, InventoryProduct bo) {
-        List<InventoryProduct> list = InventoryService.selectInventoryProduct(bo);
-        ExcelUtil<InventoryProduct> util = new ExcelUtil<InventoryProduct>(InventoryProduct.class);
+        List<InventoryProduct> list = inventoryService.selectInventoryProduct(bo);
+        ExcelUtil<InventoryProduct> util = new ExcelUtil<>(InventoryProduct.class);
         util.exportExcel(response, list, "库存货品表");
     }
 

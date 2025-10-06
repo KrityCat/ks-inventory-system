@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ruoyi.inventory.mapper.InventorySummaryMapper">
+
+    <resultMap type="inventorySummary" id="inventorySummaryResult">
+        <result property="productId" column="product_id"/>
+        <result property="productCode" column="product_code"/>
+        <result property="productName" column="product_name"/>
+        <result property="productType" column="product_type"/>
+        <result property="productTypeName" column="product_type_name"/>
+        <result property="productSpecifications" column="product_specifications"/>
+        <result property="measureUnit" column="measure_unit"/>
+        <result property="warehousingId" column="warehousing_id"/>
+        <result property="warehousingName" column="warehousing_name"/>
+        <result property="retrievalId" column="retrieval_id"/>
+        <result property="retrievalName" column="retrieval_name"/>
+        <result property="OBPlanQuantity" column="OBPlanQuantity"/>
+        <result property="OBUnivalence" column="OBUnivalence"/>
+        <result property="OBMoney" column="OBMoney"/>
+        <result property="EIPlanQuantity" column="EIPlanQuantity"/>
+        <result property="EIMoney" column="EIMoney"/>
+        <result property="ERPlanQuantity" column="ERPlanQuantity"/>
+        <result property="ERMoney" column="ERMoney"/>
+        <result property="CBPlanQuantity" column="CBPlanQuantity"/>
+        <result property="CBUnivalence" column="CBUnivalence"/>
+        <result property="CBMoney" column="CBMoney"/>
+    </resultMap>
+
+    <!--    货品发生汇总      -->
+    <select id="inventorySummaryQuery" parameterType="InventorySummary" resultMap="inventorySummaryResult">
+        SELECT DISTINCT dr.product_id,
+        p.product_code, p.product_name, p.product_type, p.product_specifications, p.measure_unit,
+        pt.product_type_id, pt.parent_id, pt.ancestors, pt.product_type_name,
+        OB.OBPlanQuantity, OB.OBMoney, CB.CBPlanQuantity, CB.CBMoney,
+        EI.warehousing_name, EI.EIPlanQuantity, EI.EIMoney,
+        ER.retrieval_name, ER.ERPlanQuantity, ER.ERMoney
+        from detail_receipt dr
+        JOIN product p ON dr.product_id = p.product_id
+        JOIN product_type pt ON pt.product_type_id = p.product_type
+        <!--        期初结存        -->
+        left join (
+        SELECT dr.product_id,
+        COALESCE(SUM(case when hr.receipt_type in (1, 4, 5, 8, 10) then dr.plan_quantity
+        when hr.receipt_type in (2, 3, 6, 7, 9) then -dr.plan_quantity else 0 end), 0) as OBPlanQuantity,
+        ROUND(COALESCE(SUM(case when hr.receipt_type in (1, 4, 5, 8, 10) then dr.money
+        when hr.receipt_type in (2, 3, 6, 7, 9) then -dr.money else 0 end), 0), 2) as OBMoney
+        from detail_receipt dr
+        join head_receipt hr on hr.systematic_receipt = dr.systematic_receipt
+        where hr.receipt_status = 2
+        <if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+            and date_format(hr.invoice_date,'%y%m%d') &lt; date_format(#{params.beginTime},'%y%m%d')
+        </if>
+        GROUP BY product_id
+        ) OB
+        on dr.product_id = OB.product_id
+        <!--        本期入库        -->
+        left join (
+        SELECT dr.product_id,
+        w.warehouse_name AS warehousing_name,
+        sum(dr.plan_quantity) as EIPlanQuantity,
+        ROUND(sum(dr.money), 2) as EIMoney
+        from detail_receipt dr
+        join head_receipt hr on hr.systematic_receipt = dr.systematic_receipt
+        JOIN warehouse w ON w.warehouse_id = CASE WHEN hr.receipt_type IN (7) THEN dr.retrieval_id ELSE
+        dr.warehousing_id END
+        WHERE hr.receipt_status = 2
+        <if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+            AND date_format(hr.invoice_date,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')
+        </if>
+        <if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+            AND date_format(hr.invoice_date,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')
+        </if>
+        AND (hr.receipt_type in (1, 4, 5, 7, 10) or (hr.receipt_type in (8) AND dr.plan_quantity &gt; 0))
+        GROUP BY dr.product_id, w.warehouse_name
+        ) EI
+        on dr.product_id = EI.product_id
+        <!--        本期出库        -->
+        left join (
+        SELECT dr.product_id,
+        wr.warehouse_name AS retrieval_name,
+        SUM(dr.plan_quantity) AS ERPlanQuantity,
+        ROUND(SUM(dr.money), 2) AS ERMoney
+        FROM detail_receipt dr
+        JOIN head_receipt hr ON hr.systematic_receipt = dr.systematic_receipt
+        JOIN warehouse wr ON wr.warehouse_id = dr.retrieval_id
+        WHERE hr.receipt_status = 2
+        <if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+            AND date_format(hr.invoice_date,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')
+        </if>
+        <if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+            AND date_format(hr.invoice_date,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')
+        </if>
+        AND (hr.receipt_type IN (2, 3, 6, 7, 9) OR (hr.receipt_type in (8) AND dr.plan_quantity &lt; 0))
+        GROUP BY dr.product_id, wr.warehouse_name
+        ) ER
+        on dr.product_id = ER.product_id
+        <!--        期末结存        -->
+        join (
+        SELECT dr.product_id,
+        COALESCE(SUM(case when hr.receipt_type in (1, 4, 5, 8, 10) then dr.plan_quantity
+        when hr.receipt_type in (2, 3, 6, 7, 9) then -dr.plan_quantity else 0 end), 0) as CBPlanQuantity,
+        ROUND(COALESCE(SUM(case when hr.receipt_type in (1, 4, 5, 8, 10) then dr.money
+        when hr.receipt_type in (2, 3, 6, 7, 9) then -dr.money else 0 end), 0), 2) as CBMoney
+        from detail_receipt dr
+        join head_receipt hr on hr.systematic_receipt = dr.systematic_receipt
+        WHERE hr.receipt_status = 2
+        <if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+            AND date_format(hr.invoice_date,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')
+        </if>
+        GROUP BY product_id
+        ) CB
+        on dr.product_id = CB.product_id
+        WHERE 1=1
+        <if test="warehousingId != null and warehousingId != ''">
+            AND dr.warehousing_id = #{warehousingId}
+        </if>
+        <if test="retrievalId != null and retrievalId != ''">
+            AND dr.retrieval_id = #{retrievalId}
+        </if>
+        <if test="productCode != null and productCode != ''">
+            AND p.product_code like concat('%', #{productCode}, '%')
+        </if>
+        <if test="productName != null and productName != ''">
+            AND p.product_name like concat('%', #{productName}, '%')
+        </if>
+    </select>
+
+</mapper>

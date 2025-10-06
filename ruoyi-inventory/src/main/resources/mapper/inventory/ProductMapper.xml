@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ruoyi.inventory.mapper.ProductMapper">
+
+    <resultMap type="Product" id="ProductResult">
+        <result property="productId" column="product_id"/>
+        <result property="productCode" column="product_code"/>
+        <result property="productName" column="product_name"/>
+        <result property="productType" column="product_type"/>
+        <result property="productSpecifications" column="product_specifications"/>
+        <result property="measureUnit" column="measure_unit"/>
+        <result property="producer" column="producer"/>
+        <result property="costPrice" column="cost_price"/>
+        <result property="univalence" column="univalence"/>
+        <result property="discount" column="discount"/>
+        <result property="productBarcode" column="product_barcode"/>
+        <result property="inventoryQty" column="inventory_qty"/>
+        <result property="lockInventoryQty" column="lock_inventory_qty"/>
+        <result property="assembleLockQty" column="assemble_lock_qty"/>
+        <result property="upperLimit" column="upper_limit"/>
+        <result property="lowerLimit" column="lower_limit"/>
+        <result property="defaultWarehouse" column="default_warehouse"/>
+        <result property="notes" column="notes"/>
+        <result property="status" column="status"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="productTypeName" column="product_type_name"/>
+        <result property="lockQty" column="lock_qty"/>
+        <result property="warehousingId" column="warehousing_id"/>
+        <result property="retrievalId" column="retrieval_id"/>
+        <association property="type" javaType="ProductType" resultMap="ProductTypeResult"/>
+    </resultMap>
+
+    <resultMap type="ProductType" id="ProductTypeResult">
+        <id property="productTypeId" column="product_type_id"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="ancestors" column="ancestors"/>
+        <result property="productTypeName" column="product_type_name"/>
+        <result property="orderNum" column="order_num"/>
+        <result property="status" column="status"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="parentName" column="parent_name"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <!--    查询货品公用方法    -->
+    <sql id="selectProductVo">
+        SELECT
+        p.product_id, p.product_code, p.product_name, p.product_type, p.product_specifications, p.measure_unit,
+        p.producer, p.cost_price, p.univalence, p.discount, p.product_barcode,
+        p.upper_limit, p.lower_limit, p.default_warehouse, p.notes, p.status, p.create_by,
+        p.create_time, p.update_by, p.update_time,
+        pt.product_type_id, pt.parent_id, pt.ancestors, pt.product_type_name, pt.order_num, pt.status, pt.del_flag,
+        pt.create_by, pt.create_time, pt.update_by, pt.update_time
+        FROM product p
+        JOIN product_type pt ON pt.product_type_id = p.product_type
+    </sql>
+
+
+
+    <!--    货品资料查询      -->
+    <select id="productQuery" parameterType="Product" resultMap="ProductResult">
+        <include refid="selectProductVo"/>
+        WHERE 1=1
+        <!-- 货品ID -->
+        <if test="productId != null and productId != ''">
+            AND p.product_id = #{productId}
+        </if>
+        <!-- 货品编号 -->
+        <if test="productCode != null and productCode != ''">
+            AND p.product_code like concat('%', #{productCode}, '%')
+        </if>
+        <!-- 货品名称 -->
+        <if test="productName != null and productName != ''">
+            AND p.product_name like concat('%', #{productName}, '%')
+        </if>
+        <!-- 货品类型 -->
+        <if test="productType != null and productType != ''">
+            AND p.product_type = #{productType}
+        </if>
+        <!-- 商品规格 -->
+        <if test="productSpecifications != null and productSpecifications != ''">
+            AND p.product_specifications like concat('%', #{productSpecifications}, '%')
+        </if>
+        <!-- 计量单位 -->
+        <if test="measureUnit != null and measureUnit != ''">
+            AND p.measure_unit like concat('%', #{measureUnit}, '%')
+        </if>
+        <!-- 货品条码 -->
+        <if test="productBarcode != null and productBarcode != ''">
+            AND p.product_barcode like concat('%', #{productBarcode}, '%')
+        </if>
+        <!-- 默认仓库 -->
+        <if test="defaultWarehouse != null and defaultWarehouse != ''">
+            AND p.default_warehouse = #{defaultWarehouse}
+        </if>
+        <!-- 开始时间检索 -->
+        <if test="params.beginTime != null and params.beginTime != ''">
+            AND date_format(u.create_time,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')
+        </if>
+        <!-- 结束时间检索 -->
+        <if test="params.endTime != null and params.endTime != ''">
+            AND date_format(u.create_time,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')
+        </if>
+        <!-- 状态 -->
+        <if test="status != null">
+            AND p.status = #{status}
+        </if>
+    </select>
+
+    <sql id="selectPlanQuantityQty">
+        SELECT COALESCE(SUM(ip.plan_quantity), 0)
+        FROM inventory_product ip
+        WHERE ip.product_id = p.product_id
+        AND ip.warehouse_id IN (#{warehousingId}, #{retrievalId})
+    </sql>
+
+    <sql id="selectLockQty">
+        SELECT COALESCE (sum(ldr.plan_quantity), 0)
+        FROM head_receipt lhr
+        JOIN detail_receipt ldr ON lhr.systematic_receipt = ldr.systematic_receipt
+        where ldr.product_id = p.product_id
+        and lhr.receipt_type IN (3, 6)
+        and lhr.receipt_status = 1
+        AND ldr.locked_goods = 1
+        AND ldr.retrieval_id IN (#{warehousingId}, #{retrievalId})
+    </sql>
+
+    <!--    货品库存查询      -->
+    <select id="productInventoryQuery" parameterType="Product" resultMap="ProductResult">
+        SELECT
+        p.product_id, p.product_code, p.product_name, p.product_type, p.product_specifications, p.measure_unit,
+        p.producer, p.cost_price, p.univalence, p.discount, pt.product_type_name,
+        (
+        <include refid="selectPlanQuantityQty"/>
+        ) AS inventory_qty,
+        (
+        <include refid="selectLockQty"/>
+        ) AS lock_qty
+        FROM product p
+        JOIN product_type pt ON pt.product_type_id = p.product_type
+        WHERE 1=1
+        <!-- 货品ID -->
+        <if test="productId != null and productId != ''">
+            AND p.product_id = #{productId}
+        </if>
+        <!-- 货品编号 -->
+        <if test="productCode != null and productCode != ''">
+            AND p.product_code like concat('%', #{productCode}, '%')
+        </if>
+        <!-- 货品名称 -->
+        <if test="productName != null and productName != ''">
+            AND p.product_name like concat('%', #{productName}, '%')
+        </if>
+    </select>
+
+    <!--    单据锁单数量查询      -->
+    <select id="lockQuery" parameterType="Product" resultMap="ProductResult">
+        SELECT
+        (
+        <include refid="selectLockQty"/>
+        ) AS lock_qty
+        FROM product p
+        WHERE 1=1
+        <!-- 货品ID -->
+        <if test="productId != null and productId != ''">
+            AND p.product_id = #{productId}
+        </if>
+    </select>
+
+    <!--    货品编号查询      -->
+    <select id="selectProductById" parameterType="Long" resultMap="ProductResult">
+        <include refid="selectProductVo"/>
+        where p.product_id = #{productId}
+    </select>
+
+    <!--    货品名称查询      -->
+    <select id="selectProductByProductName" parameterType="String" resultMap="ProductResult">
+        <include refid="selectProductVo"/>
+        where p.product_name = #{productName}
+    </select>
+
+    <!--    货品资料新增      -->
+    <insert id="insertProduct" parameterType="Product">
+        insert into product(
+        <if test="productCode != null and productCode != ''">product_code,</if>
+        <if test="productName != null and productName != ''">product_name,</if>
+        <if test="productType != null and productType != ''">product_type,</if>
+        <if test="productSpecifications != null and productSpecifications != ''">product_specifications,</if>
+        <if test="measureUnit != null and measureUnit != ''">measure_unit,</if>
+        <if test="producer != null and producer != ''">producer,</if>
+        <if test="costPrice != null and costPrice != ''">cost_price,</if>
+        <if test="univalence != null and univalence != ''">univalence,</if>
+        <if test="discount != null and discount != ''">discount,</if>
+        <if test="productBarcode != null and productBarcode != ''">product_barcode,</if>
+        <if test="upperLimit != null and upperLimit != ''">upper_limit,</if>
+        <if test="lowerLimit != null and lowerLimit != ''">lower_limit,</if>
+        <if test="defaultWarehouse != null and defaultWarehouse != ''">default_warehouse,</if>
+        <if test="notes != null and notes != ''">notes,</if>
+        <if test="status != null and status != ''">status,</if>
+        <if test="createBy != null and createBy != ''">create_by,</if>
+        create_time
+        )values(
+        <if test="productCode != null and productCode != ''">#{productCode},</if>
+        <if test="productName != null and productName != ''">#{productName},</if>
+        <if test="productType != null and productType != ''">#{productType},</if>
+        <if test="productSpecifications != null and productSpecifications != ''">#{productSpecifications},</if>
+        <if test="measureUnit != null and measureUnit != ''">#{measureUnit},</if>
+        <if test="producer != null and producer != ''">#{producer},</if>
+        <if test="costPrice != null and costPrice != ''">#{costPrice},</if>
+        <if test="univalence != null and univalence != ''">#{univalence},</if>
+        <if test="discount != null and discount != ''">#{discount},</if>
+        <if test="productBarcode != null and productBarcode != ''">#{productBarcode},</if>
+        <if test="upperLimit != null and upperLimit != ''">#{upperLimit},</if>
+        <if test="lowerLimit != null and lowerLimit != ''">#{lowerLimit},</if>
+        <if test="defaultWarehouse != null and defaultWarehouse != ''">#{defaultWarehouse},</if>
+        <if test="notes != null and notes != ''">#{notes},</if>
+        <if test="status != null and status != ''">#{status},</if>
+        <if test="createBy != null and createBy != ''">#{createBy},</if>
+        sysdate()
+        )
+    </insert>
+
+    <!--    货品资料修改      -->
+    <update id="updateProduct" parameterType="Product">
+        update product
+        <set>
+            <if test="productCode != null and productCode != ''">product_code = #{productCode},</if>
+            <if test="productName != null and productName != ''">product_name = #{productName},</if>
+            <if test="productType != null and productType != ''">product_type = #{productType},</if>
+            <if test="productSpecifications != null and productSpecifications != ''">product_specifications =
+                #{productSpecifications},
+            </if>
+            <if test="measureUnit != null and measureUnit != ''">measure_unit = #{measureUnit},</if>
+            <if test="producer != null and producer != ''">producer = #{producer},</if>
+            <if test="costPrice != null and costPrice != ''">cost_price = #{costPrice},</if>
+            <if test="univalence != null and univalence != ''">univalence = #{univalence},</if>
+            <if test="discount != null and discount != ''">discount = #{discount},</if>
+            <if test="productBarcode != null and productBarcode != ''">product_barcode = #{productBarcode},</if>
+            <if test="upperLimit != null and upperLimit != ''">upper_limit = #{upperLimit},</if>
+            <if test="lowerLimit != null and lowerLimit != ''">lower_limit = #{lowerLimit},</if>
+            <if test="defaultWarehouse != null and defaultWarehouse != ''">default_warehouse = #{defaultWarehouse},</if>
+            <if test="notes != null and notes != ''">notes = #{notes},</if>
+            <if test="status != null and status != ''">status = #{status},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            update_time = sysdate()
+        </set>
+        where product_id = #{productId}
+    </update>
+
+    <!--    库存数量更新      -->
+    <update id="updateInventoryQty" parameterType="java.util.List">
+        <foreach collection="list" index="index" item="item" separator=";">
+            update product
+            set inventory_qty = (
+            SELECT
+            COALESCE(SUM(CASE WHEN hr.receipt_status = 2 AND hr.receipt_type IN (1,4,5,8) THEN dr.plan_quantity ELSE 0
+            END), 0) -
+            COALESCE(SUM(CASE WHEN hr.receipt_status = 2 AND hr.receipt_type IN (2,3,6) THEN dr.plan_quantity ELSE 0
+            END), 0)
+            FROM detail_receipt dr
+            JOIN head_receipt hr ON dr.systematic_receipt = hr.systematic_receipt
+            WHERE dr.product_id = #{item.productId,jdbcType=VARCHAR}
+            ),
+            lock_inventory_qty = (
+            SELECT
+            COALESCE(SUM(CASE WHEN hr.receipt_status = 2 AND hr.receipt_type IN (1, 5)p THEN dr.lock_inventory_qty ELSE
+            0
+            END), 0) -
+            COALESCE(SUM(CASE WHEN hr.receipt_status = 2 AND hr.receipt_type IN (3, 6) AND dr.locked_goods = 1 THEN
+            dr.lock_inventory_qty ELSE 0
+            END), 0) -
+            COALESCE(SUM(CASE WHEN hr.receipt_status = 2 AND hr.receipt_type IN (2) THEN dr.lock_inventory_qty ELSE 0
+            END), 0)
+            FROM detail_receipt dr
+            JOIN head_receipt hr ON dr.systematic_receipt = hr.systematic_receipt
+            WHERE dr.product_id = #{item.productId,jdbcType=VARCHAR}
+            )
+            where product_id = #{item.productId,jdbcType=VARCHAR}
+        </foreach>
+    </update>
+
+    <!--    货品资料删除      -->
+    <delete id="deleteProductByIds" parameterType="Long">
+        delete from product where product_id in
+        <foreach collection="array" item="productId" open="(" separator="," close=")">
+            #{productId}
+        </foreach>
+    </delete>
+
+</mapper>

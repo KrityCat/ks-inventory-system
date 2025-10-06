@@ -90,7 +90,11 @@
               ></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="经手人" prop="userIds" v-hasPermi="['inventory:inventoryReceiptQuery:selectUser']">
+          <el-form-item
+            label="经手人"
+            prop="userIds"
+            v-hasPermi="['inventory:inventoryReceiptQuery:selectUser']"
+          >
             <el-select
               class="form-item"
               v-model="queryParams.userIds"
@@ -264,12 +268,6 @@
             </template>
           </el-table-column>
           <el-table-column
-            label="原始单号"
-            align="center"
-            prop="originalReceipt"
-            width="180"
-          />
-          <el-table-column
             label="单据类型"
             align="center"
             prop="receiptType"
@@ -327,11 +325,11 @@
             width="100"
           />
           <el-table-column
-            label="订单号"
+            label="原始单号"
             align="center"
-            prop="planReceipt"
-            width="150"
+            prop="originalReceipt"
           />
+          <el-table-column label="计划单号" align="center" prop="planReceipt" />
           <el-table-column
             label="备注"
             align="center"
@@ -429,7 +427,7 @@
                   link
                   type="primary"
                   icon="Printer"
-                  @click="printOut(scope.row)"
+                  @click="printCommon(scope.row)"
                   v-hasPermi="['inventory:inventoryReceiptQuery:printOut']"
                 ></el-button>
               </el-tooltip>
@@ -499,6 +497,28 @@
             align="center"
             prop="product.producer"
           />
+          <el-table-column
+            label="调入仓库"
+            align="center"
+            prop="warehousing.warehousingName"
+            width="100"
+          />
+          <el-table-column
+            label="调出仓库"
+            align="center"
+            prop="retrieval.retrievalName"
+            width="100"
+          />
+          <el-table-column
+            label="当前库存量"
+            align="center"
+            prop="currentInventory"
+          />
+          <el-table-column
+            label="实际库存量"
+            align="center"
+            prop="actualInventory"
+          />
           <el-table-column label="数量" align="center" prop="planQuantity" />
           <el-table-column label="单价" align="center" prop="univalence" />
           <el-table-column label="折扣" align="center" prop="discount" />
@@ -523,29 +543,35 @@
       </el-col>
     </el-row>
   </div>
+
+  <!-- 查看打印模板对话框 -->
+  <print-template-dialog
+      v-model:visible="openPrintTemplate"
+      :systematic-receipt="systematicReceipt"
+  />
 </template>
 
 <script setup name="InventoryDocumentQuery">
-import { getToken } from "@/utils/auth";
 import { useRouter } from "vue-router";
-import { listWarehouse } from "@/api/basedate/warehouse";
-import { listUser, getUserProfile } from "@/api/system/user";
-import { listSupplier } from "@/api/basedate/supplier";
-import { listCustomer } from "@/api/basedate/customer";
+import { getUserProfile } from "@/api/system/user";
 import {
   headQuery,
   detailQuery,
   getReceipt,
   delReceipt,
 } from "@/api/inventory/inventoryDocumentQuery";
-import { viewUrl } from "@/api/jimu/jiMuReport";
+import {
+  userList,
+  warehouseList,
+  supplierList,
+  customerList,
+} from "@/api/common/CommonReceipt";
+import printTemplateDialog from '@/components/CommonDialog/printTemplateDialog.vue';
 
 const { proxy } = getCurrentInstance();
 const { receipt_type } = proxy.useDict("receipt_type");
 const { receipt_status } = proxy.useDict("receipt_status");
-const { print_selected_files } = proxy.useDict("print_selected_files");
 const { finding_of_audit } = proxy.useDict("finding_of_audit");
-const { print_selected_sizes } = proxy.useDict("print_selected_sizes");
 
 // 查询结果表
 const headReceiptList = ref([]);
@@ -571,6 +597,8 @@ const open = ref(false);
 // 数据范围
 const dateRange = ref([]);
 const router = useRouter();
+const openPrintTemplate = ref(false);
+const systematicReceipt = ref(null);
 
 const data = reactive({
   option: {
@@ -603,30 +631,42 @@ const data = reactive({
     productCode: undefined,
     productName: undefined,
   },
+  resolvePromise: undefined,
   rules: {},
 });
 
-const { queryParams, form, option, rules } = toRefs(data);
+const { queryParams, form, option, resolvePromise, rules } = toRefs(data);
 
 async function Options() {
-  loading.value = true;
-  listWarehouse(option.value).then((response) => {
-    warehouseOptions.value = response.rows;
-  });
-  listSupplier(option.value).then((response) => {
-    supplierOptions.value = response.rows;
-  });
-  listCustomer(option.value).then((response) => {
-    customerOptions.value = response.rows;
-  });
-  await listUser(option.value).then((response) => {
-    userOptions.value = response.rows;
-  });
-  await getUserProfile().then((response) => {
-    queryParams.value.userIds = response.data.userId;
-  });
-  getList();
-  loading.value = false;
+  loading.value = true; // 开始加载
+
+  try {
+    // 使用 Promise.all 并行执行无依赖关系的异步请求
+    const [warehouseResp, supplierResp, customerResp, userResp] =
+      await Promise.all([
+        warehouseList(option.value),
+        supplierList(option.value),
+        customerList(option.value),
+        userList(option.value),
+      ]);
+
+    // 同步更新响应式数据
+    warehouseOptions.value = warehouseResp.rows;
+    supplierOptions.value = supplierResp.rows;
+    customerOptions.value = customerResp.rows;
+    userOptions.value = userResp.rows;
+
+    // 顺序执行有依赖关系的请求
+    const profileResp = await getUserProfile();
+    queryParams.value.userIds = profileResp.data.userId;
+
+    // 确保所有数据就绪后再获取列表
+    getList();
+  } catch (error) {
+    console.error("数据加载失败:", error);
+  } finally {
+    loading.value = false; // 无论成功失败都关闭加载状态
+  }
 }
 /** 查询库存头单列表 */
 function getList() {
@@ -668,7 +708,7 @@ function handleDetailQuery() {
 function resetQuery() {
   dateRange.value = [];
   proxy.resetForm("queryRef");
-  handleQuery();
+  Options();
 }
 /** 新增按钮 */
 function add() {
@@ -684,78 +724,52 @@ function reset() {
   proxy.resetForm("printRef");
 }
 /** 打印按钮 */
-async function printOut(row) {
-  if (row.receiptType === 1 || row.receiptType === 2) {
-    form.value.printId = print_selected_files.value[1].label;
-    form.value.printSize = print_selected_sizes.value[1].label;
-  } else if (row.receiptType === 3 || row.receiptType === 4) {
-    form.value.printId = print_selected_files.value[3].label;
-    form.value.printSize = print_selected_sizes.value[3].label;
-  } else if (row.receiptType === 5 || row.receiptType === 6) {
-    form.value.printId = print_selected_files.value[4].label;
-    form.value.printSize = print_selected_sizes.value[4].label;
-  } else if (row.receiptType === 7) {
-    form.value.printId = print_selected_files.value[5].label;
-    form.value.printSize = print_selected_sizes.value[5].label;
-  } else if (row.receiptType === 8) {
-    form.value.printId = print_selected_files.value[6].label;
-    form.value.printSize = print_selected_sizes.value[6].label;
-  }
-  await viewUrl().then((res) => {
-    openUrl.value = res;
-  });
-  const printUrl =
-    openUrl.value +
-    "/" +
-    form.value.printId +
-    "?token=Bearer " +
-    getToken() +
-    "&systematicReceipt=" +
-    row.systematicReceipt +
-    "&pageSize=" +
-    form.value.printSize;
-  window.open(printUrl, "_blank");
+function printCommon(row) {
+  systematicReceipt.value = row.systematicReceipt;
+  openPrintTemplate.value = true;
 }
+
 /** 修改按钮操作 */
 function handleUpdate(row) {
   const systematicReceipt = row.systematicReceipt;
   const receiptType = row.receiptType;
-  if (receiptType == 1 || receiptType == 2) {
+
+  // 路由配置对象
+  const routeMap = {
+    1: "/purchase/purchaseDocumentProcessing",
+    2: "/purchase/purchaseDocumentProcessing",
+    3: "/sales/salesDocumentProcessing",
+    4: "/sales/salesDocumentProcessing",
+    5: "/inventory/inventoryDocumentProcessing",
+    6: "/inventory/inventoryDocumentProcessing",
+    7: "/inventory/inventoryTransfer",
+    8: "/inventory/inventoryCounting",
+    9: "/inventory/reportingLossesProcessing",
+    10: "/inventory/reportOverflowProcessing",
+    11: "/inventory/assemblyAndDisassemblyProcessing",
+  };
+
+  // 获取对应的路径
+  const path = routeMap[receiptType];
+
+  // 如果路径存在，则进行导航
+  if (path) {
     router.push({
-      path: "/purchase/purchaseDocumentProcessing",
+      path: path,
       query: { systematicReceipt },
     });
-  } else if (receiptType == 3 || receiptType == 4) {
-    router.push({
-      path: "/sales/salesDocumentProcessing",
-      query: { systematicReceipt },
-    });
-  } else if (receiptType == 5 || receiptType == 6) {
-    router.push({
-      path: "/inventory/inventoryDocumentProcessing",
-      query: { systematicReceipt },
-    });
-  } else if (receiptType == 7) {
-    router.push({
-      path: "/inventory/inventoryTransfer",
-      query: { systematicReceipt },
-    });
-  } else if (receiptType == 8) {
-    router.push({
-      path: "/inventory/inventoryCounting",
-      query: { systematicReceipt },
-    });
+  } else {
+    return proxy.$modal.msgError("该单据类型不存在制作页面");
   }
 }
 /** 删除按钮操作 */
 function handleDelete(row) {
   const systematicReceipt = row.systematicReceipt;
   getReceipt(systematicReceipt).then((response) => {
-    const details = response.data.details;
     proxy.$modal
       .confirm("确认要删除系统编号为" + systematicReceipt + "的库存单据?")
       .then(function () {
-        return delReceipt(details);
+        return delReceipt(response.data);
       })
       .then(() => {
         getList();
@@ -805,7 +819,7 @@ function remoteSupplier(query) {
   if (query) {
     setTimeout(() => {
       option.value.supplierName = query;
-      listSupplier(option.value).then((response) => {
+      supplierList(option.value).then((response) => {
         supplierOptions.value = response.rows;
       });
       supplierOptions.value = list.value.filter((item) => {
@@ -813,7 +827,7 @@ function remoteSupplier(query) {
       });
     }, 200);
   } else {
-    listSupplier(option.value).then((response) => {
+    supplierList(option.value).then((response) => {
       supplierOptions.value = response.rows;
     });
   }
@@ -824,7 +838,7 @@ function remoteCustomer(query) {
   if (query) {
     setTimeout(() => {
       option.value.customerName = query;
-      listCustomer(option.value).then((response) => {
+      customerList(option.value).then((response) => {
         customerOptions.value = response.rows;
       });
       customerOptions.value = list.value.filter((item) => {
@@ -832,7 +846,7 @@ function remoteCustomer(query) {
       });
     }, 200);
   } else {
-    listCustomer(option.value).then((response) => {
+    customerList(option.value).then((response) => {
       customerOptions.value = response.rows;
     });
   }
